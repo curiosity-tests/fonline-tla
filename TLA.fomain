@@ -54,6 +54,8 @@ Baking.ClientResources = Resources
 Baking.PlatformBinaries = PlatformBinaries
 Baking.CacheResources = Cache
 Baking.ZipCompressLevel = 5
+Baking.ModelAttachmentMinExtent = 0.01
+Baking.ModelAttachmentMaxExtent = 50.0
 
 Client.UpdaterInfoDelay = 5000
 Client.UpdaterInfoPos = 1
@@ -233,7 +235,9 @@ Network.DisableTcpNagle = True
 Network.DisableZlibCompression = False
 Network.DisableInterthreadCommunication = False
 Network.ArtificalLags = 0
+Network.ArtificalLagsJitter = 0
 Network.ForceCompatibilityVersion =
+Network.ForceMetadataVersion =
 
 Packaging.CodeSigningHook =
 Packaging.AppIcon = Resources/TLA.ico
@@ -387,6 +391,7 @@ View.HideNativeCursor = True
 View.FadingDuration = 1000
 View.MapZoomEnabled = True
 View.MapDirectDraw = False
+View.MapRenderTargetScale = 1.0
 View.DisableLighting = False
 View.DisableFog = True
 View.GlobalDayColorTime = 300 600 1140 1380
