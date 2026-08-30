@@ -121,7 +121,7 @@
         {
             // Data[ 6 ]  -  additional pic offset
             // Data[ 7 - 8 ]  -  additional pic point
-            Elevator elevator = cast<Elevator>(GuiScreensExt::NeedScreen(Screen));
+            Elevator elevator = cast<Elevator>(::GuiScreensExt::NeedScreen(Screen));
             if (!elevator.Valid) {
                 SetActive(false);
                 return;
@@ -200,7 +200,7 @@
     {
         {
             // Data[0] — физический этаж, Data[9] — анимация индикатора, Data[10 - 11] — её позиция.
-            Elevator elevator = cast<Elevator>(GuiScreensExt::NeedScreen(Screen));
+            Elevator elevator = cast<Elevator>(::GuiScreensExt::NeedScreen(Screen));
             if (!elevator.Valid) {
                 SetActive(false);
                 return;
@@ -214,7 +214,7 @@
             }
 
             SetPosition(int(elevator.Data[10]), int(elevator.Data[11]));
-            GuiScreensExt::NeedSprite(BackgroundImage).SetFrame(::Elevator::GetElevatorIndicatorFrameTime(int(elevator.Data[0])));
+            ::GuiScreensExt::NeedSprite(BackgroundImage).SetFrame(::Elevator::GetElevatorIndicatorFrameTime(int(elevator.Data[0])));
         }
     }
 }
@@ -276,7 +276,7 @@
             // Data[ 13 ]  -  buttons count  ( 1 )
             // Data[ 12 ]  -  button down pic offset ( 1 )
             // 14+ -  rect for every button  ( 4 )
-            Elevator elevator = cast<Elevator>(GuiScreensExt::NeedScreen(Screen));
+            Elevator elevator = cast<Elevator>(::GuiScreensExt::NeedScreen(Screen));
             _Children.clear();
             if (!elevator.Valid) {
                 return;
@@ -397,7 +397,7 @@
     {
         {
             // Data[ 1 ]  -  start level
-            Elevator elevator = cast<Elevator>(GuiScreensExt::NeedScreen(Screen));
+            Elevator elevator = cast<Elevator>(::GuiScreensExt::NeedScreen(Screen));
             if (!elevator.Valid || Index < 0 || Index >= int(elevator.Data[13]) || !HasCurPlayer) {
                 Gui::HideScreen();
                 return;

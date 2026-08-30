@@ -51,9 +51,9 @@
             Lexems = params["Lexems"];
             Answers = params["Answers"];
 
-            Gui::Object buttons = GuiScreensExt::NeedObject(Find("Buttons"));
-            Gui::Object buttonSlot = GuiScreensExt::NeedObject(Find("ButtonSlot"));
-            Gui::Object bottom = GuiScreensExt::NeedObject(buttonSlot.Find("Bottom"));
+            Gui::Object buttons = ::GuiScreensExt::NeedObject(Find("Buttons"));
+            Gui::Object buttonSlot = ::GuiScreensExt::NeedObject(Find("ButtonSlot"));
+            Gui::Object bottom = ::GuiScreensExt::NeedObject(buttonSlot.Find("Bottom"));
             int height = buttons.Pos.y + (Answers - 1) * buttonSlot.Size.height + bottom.Pos.y + bottom.Size.height;
             SetSize(Size.width, height);
         }
@@ -119,8 +119,8 @@
 {
     {
         {
-            auto box = cast<DialogBox>(GuiScreensExt::NeedObject(Parent));
-            string text = MsgStr::GetGameText(Dialogbox::GetDialogTextStr(box.DialogType));
+            auto box = cast<DialogBox>(::GuiScreensExt::NeedObject(Parent));
+            string text = ::MsgStr::GetGameText(::Dialogbox::GetDialogTextStr(box.DialogType));
             text = Game.FormatTags(text, box.Lexems);
 
             SetText(text);
@@ -296,7 +296,7 @@
     {
         {
             SetActive(CellIndex ==
-                      cast<DialogBox>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent).Parent)).Answers - 1);
+                      cast<DialogBox>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent).Parent)).Answers - 1);
         }
     }
 }
@@ -356,7 +356,7 @@
     {
         {
             SetActive(CellIndex <=
-                      cast<DialogBox>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent).Parent)).Answers - 1);
+                      cast<DialogBox>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent).Parent)).Answers - 1);
         }
     }
 }
@@ -435,8 +435,8 @@
 {
     {
         {
-            DialogBox dialogBox = cast<DialogBox>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent).Parent));
-            Dialogbox::AnswerDialog(dialogBox.Session, dialogBox.DialogType, CellIndex);
+            DialogBox dialogBox = cast<DialogBox>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent).Parent));
+            ::Dialogbox::AnswerDialog(dialogBox.Session, dialogBox.DialogType, CellIndex);
             Gui::HideScreen();
         }
     }
@@ -489,9 +489,9 @@
 {
     {
         {
-            SetText(MsgStr::GetGameText(
-                Dialogbox::GetDialogTextStr(
-                    cast<DialogBox>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent).Parent)).DialogType) +
+            SetText(::MsgStr::GetGameText(
+                ::Dialogbox::GetDialogTextStr(
+                    cast<DialogBox>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent).Parent)).DialogType) +
                 CellIndex + 1));
         }
     }

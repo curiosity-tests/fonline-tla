@@ -38,7 +38,7 @@
             value = -value;
         }
 
-        value = Tla::Clamp(value, 0, 999);
+        value = ::Tla::Clamp(value, 0, 999);
 
         result += Game.EncodeUtf8('0' + offs + value / 100);
         result += Game.EncodeUtf8('0' + offs + value / 10 % 10);
@@ -57,14 +57,14 @@
         int cursor = Gui::Cursor;
         if (cursor == CursorType::Move) {
             any[] actions = {};
-            ChosenActions::GetChosenActions(actions);
-            bool isMoveAction = (actions.length() > 0 && actions[0] == Tla::ChosenMove);
+            ::ChosenActions::GetChosenActions(actions);
+            bool isMoveAction = (actions.length() > 0 && actions[0] == ::Tla::ChosenMove);
             int milliseconds = (actions.length() > 6 ? int(actions[6]) : 0);
             if (isMoveAction &&
                 (Game.FrameTime - (milliseconds == 0 ? ZERO_TIMESPAN : Time::Milliseconds(milliseconds))).milliseconds < Settings.Input.DoubleClickTime) {
                 actions[3] = (Settings.Movement.AlwaysRun ? 0 : 1);
                 actions[5] = 0;
-                ChosenActions::SetChosenActions(actions);
+                ::ChosenActions::SetChosenActions(actions);
             }
             else {
                 mpos hex;
@@ -72,7 +72,8 @@
                     int dist = Game.GetDistance(chosen.Hex, hex);
                     bool isRun =
                         (Input::IsShiftDown() ? !Settings.Movement.AlwaysRun : Settings.Movement.AlwaysRun && dist >= Settings.Movement.AlwaysRunMoveDist);
-                    ChosenActions::SetChosenActions({Tla::ChosenMove, hex.x, hex.y, isRun ? 1 : 0, 0, isMoveAction ? 0 : 1, int(Game.FrameTime.milliseconds)});
+                    ::ChosenActions::SetChosenActions(
+                        {::Tla::ChosenMove, hex.x, hex.y, isRun ? 1 : 0, 0, isMoveAction ? 0 : 1, int(Game.FrameTime.milliseconds)});
                 }
             }
         }
@@ -82,19 +83,19 @@
             Item? item = cast<Item?>(entity);
             CritterProperty skill = CritterProperty(int(Gui::CursorData.value));
             if (cr != null) {
-                ChosenActions::SetChosenActions({Tla::ChosenUseSklOnCritter, int(skill), cr.Id, 0, 0, 0, 0});
-                GuiScreensExt::NextCursor();
+                ::ChosenActions::SetChosenActions({::Tla::ChosenUseSklOnCritter, int(skill), cr.Id, 0, 0, 0, 0});
+                ::GuiScreensExt::NextCursor();
                 Gui::CursorData = ZERO_IDENT;
             }
             else {
                 if (item != null) {
                     if (item.Type != ItemType::Generic && item.Type != ItemType::Grid) {
-                        ChosenActions::SetChosenActions({Tla::ChosenUseSklOnItem, int(skill), item.Id, 0, 0, 0, 0});
+                        ::ChosenActions::SetChosenActions({::Tla::ChosenUseSklOnItem, int(skill), item.Id, 0, 0, 0, 0});
                     }
                     else {
-                        ChosenActions::SetChosenActions({Tla::ChosenUseSklOnScen, int(skill), item.ProtoId, item.Hex.x, item.Hex.y, 0, 0});
+                        ::ChosenActions::SetChosenActions({::Tla::ChosenUseSklOnScen, int(skill), item.ProtoId, item.Hex.x, item.Hex.y, 0, 0});
                     }
-                    GuiScreensExt::NextCursor();
+                    ::GuiScreensExt::NextCursor();
                     Gui::CursorData = ZERO_IDENT;
                 }
             }
@@ -103,7 +104,7 @@
             bool isAttack = (cursor == CursorType::UseWeapon);
             Item? useItem = (!isAttack && Gui::CursorData != ZERO_IDENT ? chosen.GetItem(Gui::CursorData) :
                                                                                 chosen.GetItem(ItemProperty::CritterSlot, CritterItemSlot::Main));
-            ProtoItem? proto = CritterItem::GetSlotItemProto(chosen);
+            ProtoItem? proto = ::CritterItem::GetSlotItemProto(chosen);
             if (useItem != null || (isAttack && proto != null)) {
                 Entity? entity = null;
                 if (isAttack) {
@@ -118,7 +119,7 @@
                 Item? realWeapon = chosen.GetItem(ItemProperty::CritterSlot, CritterItemSlot::Main);
                 int mode = (realWeapon != null && useItem != null ? useItem.Mode : chosen.HandsItemMode);
                 if (cr != null) {
-                    if (isAttack && WeaponHelpers::WeaponModeAim(mode) != 0) {
+                    if (isAttack && ::WeaponHelpers::WeaponModeAim(mode) != 0) {
                         //IsCritterCanAim( chosen.ModelName ) &&
                         if (!chosen.IsNoAim) {
                             dict<string, any> dict = {};
@@ -127,17 +128,18 @@
                         }
                     }
                     else {
-                        ChosenActions::SetChosenActions({Tla::ChosenUseItem,
-                                                         useItem != null ? useItem.Id : ZERO_IDENT,
-                                                         0,
-                                                         ClientDefines::TARGET_CRITTER,
-                                                         cr.Id,
-                                                         isAttack ? mode : WeaponHelpers::USE_USE,
-                                                         0});
+                        ::ChosenActions::SetChosenActions({::Tla::ChosenUseItem,
+                                                           useItem != null ? useItem.Id : ZERO_IDENT,
+                                                           0,
+                                                           ::ClientDefines::TARGET_CRITTER,
+                                                           cr.Id,
+                                                           isAttack ? mode : ::WeaponHelpers::USE_USE,
+                                                           0});
                     }
                 }
                 else if (item != null && useItem != null) {
-                    ChosenActions::SetChosenActions({Tla::ChosenUseItem, useItem.Id, 0, ClientDefines::TARGET_ITEM, item.Id, WeaponHelpers::USE_USE, 0});
+                    ::ChosenActions::SetChosenActions(
+                        {::Tla::ChosenUseItem, useItem.Id, 0, ::ClientDefines::TARGET_ITEM, item.Id, ::WeaponHelpers::USE_USE, 0});
                 }
             }
         }
@@ -232,11 +234,11 @@
                 else if (button == MouseButton::Middle) {
                     Critter? cr = CurMap.GetCritterAtScreenPos(Game.MousePos);
                     if (cr != null && cr.IsChosen) {
-                        ChosenActions::SetChosenActions({Tla::ChosenDir, (Input::IsShiftDown() ? 1 : 0), 0, 0, 0, 0, 0});
+                        ::ChosenActions::SetChosenActions({::Tla::ChosenDir, (Input::IsShiftDown() ? 1 : 0), 0, 0, 0, 0, 0});
                     }
                 }
                 else if (button == MouseButton::Right && !isHitIfaceOnMouseDown) {
-                    GuiScreensExt::NextCursor();
+                    ::GuiScreensExt::NextCursor();
                 }
             }
         }
@@ -498,7 +500,7 @@
 {
     {
         {
-            GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ConsoleImage")).SetActive(ActiveSelf);
+            ::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("ConsoleImage")).SetActive(ActiveSelf);
         }
     }
 }
@@ -595,8 +597,8 @@
     {
         void FiltersChanged()
         {
-            bool filter1Checked = cast<Gui::CheckBox>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("Filter1"))).IsChecked;
-            bool filter2Checked = cast<Gui::CheckBox>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("Filter2"))).IsChecked;
+            bool filter1Checked = cast<Gui::CheckBox>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("Filter1"))).IsChecked;
+            bool filter2Checked = cast<Gui::CheckBox>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("Filter2"))).IsChecked;
 
             ChangeDisplayedMessage(MessageBoxType::Talk, filter1Checked);
             ChangeDisplayedMessage(MessageBoxType::Combat, filter2Checked);
@@ -642,9 +644,9 @@
 {
     {
         {
-            Gui::Object messageBoxText = GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("MessageBoxText"));
-            Gui::Object messageBoxExtended = GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("MessageBoxExtended"));
-            Gui::Object console = GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("Console"));
+            Gui::Object messageBoxText = ::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("MessageBoxText"));
+            Gui::Object messageBoxExtended = ::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("MessageBoxExtended"));
+            Gui::Object console = ::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("Console"));
 
             messageBoxText.SetSize(messageBoxText.Size.width, IsChecked ? 131 : 76);
             messageBoxText.SetPosition(messageBoxText.Pos.x, IsChecked ? -27 : 28);
@@ -717,7 +719,7 @@
 {
     {
         {
-            cast<MessageBoxText>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("MessageBoxText"))).FiltersChanged();
+            cast<MessageBoxText>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("MessageBoxText"))).FiltersChanged();
         }
     }
 }
@@ -785,7 +787,7 @@
 {
     {
         {
-            cast<MessageBoxText>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("MessageBoxText"))).FiltersChanged();
+            cast<MessageBoxText>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("MessageBoxText"))).FiltersChanged();
         }
     }
 }
@@ -1033,21 +1035,21 @@
                 Item? item1 = chosen.GetItem( ItemProperty::CritterSlot, CritterItemSlot::Main );
                 Item? item2 = chosen.GetItem( ItemProperty::CritterSlot, CritterItemSlot::Secondary );
                 if( item1 != null)
-                    ChosenActions::SetAction( { Tla::ChosenMoveItem, item1.Id, item1.Count, CritterItemSlot::Secondary, 0, 0, 0 }, false, true );
+                    ::ChosenActions::SetAction( { ::Tla::ChosenMoveItem, item1.Id, item1.Count, CritterItemSlot::Secondary, 0, 0, 0 }, false, true );
                 if( item2 != null)
-                    ChosenActions::SetAction( { Tla::ChosenMoveItem, item2.Id, item2.Count, CritterItemSlot::Main, 0, 0, 0 }, false, true );
+                    ::ChosenActions::SetAction( { ::Tla::ChosenMoveItem, item2.Id, item2.Count, CritterItemSlot::Main, 0, 0, 0 }, false, true );
                    */
 
             //   Critter chosen = Chosen;
             Item? item2 = chosen.GetItem(ItemProperty::CritterSlot, CritterItemSlot::Secondary);
             if (item2 != null) {
-                ChosenActions::SetAction({Tla::ChosenMoveItem, item2.Id, item2.Count, CritterItemSlot::Main, 0, 0, 0}, false, true);
+                ::ChosenActions::SetAction({::Tla::ChosenMoveItem, item2.Id, item2.Count, CritterItemSlot::Main, 0, 0, 0}, false, true);
                 return;
             }
 
             Item? item1 = chosen.GetItem(ItemProperty::CritterSlot, CritterItemSlot::Main);
             if (item1 != null) {
-                ChosenActions::SetAction({Tla::ChosenMoveItem, item1.Id, item1.Count, CritterItemSlot::Secondary, 0, 0, 0}, false, true);
+                ::ChosenActions::SetAction({::Tla::ChosenMoveItem, item1.Id, item1.Count, CritterItemSlot::Secondary, 0, 0, 0}, false, true);
             }
         }
     }
@@ -1428,7 +1430,7 @@
 {
     {
         {
-            GuiScreensExt::NeedSprite(BackgroundImage).SetFirstFrame();
+            ::GuiScreensExt::NeedSprite(BackgroundImage).SetFirstFrame();
         }
     }
 }
@@ -1443,7 +1445,7 @@
             bool combatActive = (Time::IsTimeoutActive(Chosen.TimeoutBattle));
             if (combatActive != CombatActive) {
                 CombatActive = combatActive;
-                GuiScreensExt::NeedSprite(BackgroundImage).Play(false, !combatActive);
+                ::GuiScreensExt::NeedSprite(BackgroundImage).Play(false, !combatActive);
                 Game.PlaySound("ICIBOXX1");
             }
             /*
@@ -1661,10 +1663,10 @@
 {
     {
         {
-            int ap = (HasChosen ? Chosen.CurrentAp / Tla::AP_DIVIDER : 0);
+            int ap = (HasChosen ? Chosen.CurrentAp / ::Tla::AP_DIVIDER : 0);
             int moveAp = 0; //( IsTurnBased() ? Chosen.MoveAp : 0 );
             for (int i = 0; i < Cells.length(); i++) {
-                int absAp = int(Tla::Abs(ap));
+                int absAp = int(::Tla::Abs(ap));
                 bool active = (i < absAp + moveAp);
                 Cells[i].SetActive(active);
                 if (active) {
@@ -1941,7 +1943,7 @@
 {
     {
         {
-            GetChild(0).SetActive(ChosenActions::IsBusy(Chosen));
+            GetChild(0).SetActive(::ChosenActions::IsBusy(Chosen));
         }
     }
 }
@@ -2225,16 +2227,16 @@
     {
         {
             if (button == MouseButton::Left) {
-                Parameters::UseMainItem();
+                ::Parameters::UseMainItem();
             }
             else if (button == MouseButton::Right) {
-                Parameters::SwitchMainItemMode(true);
+                ::Parameters::SwitchMainItemMode(true);
             }
             else if (button == MouseButton::WheelUp) {
-                Parameters::SwitchMainItemMode(false);
+                ::Parameters::SwitchMainItemMode(false);
             }
             else if (button == MouseButton::WheelDown) {
-                Parameters::SwitchMainItemMode(true);
+                ::Parameters::SwitchMainItemMode(true);
             }
         }
     }
@@ -2265,13 +2267,13 @@
 //             {
 //               "$type": "ItemView",
 //               "UserData": null,
-//               "UserDataExt": "ClientDefines::ITEMS_CHOSEN_ALL",
+//               "UserDataExt": "::ClientDefines::ITEMS_CHOSEN_ALL",
 //               "UseSorting": false,
 //               "OnGetItems":
 {
     {
         {
-            return ClientItems::RefreshItemsCollection(UserDataExt);
+            return ::ClientItems::RefreshItemsCollection(UserDataExt);
         }
     }
 }
@@ -2612,19 +2614,19 @@
             if (useItem == null) {
                 @useItem = chosen.GetItem(ItemProperty::CritterSlot, CritterItemSlot::Main);
             }
-            ProtoItem? proto = CritterItem::GetSlotItemProto(chosen);
+            ProtoItem? proto = ::CritterItem::GetSlotItemProto(chosen);
             int mode = (useItem == null ? chosen.HandsItemMode : useItem.Mode);
             if (proto != null) {
-                int use = WeaponHelpers::WeaponModeUse(mode);
+                int use = ::WeaponHelpers::WeaponModeUse(mode);
                 if (proto.Type == ItemType::Weapon) {
-                    if (use == WeaponHelpers::USE_RELOAD) {
+                    if (use == ::WeaponHelpers::USE_RELOAD) {
                         usePic = "art/intrface/RELOAD.FRM".hstr();
                     }
-                    else if (use == WeaponHelpers::USE_USE) {
+                    else if (use == ::WeaponHelpers::USE_USE) {
                         usePic = "art/intrface/USEON.FRM".hstr();
                     }
-                    else if (use < WeaponHelpers::MAX_USES) {
-                        usePic = WeaponHelpers::WeaponPicUse(proto, use);
+                    else if (use < ::WeaponHelpers::MAX_USES) {
+                        usePic = ::WeaponHelpers::WeaponPicUse(proto, use);
                     }
                 }
                 if (usePic == EMPTY_HSTRING && proto.IsCanUseOnSmth) {
@@ -2635,8 +2637,8 @@
                 }
             }
 
-            GuiScreensExt::NeedSprite(BackgroundImage).Load(usePic);
-            SetPosition(180 - GuiScreensExt::NeedSprite(BackgroundImage).Size.width, Pos.y);
+            ::GuiScreensExt::NeedSprite(BackgroundImage).Load(usePic);
+            SetPosition(180 - ::GuiScreensExt::NeedSprite(BackgroundImage).Size.width, Pos.y);
         }
     }
 }
@@ -2703,19 +2705,19 @@
         {
             int apCost = 0;
             if (item.Ownership == ItemOwnership::CritterInventory) {
-                apCost = Parameters::GetItemUseApCost(Game.GetCritter(item.CritterId), item, item.Mode);
+                apCost = ::Parameters::GetItemUseApCost(Game.GetCritter(item.CritterId), item, item.Mode);
             }
             else if (false) {
                 if (HasChosen) {
                     Critter chosen = Chosen;
-                    auto item2 = CritterItem::GetSlotItemProto(chosen);
-                    apCost = Parameters::GetItemUseApCost(chosen, item2, chosen.HandsItemMode);
+                    auto item2 = ::CritterItem::GetSlotItemProto(chosen);
+                    apCost = ::Parameters::GetItemUseApCost(chosen, item2, chosen.HandsItemMode);
                 }
             }
 
             SetActive(apCost > 0);
             if (apCost > 0) {
-                GuiScreensExt::NeedText(FindText("ApCostValue")).SetText("" + apCost);
+                ::GuiScreensExt::NeedText(FindText("ApCostValue")).SetText("" + apCost);
             }
         }
     }
@@ -2900,7 +2902,7 @@
                 mode = Chosen.HandsItemMode;
             }
 
-            GuiScreensExt::NeedSprite(BackgroundImage).Hidden = (WeaponHelpers::WeaponModeAim(mode) == HitLocations::LocationNone);
+            ::GuiScreensExt::NeedSprite(BackgroundImage).Hidden = (::WeaponHelpers::WeaponModeAim(mode) == HitLocations::LocationNone);
         }
     }
 }
@@ -2940,7 +2942,7 @@
             int percent = 0;
             if (max != 0) {
                 percent = cur * 100 / max;
-                percent = Tla::Clamp(percent, 0, 100);
+                percent = ::Tla::Clamp(percent, 0, 100);
             }
 
             if (Game.FrameTime >= tick) {
@@ -3109,7 +3111,7 @@
             }
 
             int[] rect = {AbsolutePos.x, AbsolutePos.y, Size.width, Size.height};
-            cast<Indicators>(GuiScreensExt::NeedObject(Parent)).DrawIndicator(rect, Points, Color::Green, indicatorCur, indicatorMax, CurTick, true, false);
+            cast<Indicators>(::GuiScreensExt::NeedObject(Parent)).DrawIndicator(rect, Points, Color::Green, indicatorCur, indicatorMax, CurTick, true, false);
         }
     }
 }
@@ -3182,12 +3184,12 @@
             int indicatorCur = 0;
 
             if (item.Deteriorable) {
-                indicatorMax = Tla::MaxDeterioration;
+                indicatorMax = ::Tla::MaxDeterioration;
                 indicatorCur = item.Deterioration;
             }
 
             int[] rect = {AbsolutePos.x, AbsolutePos.y, Size.width, Size.height};
-            cast<Indicators>(GuiScreensExt::NeedObject(Parent)).DrawIndicator(rect, Points, Color::Red, indicatorCur, indicatorMax, CurTick, true, false);
+            cast<Indicators>(::GuiScreensExt::NeedObject(Parent)).DrawIndicator(rect, Points, Color::Red, indicatorCur, indicatorMax, CurTick, true, false);
         }
     }
 }

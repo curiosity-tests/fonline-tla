@@ -97,7 +97,7 @@
     void GenProps()
     {
         Props = RegProps.clone();
-        Parameters::CritterGenerate(Props);
+        ::Parameters::CritterGenerate(Props);
     }
 
     int GetUnspentStatPoints()
@@ -117,7 +117,7 @@
 
     string FormatXX(int value)
     {
-        value = Tla::Clamp(value, 0, 99);
+        value = ::Tla::Clamp(value, 0, 99);
         return value < 10 ? "0" + value : "" + value;
     }
 }
@@ -126,7 +126,7 @@
 {
     {
         {
-            RegProps = Parameters::GenerateRegProps();
+            RegProps = ::Parameters::GenerateRegProps();
             GenProps();
         }
     }
@@ -407,7 +407,7 @@
 {
     {
         {
-            Text = MsgStr::GetInventoryShortSpecialText(cast<BaseStat>(GuiScreensExt::NeedObject(Parent)).Prop);
+            Text = ::MsgStr::GetInventoryShortSpecialText(cast<BaseStat>(::GuiScreensExt::NeedObject(Parent)).Prop);
         }
     }
 }
@@ -448,7 +448,7 @@
 {
     {
         {
-            return FormatXX(GetPropValue(cast<BaseStat>(GuiScreensExt::NeedObject(Parent)).Prop));
+            return FormatXX(GetPropValue(cast<BaseStat>(::GuiScreensExt::NeedObject(Parent)).Prop));
         }
     }
 }
@@ -517,7 +517,7 @@
 {
     {
         {
-            return MsgStr::GetGameText(MsgStr::StatLevelAbbTextId(GetPropValue(cast<BaseStat>(GuiScreensExt::NeedObject(Parent)).Prop)));
+            return ::MsgStr::GetGameText(::MsgStr::StatLevelAbbTextId(GetPropValue(cast<BaseStat>(::GuiScreensExt::NeedObject(Parent)).Prop)));
         }
     }
 }
@@ -630,7 +630,7 @@
 {
     {
         {
-            CritterProperty prop = cast<BaseStat>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<BaseStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
             if (Props[prop] < 10 && GetUnspentStatPoints() > 0) {
                 RegProps[prop] = RegProps[prop] + 1;
                 GenProps();
@@ -700,7 +700,7 @@
 {
     {
         {
-            CritterProperty prop = cast<BaseStat>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<BaseStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
             if (Props[prop] > 1) {
                 RegProps[prop] = RegProps[prop] - 1;
                 GenProps();
@@ -786,7 +786,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrRegSpecialSum)
+            ::MsgStr::GetGameText(::MsgStr::StrRegSpecialSum)
         }
     }
 }
@@ -1056,11 +1056,12 @@
 {
     {
         {
-            CritterProperty prop = cast<HealthStat>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<HealthStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
             if (prop == CritterProperty::MaxLife) {
-                return MsgStr::GetGameText(MsgStr::StrInvHp) + "  " + GetPropValue(CritterProperty::CurrentHp) + " / " + GetPropValue(CritterProperty::MaxLife);
+                return ::MsgStr::GetGameText(::MsgStr::StrInvHp) + "  " + GetPropValue(CritterProperty::CurrentHp) + " / " +
+                       GetPropValue(CritterProperty::MaxLife);
             }
-            return MsgStr::GetParamNameText(prop);
+            return ::MsgStr::GetParamNameText(prop);
         }
     }
 }
@@ -1101,7 +1102,7 @@
 {
     {
         {
-            CritterProperty prop = cast<HealthStat>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<HealthStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
             ucolor color;
             if (prop == CritterProperty::IsRadiated) {
                 color = (GetPropValue(CritterProperty::RadiationLevel) != 0 ? ucolor(0) : Color::Dark);
@@ -1321,8 +1322,8 @@
 {
     {
         {
-            CritterProperty prop = cast<ExtendedStat>(GuiScreensExt::NeedObject(Parent)).Prop;
-            Text = MsgStr::GetParamShortNameText(prop);
+            CritterProperty prop = cast<ExtendedStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
+            Text = ::MsgStr::GetParamShortNameText(prop);
         }
     }
 }
@@ -1375,7 +1376,7 @@
 {
     {
         {
-            CritterProperty prop = cast<ExtendedStat>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<ExtendedStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
             string text;
             if (prop == CritterProperty::CarryWeight) {
                 text = "" + (GetPropValue(prop) / 1000);
@@ -1675,7 +1676,7 @@
 {
     {
         {
-            CritterProperty prop = cast<TraitLeft>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<TraitLeft>(::GuiScreensExt::NeedObject(Parent)).Prop;
             if (RegProps[prop] == 0) {
                 int count = 0;
                 for (int i = 0; i < CritterPropertyGroup::Traits.length(); i++) {
@@ -1691,7 +1692,7 @@
                 RegProps[prop] = 0;
             }
 
-            GuiScreensExt::NeedText(GuiScreensExt::NeedObject(Parent).FindText("TraitName1")).SetTextColor(RegProps[prop] != 0 ? Color::LGray : 0);
+            ::GuiScreensExt::NeedText(::GuiScreensExt::NeedObject(Parent).FindText("TraitName1")).SetTextColor(RegProps[prop] != 0 ? Color::LGray : 0);
 
             GenProps();
         }
@@ -1758,7 +1759,7 @@
 {
     {
         {
-            Text = MsgStr::GetParamNameText(cast<TraitLeft>(GuiScreensExt::NeedObject(Parent)).Prop);
+            Text = ::MsgStr::GetParamNameText(cast<TraitLeft>(::GuiScreensExt::NeedObject(Parent)).Prop);
         }
     }
 }
@@ -1966,7 +1967,7 @@
 {
     {
         {
-            CritterProperty prop = cast<TraitRight>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<TraitRight>(::GuiScreensExt::NeedObject(Parent)).Prop;
             if (RegProps[prop] == 0) {
                 int count = 0;
                 for (int i = 0; i < CritterPropertyGroup::Traits.length(); i++) {
@@ -1982,7 +1983,7 @@
                 RegProps[prop] = 0;
             }
 
-            GuiScreensExt::NeedText(GuiScreensExt::NeedObject(Parent).FindText("TraitName2")).SetTextColor(RegProps[prop] != 0 ? Color::LGray : 0);
+            ::GuiScreensExt::NeedText(::GuiScreensExt::NeedObject(Parent).FindText("TraitName2")).SetTextColor(RegProps[prop] != 0 ? Color::LGray : 0);
 
             GenProps();
         }
@@ -2049,7 +2050,7 @@
 {
     {
         {
-            Text = MsgStr::GetParamNameText(cast<TraitRight>(GuiScreensExt::NeedObject(Parent)).Prop);
+            Text = ::MsgStr::GetParamNameText(cast<TraitRight>(::GuiScreensExt::NeedObject(Parent)).Prop);
         }
     }
 }
@@ -2265,7 +2266,7 @@
 {
     {
         {
-            CritterProperty prop = cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop;
             int freeTagSkills = Settings.Player.StartTagSkillPoints - (RegProps[CritterProperty::TagSkill1] != CritterProperty::None ? 1 : 0) -
                                 (RegProps[CritterProperty::TagSkill2] != CritterProperty::None ? 1 : 0) -
                                 (RegProps[CritterProperty::TagSkill3] != CritterProperty::None ? 1 : 0);
@@ -2291,8 +2292,8 @@
 
             bool tagged = (CritterProperty(RegProps[CritterProperty::TagSkill1]) == prop || CritterProperty(RegProps[CritterProperty::TagSkill2]) == prop ||
                            CritterProperty(RegProps[CritterProperty::TagSkill3]) == prop);
-            GuiScreensExt::NeedText(GuiScreensExt::NeedObject(Parent).FindText("SkillName")).SetTextColor(tagged ? Color::LGray : 0);
-            GuiScreensExt::NeedText(GuiScreensExt::NeedObject(Parent).FindText("SkillValue")).SetTextColor(tagged ? Color::LGray : 0);
+            ::GuiScreensExt::NeedText(::GuiScreensExt::NeedObject(Parent).FindText("SkillName")).SetTextColor(tagged ? Color::LGray : 0);
+            ::GuiScreensExt::NeedText(::GuiScreensExt::NeedObject(Parent).FindText("SkillValue")).SetTextColor(tagged ? Color::LGray : 0);
 
             GenProps();
         }
@@ -2359,7 +2360,7 @@
 {
     {
         {
-            Text = MsgStr::GetParamNameText(cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop);
+            Text = ::MsgStr::GetParamNameText(cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop);
         }
     }
 }
@@ -2370,7 +2371,7 @@
 {
     {
         {
-            SetTextColor(IsTagSkill(cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop) ? ucolor(0xFFAAAAAA) : Color::Text);
+            SetTextColor(IsTagSkill(cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop) ? ucolor(0xFFAAAAAA) : Color::Text);
         }
     }
 }
@@ -2413,7 +2414,7 @@
 {
     {
         {
-            return GetPropValue(cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop) + "%";
+            return GetPropValue(cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop) + "%";
         }
     }
 }
@@ -2454,7 +2455,7 @@
 {
     {
         {
-            SetTextColor(IsTagSkill(cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop) ? ucolor(0xFFAAAAAA) : Color::Text);
+            SetTextColor(IsTagSkill(cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop) ? ucolor(0xFFAAAAAA) : Color::Text);
         }
     }
 }
@@ -2492,7 +2493,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaSkills)
+            ::MsgStr::GetGameText(::MsgStr::StrChaSkills)
         }
     }
 }
@@ -2610,7 +2611,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrRegUnspentTags)
+            ::MsgStr::GetGameText(::MsgStr::StrRegUnspentTags)
         }
     }
 }
@@ -2776,30 +2777,30 @@
 
             CritterProperty prop = CritterProperty::None;
 
-            if (prop == CritterProperty::None && cast<BaseStat?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<BaseStat>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<BaseStat?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<BaseStat>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
-            if (prop == CritterProperty::None && cast<HealthStat?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<HealthStat>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<HealthStat?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<HealthStat>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
-            if (prop == CritterProperty::None && cast<ExtendedStat?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<ExtendedStat>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<ExtendedStat?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<ExtendedStat>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
-            if (prop == CritterProperty::None && cast<TraitLeft?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<TraitLeft>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<TraitLeft?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<TraitLeft>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
-            if (prop == CritterProperty::None && cast<TraitRight?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<TraitRight>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<TraitRight?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<TraitRight>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
-            if (prop == CritterProperty::None && cast<Skill?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<Skill>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<Skill?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<Skill>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
 
             if (prop != CritterProperty::None && CurTip != prop) {
                 CurTip = prop;
-                GuiScreensExt::NeedText(FindText("Name")).Text = MsgStr::GetParamNameText(prop);
-                GuiScreensExt::NeedText(FindText("Desc")).Text = MsgStr::GetParamDescText(prop);
-                GuiScreensExt::NeedPanel(FindPanel("Image")).SetBackgroundImage(MsgStr::GetParamPicText(prop));
+                ::GuiScreensExt::NeedText(FindText("Name")).Text = ::MsgStr::GetParamNameText(prop);
+                ::GuiScreensExt::NeedText(FindText("Desc")).Text = ::MsgStr::GetParamDescText(prop);
+                ::GuiScreensExt::NeedPanel(FindPanel("Image")).SetBackgroundImage(::MsgStr::GetParamPicText(prop));
             }
         }
     }
@@ -3190,7 +3191,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaPrint)
+            ::MsgStr::GetGameText(::MsgStr::StrChaPrint)
         }
     }
 }
@@ -3347,8 +3348,8 @@
 {
     {
         {
-            if (Parameters::CritterGenerateCheck(RegProps)) {
-                PlayerRegistration::CallRegisterPlayer(Game.GetCacheText("RegName__"), Game.GetCacheText("RegPassword__"), RegProps.clone());
+            if (::Parameters::CritterGenerateCheck(RegProps)) {
+                ::PlayerRegistration::CallRegisterPlayer(Game.GetCacheText("RegName__"), Game.GetCacheText("RegPassword__"), RegProps.clone());
             }
         }
     }
@@ -3376,7 +3377,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaOk)
+            ::MsgStr::GetGameText(::MsgStr::StrChaOk)
         }
     }
 }
@@ -3533,7 +3534,7 @@
 {
     {
         {
-            GuiScreensExt::TryExit();
+            ::GuiScreensExt::TryExit();
         }
     }
 }
@@ -3560,7 +3561,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaCancel)
+            ::MsgStr::GetGameText(::MsgStr::StrChaCancel)
         }
     }
 }
@@ -3719,7 +3720,7 @@
 {
     {
         {
-            GuiScreensExt::NeedPanel(GuiScreensExt::NeedScreen(Screen).FindPanel("CharacterNamePopUp")).SetActive(true);
+            ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedScreen(Screen).FindPanel("CharacterNamePopUp")).SetActive(true);
         }
     }
 }
@@ -3903,7 +3904,7 @@
 {
     {
         {
-            GuiScreensExt::NeedPanel(GuiScreensExt::NeedScreen(Screen).FindPanel("CharacterAgePopUp")).SetActive(true);
+            ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedScreen(Screen).FindPanel("CharacterAgePopUp")).SetActive(true);
         }
     }
 }
@@ -4087,7 +4088,7 @@
 {
     {
         {
-            GuiScreensExt::NeedPanel(GuiScreensExt::NeedScreen(Screen).FindPanel("CharacterGenderPopUp")).SetActive(true);
+            ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedScreen(Screen).FindPanel("CharacterGenderPopUp")).SetActive(true);
         }
     }
 }
@@ -4115,8 +4116,8 @@
 {
     {
         {
-            return GetPropValue(CritterProperty::Gender) == GenderType::Male ? MsgStr::GetGameText(MsgStr::StrMaleName) :
-                                                                               MsgStr::GetGameText(MsgStr::StrFemaleName);
+            return GetPropValue(CritterProperty::Gender) == GenderType::Male ? ::MsgStr::GetGameText(::MsgStr::StrMaleName) :
+                                                                               ::MsgStr::GetGameText(::MsgStr::StrFemaleName);
         }
     }
 }
@@ -4336,7 +4337,7 @@
             Game.SetCacheText("RegName__", Text);
 
             if (key == KeyCode::Return || key == KeyCode::Numpadenter) {
-                GuiScreensExt::NeedObject(Parent).SetActive(false);
+                ::GuiScreensExt::NeedObject(Parent).SetActive(false);
             }
         }
     }
@@ -4420,7 +4421,7 @@
             Game.SetCacheText("RegPassword__", Text);
 
             if (key == KeyCode::Return || key == KeyCode::Numpadenter) {
-                GuiScreensExt::NeedObject(Parent).SetActive(false);
+                ::GuiScreensExt::NeedObject(Parent).SetActive(false);
             }
         }
     }
@@ -4560,8 +4561,8 @@
     {
         {
             RegProps[CritterProperty::Age] = RegProps[CritterProperty::Age] + 1;
-            if (RegProps[CritterProperty::Age] > Tla::AgeMax) {
-                RegProps[CritterProperty::Age] = Tla::AgeMin;
+            if (RegProps[CritterProperty::Age] > ::Tla::AgeMax) {
+                RegProps[CritterProperty::Age] = ::Tla::AgeMin;
             }
             GenProps();
         }
@@ -4630,8 +4631,8 @@
     {
         {
             RegProps[CritterProperty::Age] = RegProps[CritterProperty::Age] - 1;
-            if (RegProps[CritterProperty::Age] < Tla::AgeMin) {
-                RegProps[CritterProperty::Age] = Tla::AgeMax;
+            if (RegProps[CritterProperty::Age] < ::Tla::AgeMin) {
+                RegProps[CritterProperty::Age] = ::Tla::AgeMax;
             }
             GenProps();
         }
@@ -4847,7 +4848,7 @@
             RegProps[CritterProperty::Gender] = GenderType::Male;
             GenProps();
             SetSwitch(true);
-            GuiScreensExt::NeedButton(GuiScreensExt::NeedObject(Parent).FindButton("Female")).SetSwitch(false);
+            ::GuiScreensExt::NeedButton(::GuiScreensExt::NeedObject(Parent).FindButton("Female")).SetSwitch(false);
         }
     }
 }
@@ -4925,7 +4926,7 @@
             RegProps[CritterProperty::Gender] = GenderType::Female;
             GenProps();
             SetSwitch(true);
-            GuiScreensExt::NeedButton(GuiScreensExt::NeedObject(Parent).FindButton("Male")).SetSwitch(false);
+            ::GuiScreensExt::NeedButton(::GuiScreensExt::NeedObject(Parent).FindButton("Male")).SetSwitch(false);
         }
     }
 }

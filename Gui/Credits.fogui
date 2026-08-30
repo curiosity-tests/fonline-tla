@@ -32,11 +32,11 @@
 
         void RefreshCreditsLayout()
         {
-            auto creditsText = GuiScreensExt::NeedText(FindText("CreditsText"));
-            creditsText.SetText(MsgStr::GetGameText(MsgStr::StrGameCredits));
+            auto creditsText = ::GuiScreensExt::NeedText(FindText("CreditsText"));
+            creditsText.SetText(::MsgStr::GetGameText(::MsgStr::StrGameCredits));
             verify(!creditsText.Text.isEmpty(), "Credits text must not be empty");
 
-            string speedText = MsgStr::GetGameText(MsgStr::StrGameCreditsSpeed);
+            string speedText = ::MsgStr::GetGameText(::MsgStr::StrGameCreditsSpeed);
             int speed = 0;
             if (speedText.tryToInt(speed) && speed > 0) {
                 CreditsDeltaTick = Time::Milliseconds(speed);
@@ -94,7 +94,7 @@
             }
             CreditsTick = Game.FrameTime + CreditsDeltaTick;
 
-            auto creditsText = GuiScreensExt::NeedText(FindText("CreditsText"));
+            auto creditsText = ::GuiScreensExt::NeedText(FindText("CreditsText"));
             creditsText.SetPosition(creditsText.Pos.x, creditsText.Pos.y - 1);
         }
     }
@@ -150,7 +150,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrGameCredits)
+            ::MsgStr::GetGameText(::MsgStr::StrGameCredits)
         }
     }
 }

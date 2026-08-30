@@ -110,7 +110,7 @@
                 }
             }
 
-            SetText(MsgStr::GetHoloText(MsgStr::HoloInfoDescTextId(holoNum)));
+            SetText(::MsgStr::GetHoloText(::MsgStr::HoloInfoDescTextId(holoNum)));
         }
     }
 }
@@ -198,7 +198,7 @@
                 }
             }
 
-            SetText(MsgStr::GetHoloText(MsgStr::HoloInfoNameTextId(holoNum)));
+            SetText(::MsgStr::GetHoloText(::MsgStr::HoloInfoNameTextId(holoNum)));
         }
     }
 }
@@ -283,8 +283,8 @@
 {
     {
         {
-            string text = GuiScreensExt::NeedText(GuiScreensExt::NeedScreen(Screen).FindText("IboxText")).Text;
-            string title = GuiScreensExt::NeedText(GuiScreensExt::NeedScreen(Screen).FindText("IboxTitle")).Text;
+            string text = ::GuiScreensExt::NeedText(::GuiScreensExt::NeedScreen(Screen).FindText("IboxText")).Text;
+            string title = ::GuiScreensExt::NeedText(::GuiScreensExt::NeedScreen(Screen).FindText("IboxTitle")).Text;
             //SetChosenAction( { Id, 0, 0, 0, 0, 0, 0 } );
         }
     }
@@ -305,7 +305,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrInputBoxWrite)
+            ::MsgStr::GetGameText(::MsgStr::StrInputBoxWrite)
         }
     }
 }
@@ -437,7 +437,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrInputBoxBack)
+            ::MsgStr::GetGameText(::MsgStr::StrInputBoxBack)
         }
     }
 }

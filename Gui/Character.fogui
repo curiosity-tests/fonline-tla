@@ -86,7 +86,7 @@
 
     string FormatXX(int value)
     {
-        value = Tla::Clamp(value, 0, 99);
+        value = ::Tla::Clamp(value, 0, 99);
         return value < 10 ? "0" + value : "" + value;
     }
 }
@@ -327,7 +327,7 @@
 {
     {
         {
-            Text = MsgStr::GetInventoryShortSpecialText(cast<BaseStat>(GuiScreensExt::NeedObject(Parent)).Prop);
+            Text = ::MsgStr::GetInventoryShortSpecialText(cast<BaseStat>(::GuiScreensExt::NeedObject(Parent)).Prop);
         }
     }
 }
@@ -369,7 +369,7 @@
 {
     {
         {
-            return FormatXX(GetPropValue(cast<BaseStat>(GuiScreensExt::NeedObject(Parent)).Prop));
+            return FormatXX(GetPropValue(cast<BaseStat>(::GuiScreensExt::NeedObject(Parent)).Prop));
         }
     }
 }
@@ -438,7 +438,7 @@
 {
     {
         {
-            return MsgStr::GetGameText(MsgStr::StatLevelTextId(GetPropValue(cast<BaseStat>(GuiScreensExt::NeedObject(Parent)).Prop)));
+            return ::MsgStr::GetGameText(::MsgStr::StatLevelTextId(GetPropValue(cast<BaseStat>(::GuiScreensExt::NeedObject(Parent)).Prop)));
         }
     }
 }
@@ -648,11 +648,12 @@
 {
     {
         {
-            CritterProperty prop = cast<HealthStat>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<HealthStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
             if (prop == CritterProperty::MaxLife) {
-                return MsgStr::GetGameText(MsgStr::StrInvHp) + "  " + GetPropValue(CritterProperty::CurrentHp) + " / " + GetPropValue(CritterProperty::MaxLife);
+                return ::MsgStr::GetGameText(::MsgStr::StrInvHp) + "  " + GetPropValue(CritterProperty::CurrentHp) + " / " +
+                       GetPropValue(CritterProperty::MaxLife);
             }
-            return MsgStr::GetParamNameText(prop);
+            return ::MsgStr::GetParamNameText(prop);
         }
     }
 }
@@ -693,7 +694,7 @@
 {
     {
         {
-            CritterProperty prop = cast<HealthStat>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<HealthStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
             ucolor color;
             if (prop == CritterProperty::IsRadiated) {
                 color = (GetPropValue(CritterProperty::RadiationLevel) != 0 ? ucolor(0) : Color::Dark);
@@ -906,8 +907,8 @@
 {
     {
         {
-            CritterProperty prop = cast<ExtendedStat>(GuiScreensExt::NeedObject(Parent)).Prop;
-            Text = MsgStr::GetParamShortNameText(prop);
+            CritterProperty prop = cast<ExtendedStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
+            Text = ::MsgStr::GetParamShortNameText(prop);
         }
     }
 }
@@ -955,7 +956,7 @@
 {
     {
         {
-            CritterProperty prop = cast<ExtendedStat>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<ExtendedStat>(::GuiScreensExt::NeedObject(Parent)).Prop;
             string text;
             if (prop == CritterProperty::CarryWeight) {
                 text = "" + (GetPropValue(prop) / 1000);
@@ -1213,7 +1214,7 @@
 {
     {
         {
-            Text = MsgStr::GetParamNameText(cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop);
+            Text = ::MsgStr::GetParamNameText(cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop);
         }
     }
 }
@@ -1225,7 +1226,7 @@
 {
     {
         {
-            SetTextColor(IsTagSkill(cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop) ? ucolor(0xFFAAAAAA) : Color::Text);
+            SetTextColor(IsTagSkill(cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop) ? ucolor(0xFFAAAAAA) : Color::Text);
         }
     }
 }
@@ -1236,8 +1237,8 @@
     {
         {
             if (button == MouseButton::Left) {
-                cast<Skills>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent)).CurSkill =
-                    cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop;
+                cast<Skills>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent)).CurSkill =
+                    cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop;
             }
         }
     }
@@ -1284,7 +1285,7 @@
 {
     {
         {
-            CritterProperty prop = cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty prop = cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop;
             return (GetPropValue(prop) + SkillUp.get(prop, 0)) + "%";
         }
     }
@@ -1326,7 +1327,7 @@
 {
     {
         {
-            SetTextColor(IsTagSkill(cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop) ? ucolor(0xFFAAAAAA) : Color::Text);
+            SetTextColor(IsTagSkill(cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop) ? ucolor(0xFFAAAAAA) : Color::Text);
         }
     }
 }
@@ -1337,8 +1338,8 @@
     {
         {
             if (button == MouseButton::Left) {
-                cast<Skills>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent)).CurSkill =
-                    cast<Skill>(GuiScreensExt::NeedObject(Parent)).Prop;
+                cast<Skills>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent)).CurSkill =
+                    cast<Skill>(::GuiScreensExt::NeedObject(Parent)).Prop;
             }
         }
     }
@@ -1380,7 +1381,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaSkills)
+            ::MsgStr::GetGameText(::MsgStr::StrChaSkills)
         }
     }
 }
@@ -1468,7 +1469,7 @@
 {
     {
         {
-            SetPosition(245, -10 + ShowSkills.find(cast<Skills>(GuiScreensExt::NeedObject(Parent)).CurSkill) * 11);
+            SetPosition(245, -10 + ShowSkills.find(cast<Skills>(::GuiScreensExt::NeedObject(Parent)).CurSkill) * 11);
         }
     }
 }
@@ -1543,10 +1544,10 @@
                 return;
             }
 
-            CritterProperty curSkill = cast<Skills>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent)).CurSkill;
+            CritterProperty curSkill = cast<Skills>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent)).CurSkill;
             SkillUp.setIfNotExist(curSkill, 0);
             int skillVal = GetPropValue(curSkill) + SkillUp[curSkill];
-            if (skillVal >= Tla::MaxSkillValue()) {
+            if (skillVal >= ::Tla::MaxSkillValue()) {
                 return;
             }
 
@@ -1641,7 +1642,7 @@
 {
     {
         {
-            CritterProperty curSkill = cast<Skills>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent)).CurSkill;
+            CritterProperty curSkill = cast<Skills>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent)).CurSkill;
             SkillUp.setIfNotExist(curSkill, 0);
             if (SkillUp[curSkill] <= 0) {
                 return;
@@ -1755,7 +1756,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaUnspentSp)
+            ::MsgStr::GetGameText(::MsgStr::StrChaUnspentSp)
         }
     }
 }
@@ -1918,17 +1919,17 @@
 
             CritterProperty prop = CritterProperty::None;
 
-            if (prop == CritterProperty::None && cast<BaseStat?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<BaseStat>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<BaseStat?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<BaseStat>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
-            if (prop == CritterProperty::None && cast<HealthStat?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<HealthStat>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<HealthStat?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<HealthStat>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
-            if (prop == CritterProperty::None && cast<ExtendedStat?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<ExtendedStat>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<ExtendedStat?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<ExtendedStat>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
-            if (prop == CritterProperty::None && cast<Skill?>(GuiScreensExt::NeedObject(obj.Parent)) != null) {
-                prop = cast<Skill>(GuiScreensExt::NeedObject(obj.Parent)).Prop;
+            if (prop == CritterProperty::None && cast<Skill?>(::GuiScreensExt::NeedObject(obj.Parent)) != null) {
+                prop = cast<Skill>(::GuiScreensExt::NeedObject(obj.Parent)).Prop;
             }
 
             if (cast<TextLevel?>(obj) != null) {
@@ -1940,15 +1941,15 @@
 
             if (prop != CritterProperty::None && CurTip != prop) {
                 CurTip = prop;
-                GuiScreensExt::NeedText(FindText("Name")).Text = MsgStr::GetParamNameText(prop);
-                GuiScreensExt::NeedText(FindText("Desc")).Text = MsgStr::GetParamDescText(prop);
-                GuiScreensExt::NeedPanel(FindPanel("Image")).SetBackgroundImage(MsgStr::GetParamPicText(prop));
+                ::GuiScreensExt::NeedText(FindText("Name")).Text = ::MsgStr::GetParamNameText(prop);
+                ::GuiScreensExt::NeedText(FindText("Desc")).Text = ::MsgStr::GetParamDescText(prop);
+                ::GuiScreensExt::NeedPanel(FindPanel("Image")).SetBackgroundImage(::MsgStr::GetParamPicText(prop));
             }
-            auto panel = cast<PropsPanel?>(GuiScreensExt::NeedObject(obj.Parent));
+            auto panel = cast<PropsPanel?>(::GuiScreensExt::NeedObject(obj.Parent));
             if (prop == CritterProperty::None && panel != null) {
-                GuiScreensExt::NeedText(FindText("Name")).Text = panel.Caption;
-                GuiScreensExt::NeedText(FindText("Desc")).Text = panel.Description;
-                GuiScreensExt::NeedPanel(FindPanel("Image")).SetBackgroundImage(panel.Image);
+                ::GuiScreensExt::NeedText(FindText("Name")).Text = panel.Caption;
+                ::GuiScreensExt::NeedText(FindText("Desc")).Text = panel.Description;
+                ::GuiScreensExt::NeedPanel(FindPanel("Image")).SetBackgroundImage(panel.Image);
             }
         }
     }
@@ -2339,7 +2340,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaPrint)
+            ::MsgStr::GetGameText(::MsgStr::StrChaPrint)
         }
     }
 }
@@ -2540,7 +2541,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaOk)
+            ::MsgStr::GetGameText(::MsgStr::StrChaOk)
         }
     }
 }
@@ -2724,7 +2725,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaCancel)
+            ::MsgStr::GetGameText(::MsgStr::StrChaCancel)
         }
     }
 }
@@ -3081,8 +3082,8 @@
 {
     {
         {
-            return GetPropValue(CritterProperty::Gender) == GenderType::Male ? MsgStr::GetGameText(MsgStr::StrMaleName) :
-                                                                               MsgStr::GetGameText(MsgStr::StrFemaleName);
+            return GetPropValue(CritterProperty::Gender) == GenderType::Male ? ::MsgStr::GetGameText(::MsgStr::StrMaleName) :
+                                                                               ::MsgStr::GetGameText(::MsgStr::StrFemaleName);
         }
     }
 }
@@ -3200,7 +3201,7 @@
 {
     {
         {
-            return Game.ReplaceText(MsgStr::GetGameText(MsgStr::StrChaLevel), "%d", GetPropValue(CritterProperty::Level));
+            return Game.ReplaceText(::MsgStr::GetGameText(::MsgStr::StrChaLevel), "%d", GetPropValue(CritterProperty::Level));
         }
     }
 }
@@ -3265,7 +3266,7 @@
 {
     {
         {
-            return Game.ReplaceText(MsgStr::GetGameText(MsgStr::StrChaExperience), "%d", GetPropValue(CritterProperty::Experience));
+            return Game.ReplaceText(::MsgStr::GetGameText(::MsgStr::StrChaExperience), "%d", GetPropValue(CritterProperty::Experience));
         }
     }
 }
@@ -3330,7 +3331,9 @@
 {
     {
         {
-            return Game.ReplaceText(MsgStr::GetGameText(MsgStr::StrChaNextLevel), "%d", Tla::NumericalNumber(GetPropValue(CritterProperty::Level)) * 1000);
+            return Game.ReplaceText(::MsgStr::GetGameText(::MsgStr::StrChaNextLevel),
+                                    "%d",
+                                    ::Tla::NumericalNumber(GetPropValue(CritterProperty::Level)) * 1000);
         }
     }
 }
@@ -3438,9 +3441,9 @@
 {
     {
         {
-            GuiScreensExt::NeedPanel(FindPanel(reflection::typeof<PerksTitle>().nameWithoutNamespace)).SetActive(CurSwitch == 0);
-            GuiScreensExt::NeedPanel(FindPanel(reflection::typeof<KarmaTitle>().nameWithoutNamespace)).SetActive(CurSwitch == 1);
-            GuiScreensExt::NeedPanel(FindPanel(reflection::typeof<KillsTitle>().nameWithoutNamespace)).SetActive(CurSwitch == 2);
+            ::GuiScreensExt::NeedPanel(FindPanel(reflection::typeof<PerksTitle>().nameWithoutNamespace)).SetActive(CurSwitch == 0);
+            ::GuiScreensExt::NeedPanel(FindPanel(reflection::typeof<KarmaTitle>().nameWithoutNamespace)).SetActive(CurSwitch == 1);
+            ::GuiScreensExt::NeedPanel(FindPanel(reflection::typeof<KillsTitle>().nameWithoutNamespace)).SetActive(CurSwitch == 2);
         }
     }
 }
@@ -3649,7 +3652,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrSwitchPerksName)
+            ::MsgStr::GetGameText(::MsgStr::StrSwitchPerksName)
         }
     }
 }
@@ -3714,7 +3717,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrSwitchKarmaName)
+            ::MsgStr::GetGameText(::MsgStr::StrSwitchKarmaName)
         }
     }
 }
@@ -3779,7 +3782,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrSwitchKillsName)
+            ::MsgStr::GetGameText(::MsgStr::StrSwitchKillsName)
         }
     }
 }
@@ -3876,10 +3879,10 @@
 {
     {
         {
-            cast<Switcher>(GuiScreensExt::NeedObject(Parent)).CurSwitch = 0;
+            cast<Switcher>(::GuiScreensExt::NeedObject(Parent)).CurSwitch = 0;
 
-            Gui::Panel panel = GuiScreensExt::NeedPanel(GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
-            Gui::Panel panel2 = GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
+            Gui::Panel panel = ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
+            Gui::Panel panel2 = ::GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
             auto grid = cast<PropsGrid>(panel2);
             grid.FillGrid(0);
             Gui::ShowScreen(GuiScreen::Character);
@@ -3941,10 +3944,10 @@
 {
     {
         {
-            cast<Switcher>(GuiScreensExt::NeedObject(Parent)).CurSwitch = 1;
+            cast<Switcher>(::GuiScreensExt::NeedObject(Parent)).CurSwitch = 1;
 
-            Gui::Panel panel = GuiScreensExt::NeedPanel(GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
-            Gui::Panel panel2 = GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
+            Gui::Panel panel = ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
+            Gui::Panel panel2 = ::GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
             auto grid = cast<PropsGrid>(panel2);
             grid.FillGrid(1);
             Gui::ShowScreen(GuiScreen::Character);
@@ -4013,8 +4016,8 @@
             //int curSwitch = cast< Switcher >( Parent ).CurSwitch;
             //if( cast< Switcher >( Parent ).SwitchScroll[ curSwitch ] > 0 )
             //    cast< Switcher >( Parent ).SwitchScroll[ curSwitch ]--;
-            Gui::Panel panel = GuiScreensExt::NeedPanel(GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
-            Gui::Panel panel2 = GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
+            Gui::Panel panel = ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
+            Gui::Panel panel2 = ::GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
             panel2.ModifyScroll(-10, 0);
         }
     }
@@ -4089,8 +4092,8 @@
         {
             //int curSwitch = cast< Switcher >( Parent ).CurSwitch;
             //cast< Switcher >( Parent ).SwitchScroll[ curSwitch ]++;
-            Gui::Panel panel = GuiScreensExt::NeedPanel(GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
-            Gui::Panel panel2 = GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
+            Gui::Panel panel = ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
+            Gui::Panel panel2 = ::GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
             panel2.ModifyScroll(+10, 0);
         }
     }
@@ -4159,9 +4162,9 @@
 {
     {
         {
-            cast<Switcher>(GuiScreensExt::NeedObject(Parent)).CurSwitch = 2;
-            Gui::Panel panel = GuiScreensExt::NeedPanel(GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
-            Gui::Panel panel2 = GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
+            cast<Switcher>(::GuiScreensExt::NeedObject(Parent)).CurSwitch = 2;
+            Gui::Panel panel = ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedObject(Parent).FindPanel("PropdGridBase"));
+            Gui::Panel panel2 = ::GuiScreensExt::NeedPanel(panel.FindPanel("PropsGrid"));
             auto grid = cast<PropsGrid>(panel2);
             grid.FillGrid(2);
             Gui::ShowScreen(GuiScreen::Character);
@@ -4306,20 +4309,20 @@
                 if (kills[i] != 0) {
                     if (!killsTitleAdded) {
                         killsTitleAdded = true;
-                        Captions.insertLast(MsgStr::GetGameText(MsgStr::StrKillsName));
-                        Descriptions.insertLast(MsgStr::GetGameText(MsgStr::StrKillsDesc));
-                        Images.insertLast(MsgStr::GetGameText(MsgStr::StrKillsSkillDex));
+                        Captions.insertLast(::MsgStr::GetGameText(::MsgStr::StrKillsName));
+                        Descriptions.insertLast(::MsgStr::GetGameText(::MsgStr::StrKillsDesc));
+                        Images.insertLast(::MsgStr::GetGameText(::MsgStr::StrKillsSkillDex));
                         HeadersIndexes.insertLast(totalRows);
                         totalRows++;
                     }
-                    string text = MsgStr::GetGameText(MsgStr::KillNameTextId(i));
+                    string text = ::MsgStr::GetGameText(::MsgStr::KillNameTextId(i));
                     if (kills[i] > 1) {
                         text += " (" + kills[i] + ")";
                     }
 
                     Captions.insertLast(text);
-                    Descriptions.insertLast(MsgStr::GetGameText(MsgStr::KillDescTextId(i)));
-                    Images.insertLast(MsgStr::GetGameText(MsgStr::StrKillsSkillDex));
+                    Descriptions.insertLast(::MsgStr::GetGameText(::MsgStr::KillDescTextId(i)));
+                    Images.insertLast(::MsgStr::GetGameText(::MsgStr::StrKillsSkillDex));
                     totalRows++;
                 }
             }
@@ -4336,16 +4339,16 @@
                 if (GetPropValue(CritterPropertyGroup::Traits[i]) != 0) {
                     if (!traitsTitleAdded) {
                         traitsTitleAdded = true;
-                        Captions.insertLast(MsgStr::GetGameText(MsgStr::StrTraitsName));
-                        Descriptions.insertLast(MsgStr::GetGameText(MsgStr::StrTraitsDescr));
-                        Images.insertLast(MsgStr::GetGameText(MsgStr::StrTraitsSkilldex));
+                        Captions.insertLast(::MsgStr::GetGameText(::MsgStr::StrTraitsName));
+                        Descriptions.insertLast(::MsgStr::GetGameText(::MsgStr::StrTraitsDescr));
+                        Images.insertLast(::MsgStr::GetGameText(::MsgStr::StrTraitsSkilldex));
                         HeadersIndexes.insertLast(totalRows);
                         totalRows++;
                     }
 
-                    Captions.insertLast(MsgStr::GetParamNameText(CritterPropertyGroup::Traits[i]));
-                    Descriptions.insertLast(MsgStr::GetParamDescText(CritterPropertyGroup::Traits[i]));
-                    Images.insertLast(MsgStr::GetParamPicText(CritterPropertyGroup::Traits[i]));
+                    Captions.insertLast(::MsgStr::GetParamNameText(CritterPropertyGroup::Traits[i]));
+                    Descriptions.insertLast(::MsgStr::GetParamDescText(CritterPropertyGroup::Traits[i]));
+                    Images.insertLast(::MsgStr::GetParamPicText(CritterPropertyGroup::Traits[i]));
                     totalRows++;
                 }
             }
@@ -4357,20 +4360,20 @@
                 if (value != 0) {
                     if (!perksTitleAdded) {
                         perksTitleAdded = true;
-                        Captions.insertLast(MsgStr::GetGameText(MsgStr::StrPerksName));
-                        Descriptions.insertLast(MsgStr::GetGameText(MsgStr::StrPerksDescr));
-                        Images.insertLast(MsgStr::GetGameText(MsgStr::StrPerksSkilldex));
+                        Captions.insertLast(::MsgStr::GetGameText(::MsgStr::StrPerksName));
+                        Descriptions.insertLast(::MsgStr::GetGameText(::MsgStr::StrPerksDescr));
+                        Images.insertLast(::MsgStr::GetGameText(::MsgStr::StrPerksSkilldex));
                         HeadersIndexes.insertLast(totalRows);
                         totalRows++;
                     }
-                    string text = MsgStr::GetParamNameText(CritterPropertyGroup::Perks[i]);
+                    string text = ::MsgStr::GetParamNameText(CritterPropertyGroup::Perks[i]);
                     if (value > 1) {
                         text += " (" + value + ")";
                     }
 
                     Captions.insertLast(text);
-                    Descriptions.insertLast(MsgStr::GetParamDescText(CritterPropertyGroup::Perks[i]));
-                    Images.insertLast(MsgStr::GetParamPicText(CritterPropertyGroup::Perks[i]));
+                    Descriptions.insertLast(::MsgStr::GetParamDescText(CritterPropertyGroup::Perks[i]));
+                    Images.insertLast(::MsgStr::GetParamPicText(CritterPropertyGroup::Perks[i]));
                     totalRows++;
                 }
             }
@@ -4383,15 +4386,15 @@
                 return;
             }
 
-            string karmaCaption = MsgStr::GetGameText(MsgStr::StrKarmaGenGenName) + " " + MsgStr::GetGameText(MsgStr::StrKarmaGenCaption);
+            string karmaCaption = ::MsgStr::GetGameText(::MsgStr::StrKarmaGenGenName) + " " + ::MsgStr::GetGameText(::MsgStr::StrKarmaGenCaption);
             auto karmaValue = GetPropValue(CritterProperty::Karma);
-            auto karmaLevel = Reputation::GetKarmaLevel(karmaValue);
+            auto karmaLevel = ::Reputation::GetKarmaLevel(karmaValue);
             karmaCaption = Game.ReplaceText(karmaCaption, "%d", karmaValue);
-            karmaCaption = Game.ReplaceText(karmaCaption, "%s", MsgStr::GetKarmaLevelNameText(karmaLevel));
+            karmaCaption = Game.ReplaceText(karmaCaption, "%s", ::MsgStr::GetKarmaLevelNameText(karmaLevel));
 
             Captions.insertLast(karmaCaption);
-            Descriptions.insertLast(MsgStr::GetGameText(MsgStr::StrKarmaGenDescription));
-            Images.insertLast(MsgStr::GetKarmaLevelSkilldexText(karmaLevel));
+            Descriptions.insertLast(::MsgStr::GetGameText(::MsgStr::StrKarmaGenDescription));
+            Images.insertLast(::MsgStr::GetKarmaLevelSkilldexText(karmaLevel));
 
             int totalRows = 1;
 
@@ -4399,9 +4402,9 @@
             for (int i = 0; i < CritterPropertyGroup::KarmaPerks.length(); i++) {
                 auto perk = CritterPropertyGroup::KarmaPerks[i];
                 if (GetPropValue(perk) != 0) {
-                    Captions.insertLast(MsgStr::GetParamNameText(perk));
-                    Descriptions.insertLast(MsgStr::GetParamDescText(perk));
-                    Images.insertLast(MsgStr::GetParamPicText(perk));
+                    Captions.insertLast(::MsgStr::GetParamNameText(perk));
+                    Descriptions.insertLast(::MsgStr::GetParamDescText(perk));
+                    Images.insertLast(::MsgStr::GetParamPicText(perk));
                     totalRows++;
                 }
             }
@@ -4411,19 +4414,19 @@
             for (int i = 0; i < CritterPropertyGroup::Reputations.length(); i++) {
                 if (!townReputationTitleAdded) {
                     townReputationTitleAdded = true;
-                    Captions.insertLast(MsgStr::GetGameText(MsgStr::StrTownrepTitleName));
-                    Descriptions.insertLast(MsgStr::GetGameText(MsgStr::StrTownrepTitleDesc));
-                    Images.insertLast(MsgStr::GetGameText(MsgStr::StrTownrepTitlePic));
+                    Captions.insertLast(::MsgStr::GetGameText(::MsgStr::StrTownrepTitleName));
+                    Descriptions.insertLast(::MsgStr::GetGameText(::MsgStr::StrTownrepTitleDesc));
+                    Images.insertLast(::MsgStr::GetGameText(::MsgStr::StrTownrepTitlePic));
                     HeadersIndexes.insertLast(totalRows);
                     totalRows++;
                 }
 
                 int value = GetPropValue(CritterPropertyGroup::Reputations[i]);
-                auto repLevel = Reputation::GetReputationLevel(value);
-                Captions.insertLast(MsgStr::GetGameText(MsgStr::ReputationNameTextId(i)) + ": " + MsgStr::GetReputationLevelNameText(repLevel) + " (" + value +
-                                    ")");
-                Descriptions.insertLast(MsgStr::GetReputationLevelDescText(repLevel));
-                Images.insertLast(MsgStr::GetReputationLevelSkilldexText(repLevel));
+                auto repLevel = ::Reputation::GetReputationLevel(value);
+                Captions.insertLast(::MsgStr::GetGameText(::MsgStr::ReputationNameTextId(i)) + ": " + ::MsgStr::GetReputationLevelNameText(repLevel) + " (" +
+                                    value + ")");
+                Descriptions.insertLast(::MsgStr::GetReputationLevelDescText(repLevel));
+                Images.insertLast(::MsgStr::GetReputationLevelSkilldexText(repLevel));
                 totalRows++;
             }
 
@@ -4434,16 +4437,16 @@
                 if (addictions[i]) {
                     if (!addictionTitleAdded) {
                         addictionTitleAdded = true;
-                        Captions.insertLast(MsgStr::GetGameText(MsgStr::StrAddictTitleName));
-                        Descriptions.insertLast(MsgStr::GetGameText(MsgStr::StrAddictTitleDesc));
-                        Images.insertLast(MsgStr::GetGameText(MsgStr::StrAddictTitlePic));
+                        Captions.insertLast(::MsgStr::GetGameText(::MsgStr::StrAddictTitleName));
+                        Descriptions.insertLast(::MsgStr::GetGameText(::MsgStr::StrAddictTitleDesc));
+                        Images.insertLast(::MsgStr::GetGameText(::MsgStr::StrAddictTitlePic));
                         HeadersIndexes.insertLast(totalRows);
                         totalRows++;
                     }
 
-                    Captions.insertLast(MsgStr::GetGameText(MsgStr::AddictionNameTextId(i)));
-                    Descriptions.insertLast(MsgStr::GetGameText(MsgStr::AddictionNameTextId(i)));
-                    Images.insertLast(MsgStr::GetGameText(MsgStr::AddictionPicTextId(i)));
+                    Captions.insertLast(::MsgStr::GetGameText(::MsgStr::AddictionNameTextId(i)));
+                    Descriptions.insertLast(::MsgStr::GetGameText(::MsgStr::AddictionNameTextId(i)));
+                    Images.insertLast(::MsgStr::GetGameText(::MsgStr::AddictionPicTextId(i)));
                     totalRows++;
                 }
             }
@@ -4462,7 +4465,7 @@
 {
     {
         {
-            FillGrid(cast<Switcher>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent)).CurSwitch);
+            FillGrid(cast<Switcher>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent)).CurSwitch);
         }
     }
 }
@@ -4556,7 +4559,7 @@
 {
     {
         {
-            auto grid = cast<PropsGrid>(GuiScreensExt::NeedObject(Parent));
+            auto grid = cast<PropsGrid>(::GuiScreensExt::NeedObject(Parent));
             Caption = grid.Captions[cellIndex];
             Image = grid.Images[cellIndex];
             Description = grid.Descriptions[cellIndex];
@@ -4610,7 +4613,7 @@
 {
     {
         {
-            auto panel = cast<PropsPanel>(GuiScreensExt::NeedObject(Parent));
+            auto panel = cast<PropsPanel>(::GuiScreensExt::NeedObject(Parent));
             Text = panel.Caption;
             if (panel.IsHeader) {
                 SetTextFlags(FontFlag(int(FontFlag::CenterX)));

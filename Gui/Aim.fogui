@@ -37,17 +37,17 @@
                 return "";
             }
             Critter chosen = Chosen;
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr == null) {
                 return "";
             }
             Item? item = chosen.GetItem(ItemProperty::CritterSlot, CritterItemSlot::Main);
-            ProtoItem? proto = CritterItem::GetSlotItemProto(chosen);
+            ProtoItem? proto = ::CritterItem::GetSlotItemProto(chosen);
             int mode = (item == null ? chosen.HandsItemMode : item.Mode);
-            int use = WeaponHelpers::WeaponModeUse(mode);
-            int aim = WeaponHelpers::WeaponModeAim(mode);
-            mode = WeaponHelpers::MakeWeaponMode(use, loc);
-            int hit = ClientMain::ToHit(chosen, cr, proto, mode);
+            int use = ::WeaponHelpers::WeaponModeUse(mode);
+            int aim = ::WeaponHelpers::WeaponModeAim(mode);
+            mode = ::WeaponHelpers::MakeWeaponMode(use, loc);
+            int hit = ::ClientMain::ToHit(chosen, cr, proto, mode);
             return (hit == 0 ? "-" : "" + hit);
         }
 
@@ -57,12 +57,12 @@
             if (!HasChosen) {
                 return;
             }
-            ident targetCritterId = cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId;
+            ident targetCritterId = cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId;
             Item? item = Chosen.GetItem(ItemProperty::CritterSlot, CritterItemSlot::Main);
             int use = (item == null ? Chosen.HandsItemMode : item.Mode) & 0xF;
             int mode = use | (loc << 4);
-            ChosenActions::SetChosenActions(
-                {Tla::ChosenUseItem, item != null ? item.Id : ZERO_IDENT, 0, ClientDefines::TARGET_CRITTER, targetCritterId, mode, 0});
+            ::ChosenActions::SetChosenActions(
+                {::Tla::ChosenUseItem, item != null ? item.Id : ZERO_IDENT, 0, ::ClientDefines::TARGET_CRITTER, targetCritterId, mode, 0});
         }
     }
 }
@@ -153,12 +153,12 @@
 {
     {
         {
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr == null) {
                 Gui::HideScreen();
                 return;
             }
-            string name = CritterAnims::GetCritterAlias(cr.ModelName).str.replace("aa.frm", "na.frm");
+            string name = ::CritterAnims::GetCritterAlias(cr.ModelName).str.replace("aa.frm", "na.frm");
             SetBackgroundImage(name);
         }
     }
@@ -202,7 +202,7 @@
 {
     {
         {
-            return cast<Aim>(GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationHead);
+            return cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationHead);
         }
     }
 }
@@ -302,9 +302,9 @@
 {
     {
         {
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr != null) {
-                Text = Game.GetText(TextPackKey(TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationHead - 1)));
+                Text = Game.GetText(TextPackKey(::TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationHead - 1)));
             }
         }
     }
@@ -338,7 +338,7 @@
 {
     {
         {
-            cast<Aim>(GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationHead);
+            cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationHead);
         }
     }
 }
@@ -368,7 +368,7 @@
 {
     {
         {
-            return cast<Aim>(GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationEyes);
+            return cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationEyes);
         }
     }
 }
@@ -462,9 +462,9 @@
 {
     {
         {
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr != null) {
-                Text = Game.GetText(TextPackKey(TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationEyes - 1)));
+                Text = Game.GetText(TextPackKey(::TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationEyes - 1)));
             }
         }
     }
@@ -498,7 +498,7 @@
 {
     {
         {
-            cast<Aim>(GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationEyes);
+            cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationEyes);
         }
     }
 }
@@ -528,7 +528,7 @@
 {
     {
         {
-            return cast<Aim>(GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationRightArm);
+            return cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationRightArm);
         }
     }
 }
@@ -616,9 +616,9 @@
 {
     {
         {
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr != null) {
-                Text = Game.GetText(TextPackKey(TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationRightArm - 1)));
+                Text = Game.GetText(TextPackKey(::TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationRightArm - 1)));
             }
         }
     }
@@ -652,7 +652,7 @@
 {
     {
         {
-            cast<Aim>(GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationRightArm);
+            cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationRightArm);
         }
     }
 }
@@ -682,7 +682,7 @@
 {
     {
         {
-            return cast<Aim>(GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationRightLeg);
+            return cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationRightLeg);
         }
     }
 }
@@ -776,9 +776,9 @@
 {
     {
         {
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr != null) {
-                Text = Game.GetText(TextPackKey(TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationRightLeg - 1)));
+                Text = Game.GetText(TextPackKey(::TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationRightLeg - 1)));
             }
         }
     }
@@ -812,7 +812,7 @@
 {
     {
         {
-            cast<Aim>(GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationRightLeg);
+            cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationRightLeg);
         }
     }
 }
@@ -842,7 +842,7 @@
 {
     {
         {
-            return cast<Aim>(GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationTorso);
+            return cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationTorso);
         }
     }
 }
@@ -930,9 +930,9 @@
 {
     {
         {
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr != null) {
-                Text = Game.GetText(TextPackKey(TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationTorso - 1)));
+                Text = Game.GetText(TextPackKey(::TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationTorso - 1)));
             }
         }
     }
@@ -966,7 +966,7 @@
 {
     {
         {
-            cast<Aim>(GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationTorso);
+            cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationTorso);
         }
     }
 }
@@ -996,7 +996,7 @@
 {
     {
         {
-            return cast<Aim>(GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationGroin);
+            return cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationGroin);
         }
     }
 }
@@ -1084,9 +1084,9 @@
 {
     {
         {
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr != null) {
-                Text = Game.GetText(TextPackKey(TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationGroin - 1)));
+                Text = Game.GetText(TextPackKey(::TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationGroin - 1)));
             }
         }
     }
@@ -1120,7 +1120,7 @@
 {
     {
         {
-            cast<Aim>(GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationGroin);
+            cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationGroin);
         }
     }
 }
@@ -1150,7 +1150,7 @@
 {
     {
         {
-            return cast<Aim>(GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationLeftArm);
+            return cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationLeftArm);
         }
     }
 }
@@ -1238,9 +1238,9 @@
 {
     {
         {
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr != null) {
-                Text = Game.GetText(TextPackKey(TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationLeftArm - 1)));
+                Text = Game.GetText(TextPackKey(::TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationLeftArm - 1)));
             }
         }
     }
@@ -1274,7 +1274,7 @@
 {
     {
         {
-            cast<Aim>(GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationLeftArm);
+            cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationLeftArm);
         }
     }
 }
@@ -1304,7 +1304,7 @@
 {
     {
         {
-            return cast<Aim>(GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationLeftLeg);
+            return cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).GetChance(HitLocations::LocationLeftLeg);
         }
     }
 }
@@ -1392,9 +1392,9 @@
 {
     {
         {
-            Critter? cr = Game.GetCritter(cast<Aim>(GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
+            Critter? cr = Game.GetCritter(cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).TargetCritterId);
             if (cr != null) {
-                Text = Game.GetText(TextPackKey(TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationLeftLeg - 1)));
+                Text = Game.GetText(TextPackKey(::TextPackName::Combat, "" + (1000 + cr.CrTypeAlias * 10 + HitLocations::LocationLeftLeg - 1)));
             }
         }
     }
@@ -1428,7 +1428,7 @@
 {
     {
         {
-            cast<Aim>(GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationLeftLeg);
+            cast<Aim>(::GuiScreensExt::NeedScreen(Screen)).OnHitLocationSelect(HitLocations::LocationLeftLeg);
         }
     }
 }

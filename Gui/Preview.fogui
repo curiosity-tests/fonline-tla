@@ -24,7 +24,7 @@
         ident PreviewCritterId;
         ident PreviewItemId;
         bool ItemInInv = false;
-        ClientItems::Collection ItemsCollection = ClientItems::Collection::ChosenAll;
+        ::ClientItems::Collection ItemsCollection = ::ClientItems::Collection::ChosenAll;
         Sprite::Sprite spr = Sprite::Sprite();
         int CurDir = 0;
         nanotime LastDirChangeTick = ZERO_NANOTIME;
@@ -34,7 +34,7 @@
 {
     {
         {
-            SetSize(GuiScreensExt::NeedObject(Parent).Size.width, GuiScreensExt::NeedObject(Parent).Size.height);
+            SetSize(::GuiScreensExt::NeedObject(Parent).Size.width, ::GuiScreensExt::NeedObject(Parent).Size.height);
             CurDir = 0;
             LastDirChangeTick = Game.FrameTime;
         }
@@ -97,7 +97,7 @@
                         }
                     }
                     Game.DrawCritter2d(cr.ModelName,
-                                       Animation::GetStateAnim(cr),
+                                       ::Animation::GetStateAnim(cr),
                                        CritterActionAnim::Idle,
                                        CurDir,
                                        AbsolutePos.x,
@@ -111,7 +111,7 @@
             }
             else if (PreviewItemId != ZERO_IDENT) {
                 //Item@ item = Game.GetItem( PreviewItemId );
-                Item? item = ClientItems::GetCollectionItem(PreviewItemId, ItemsCollection);
+                Item? item = ::ClientItems::GetCollectionItem(PreviewItemId, ItemsCollection);
                 if (item != null) {
                     spr.Load(ItemInInv ? item.PicInv : item.PicMap);
                     spr.SetFirstFrame();

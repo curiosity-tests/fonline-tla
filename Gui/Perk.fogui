@@ -40,7 +40,7 @@
         AccessPerks.clear();
 
         for (int i = 0, j = CritterPropertyGroup::Perks.length(); i < j; i++) {
-            if (Perks::PerkCheck(Chosen, CritterPropertyGroup::Perks[i])) {
+            if (::Perks::PerkCheck(Chosen, CritterPropertyGroup::Perks[i])) {
                 AccessPerks.insertLast(CritterPropertyGroup::Perks[i]);
             }
         }
@@ -176,7 +176,7 @@
     {
         {
             Prop = int(CellIndex + Scroll) < AccessPerks.length() ? AccessPerks[CellIndex + Scroll] : CritterProperty::None;
-            return Prop != CritterProperty::None ? MsgStr::GetParamNameText(Prop) : "";
+            return Prop != CritterProperty::None ? ::MsgStr::GetParamNameText(Prop) : "";
         }
     }
 }
@@ -327,7 +327,7 @@
 {
     {
         {
-            return TargetPerk != CritterProperty::None ? MsgStr::GetParamNameText(TargetPerk) : "";
+            return TargetPerk != CritterProperty::None ? ::MsgStr::GetParamNameText(TargetPerk) : "";
         }
     }
 }
@@ -398,7 +398,7 @@
 {
     {
         {
-            return TargetPerk != CritterProperty::None ? MsgStr::GetParamDescText(TargetPerk) : "";
+            return TargetPerk != CritterProperty::None ? ::MsgStr::GetParamDescText(TargetPerk) : "";
         }
     }
 }
@@ -503,7 +503,7 @@
 {
     {
         {
-            SetBackgroundImage(TargetPerk != CritterProperty::None ? MsgStr::GetParamPicText(TargetPerk) : "");
+            SetBackgroundImage(TargetPerk != CritterProperty::None ? ::MsgStr::GetParamPicText(TargetPerk) : "");
         }
     }
 }
@@ -610,7 +610,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPerkTake)
+            ::MsgStr::GetGameText(::MsgStr::StrPerkTake)
         }
     }
 }
@@ -748,7 +748,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPerkCancel)
+            ::MsgStr::GetGameText(::MsgStr::StrPerkCancel)
         }
     }
 }

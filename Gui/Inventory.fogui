@@ -80,8 +80,8 @@
 {
     {
         {
-            auto @itemsContainer = GuiScreens::ItemsContainer::CreateHierarchy(this);
-            itemsContainer.ItemsCollection = ClientDefines::ITEMS_INVENTORY;
+            auto @itemsContainer = ::GuiScreens::ItemsContainer::CreateHierarchy(this);
+            itemsContainer.ItemsCollection = ::ClientDefines::ITEMS_INVENTORY;
         }
     }
 }
@@ -119,13 +119,13 @@
 //     {
 //       "$type": "ItemView",
 //       "UserData": "CritterItemSlot::Main",
-//       "UserDataExt": "ClientDefines::ITEMS_CHOSEN_ALL",
+//       "UserDataExt": "::ClientDefines::ITEMS_CHOSEN_ALL",
 //       "UseSorting": false,
 //       "OnGetItems":
 {
     {
         {
-            return ClientItems::RefreshItemsCollection(UserDataExt);
+            return ::ClientItems::RefreshItemsCollection(UserDataExt);
         }
     }
 }
@@ -207,13 +207,13 @@
 //     {
 //       "$type": "ItemView",
 //       "UserData": "CritterItemSlot::Secondary",
-//       "UserDataExt": "ClientDefines::ITEMS_CHOSEN_ALL",
+//       "UserDataExt": "::ClientDefines::ITEMS_CHOSEN_ALL",
 //       "UseSorting": false,
 //       "OnGetItems":
 {
     {
         {
-            return ClientItems::RefreshItemsCollection(UserDataExt);
+            return ::ClientItems::RefreshItemsCollection(UserDataExt);
         }
     }
 }
@@ -295,13 +295,13 @@
 //     {
 //       "$type": "ItemView",
 //       "UserData": "CritterItemSlot::Armor",
-//       "UserDataExt": "ClientDefines::ITEMS_CHOSEN_ALL",
+//       "UserDataExt": "::ClientDefines::ITEMS_CHOSEN_ALL",
 //       "UseSorting": false,
 //       "OnGetItems":
 {
     {
         {
-            return ClientItems::RefreshItemsCollection(UserDataExt);
+            return ::ClientItems::RefreshItemsCollection(UserDataExt);
         }
     }
 }
@@ -450,7 +450,7 @@
     {
         {
             SetDraggable(true);
-            GuiScreensExt::NeedSprite(BackgroundImage).Load(item.PicInv);
+            ::GuiScreensExt::NeedSprite(BackgroundImage).Load(item.PicInv);
         }
     }
 }
@@ -484,7 +484,7 @@
 {
     {
         {
-            GuiScreens::Preview::CreateHierarchy(this);
+            ::GuiScreens::Preview::CreateHierarchy(this);
         }
     }
 }
@@ -566,28 +566,28 @@
             string text = "";
             int ox = 0, oy = 0;
 
-            text = ClientMain::GenericDescription(GenericDescriptionsTypes::InventoryMain, ox, oy);
+            text = ::ClientMain::GenericDescription(GenericDescriptionsTypes::InventoryMain, ox, oy);
             Game.DrawText(text,
                           ipos(AbsolutePos.x + ox, AbsolutePos.y + oy),
                           isize(Size.width, Size.height),
                           Color::Text,
                           TextFormat(FontType::Default, FontFlag(int(FontFlag::TruncateLine)), 0));
 
-            text = ClientMain::GenericDescription(GenericDescriptionsTypes::InventorySpecial, ox, oy);
+            text = ::ClientMain::GenericDescription(GenericDescriptionsTypes::InventorySpecial, ox, oy);
             Game.DrawText(text,
                           ipos(AbsolutePos.x + ox, AbsolutePos.y + oy),
                           isize(Size.width, Size.height),
                           Color::Text,
                           TextFormat(FontType::Default, FontFlag(int(FontFlag::TruncateLine)), 0));
 
-            text = ClientMain::GenericDescription(GenericDescriptionsTypes::InventoryStats, ox, oy);
+            text = ::ClientMain::GenericDescription(GenericDescriptionsTypes::InventoryStats, ox, oy);
             Game.DrawText(text,
                           ipos(AbsolutePos.x + ox, AbsolutePos.y + oy),
                           isize(Size.width, Size.height),
                           Color::Text,
                           TextFormat(FontType::Default, FontFlag(int(FontFlag::TruncateLine)), 0));
 
-            text = ClientMain::GenericDescription(GenericDescriptionsTypes::InventoryResist, ox, oy);
+            text = ::ClientMain::GenericDescription(GenericDescriptionsTypes::InventoryResist, ox, oy);
             Game.DrawText(text,
                           ipos(AbsolutePos.x + ox, AbsolutePos.y + oy),
                           isize(Size.width, Size.height),

@@ -247,7 +247,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsLanguage)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsLanguage)
         }
     }
 }
@@ -386,7 +386,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsLanguageRussian)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsLanguageRussian)
         }
     }
 }
@@ -528,7 +528,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsLanguageEnglish)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsLanguageEnglish)
         }
     }
 }
@@ -597,7 +597,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsResolution)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsResolution)
         }
     }
 }
@@ -1519,7 +1519,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsFullScreen)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsFullScreen)
         }
     }
 }
@@ -1660,7 +1660,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsAlwaysOnTop)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsAlwaysOnTop)
         }
     }
 }
@@ -1801,7 +1801,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsMusic)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsMusic)
         }
     }
 }
@@ -2070,7 +2070,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsSound)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsSound)
         }
     }
 }
@@ -2339,7 +2339,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsAlwaysRun)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsAlwaysRun)
         }
     }
 }
@@ -2480,7 +2480,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsCombatMode)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsCombatMode)
         }
     }
 }
@@ -2612,7 +2612,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsCombatModeBoth)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsCombatModeBoth)
         }
     }
 }
@@ -2747,7 +2747,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsCombatModeRt)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsCombatModeRt)
         }
     }
 }
@@ -2882,7 +2882,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsCombatModeTb)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsCombatModeTb)
         }
     }
 }
@@ -2951,7 +2951,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsCombatMessages)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsCombatMessages)
         }
     }
 }
@@ -3083,7 +3083,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsCombatMessagesFull)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsCombatMessagesFull)
         }
     }
 }
@@ -3218,7 +3218,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsCombatMessagesShort)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsCombatMessagesShort)
         }
     }
 }
@@ -3287,7 +3287,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsGameServer)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsGameServer)
         }
     }
 }
@@ -3611,7 +3611,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsProxyType)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsProxyType)
         }
     }
 }
@@ -3743,7 +3743,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsProxyTypeNone)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsProxyTypeNone)
         }
     }
 }
@@ -3878,7 +3878,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsProxyTypeSocks4)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsProxyTypeSocks4)
         }
     }
 }
@@ -4013,7 +4013,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsProxyTypeSocks5)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsProxyTypeSocks5)
         }
     }
 }
@@ -4148,7 +4148,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsProxyTypeHttp)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsProxyTypeHttp)
         }
     }
 }
@@ -4217,7 +4217,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsProxyServer)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsProxyServer)
         }
     }
 }
@@ -4536,7 +4536,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsProxyAccess)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsProxyAccess)
         }
     }
 }
@@ -4925,7 +4925,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrOptionsBack)
+            ::MsgStr::GetGameText(::MsgStr::StrOptionsBack)
         }
     }
 }

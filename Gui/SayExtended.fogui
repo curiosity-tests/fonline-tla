@@ -128,7 +128,7 @@
 {
     {
         {
-            SetText(MsgStr::GetTextPackText(cast<SayExtended>(GuiScreensExt::NeedObject(Parent)).HeaderMessageID));
+            SetText(::MsgStr::GetTextPackText(cast<SayExtended>(::GuiScreensExt::NeedObject(Parent)).HeaderMessageID));
         }
     }
 }
@@ -202,8 +202,8 @@
 {
     {
         {
-            if (cast<SayExtended>(GuiScreensExt::NeedObject(Parent)).InputMessageID != 0) {
-                SetText(MsgStr::GetTextPackText(cast<SayExtended>(GuiScreensExt::NeedObject(Parent)).InputMessageID));
+            if (cast<SayExtended>(::GuiScreensExt::NeedObject(Parent)).InputMessageID != 0) {
+                SetText(::MsgStr::GetTextPackText(cast<SayExtended>(::GuiScreensExt::NeedObject(Parent)).InputMessageID));
             }
             else {
                 SetText("");
@@ -286,8 +286,8 @@
 {
     {
         {
-            string inputText = GuiScreensExt::NeedText(GuiScreensExt::NeedScreen(Screen).FindText("MainSayText")).Text;
-            auto screen = cast<SayExtended>(GuiScreensExt::NeedObject(Parent));
+            string inputText = ::GuiScreensExt::NeedText(::GuiScreensExt::NeedScreen(Screen).FindText("MainSayText")).Text;
+            auto screen = cast<SayExtended>(::GuiScreensExt::NeedObject(Parent));
             if (screen.FromScenery) {
                 CurPlayer.ServerCall.ProcessSayExtendedFromScenery(inputText, screen.ProtoID, mpos(screen.HexX, screen.HexY));
             }
@@ -320,7 +320,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrSayOk)
+            ::MsgStr::GetGameText(::MsgStr::StrSayOk)
         }
     }
 }
@@ -452,7 +452,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrSayCancel)
+            ::MsgStr::GetGameText(::MsgStr::StrSayCancel)
         }
     }
 }

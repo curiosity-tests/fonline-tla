@@ -37,14 +37,15 @@
             if (TargetCritterId != ZERO_IDENT) {
                 Critter? targetCr = Game.GetCritter(TargetCritterId);
                 if (targetCr != null) {
-                    ChosenActions::SetChosenActions(
-                        {Tla::ChosenUseItem, item.Id, 0, ClientDefines::TARGET_CRITTER, TargetCritterId, WeaponHelpers::USE_USE, 0});
+                    ::ChosenActions::SetChosenActions(
+                        {::Tla::ChosenUseItem, item.Id, 0, ::ClientDefines::TARGET_CRITTER, TargetCritterId, ::WeaponHelpers::USE_USE, 0});
                 }
             }
             else if (TargetItemId != ZERO_IDENT) {
                 Item? targetItem = Game.GetItem(TargetItemId);
                 if (targetItem != null) {
-                    ChosenActions::SetChosenActions({Tla::ChosenUseItem, item.Id, 0, ClientDefines::TARGET_ITEM, TargetItemId, WeaponHelpers::USE_USE, 0});
+                    ::ChosenActions::SetChosenActions(
+                        {::Tla::ChosenUseItem, item.Id, 0, ::ClientDefines::TARGET_ITEM, TargetItemId, ::WeaponHelpers::USE_USE, 0});
                 }
             }
             Gui::HideScreen();
@@ -65,7 +66,7 @@
 {
     {
         {
-            TlaFixedDropMenu::SetDropMenuEnabled(true);
+            ::TlaFixedDropMenu::SetDropMenuEnabled(true);
         }
     }
 }
@@ -121,9 +122,9 @@
 {
     {
         {
-            auto @itemsContainer = GuiScreens::ItemsContainer::CreateHierarchy(this);
-            itemsContainer.ItemsCollection = ClientDefines::ITEMS_USE;
-            itemsContainer.SetSelectCallback(GuiScreens::ItemsContainer::SelectCallbackFunc(cast<UseItem>(GuiScreensExt::NeedObject(Parent)).OnItemSelect));
+            auto @itemsContainer = ::GuiScreens::ItemsContainer::CreateHierarchy(this);
+            itemsContainer.ItemsCollection = ::ClientDefines::ITEMS_USE;
+            itemsContainer.SetSelectCallback(::GuiScreens::ItemsContainer::SelectCallbackFunc(cast<UseItem>(::GuiScreensExt::NeedObject(Parent)).OnItemSelect));
         }
     }
 }
@@ -192,7 +193,7 @@
 {
     {
         {
-            GuiScreens::Preview::CreateHierarchy(this);
+            ::GuiScreens::Preview::CreateHierarchy(this);
         }
     }
 }
@@ -200,7 +201,7 @@
 {
     {
         {
-            GuiScreens::Preview::Preview preview = cast<GuiScreens::Preview::Preview>(GetChild(0));
+            ::GuiScreens::Preview::Preview preview = cast<::GuiScreens::Preview::Preview>(GetChild(0));
             preview.PreviewCritterId = params["TargetCritterId"];
             preview.PreviewItemId = params["TargetItemId"];
         }

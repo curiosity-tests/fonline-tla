@@ -49,7 +49,7 @@
 {
     {
         {
-            CurMenu = GuiScreens::PipBoy::MenuMode::None;
+            CurMenu = ::GuiScreens::PipBoy::MenuMode::None;
         }
     }
 }
@@ -117,12 +117,12 @@
 {
     {
         {
-            GuiScreensExt::NeedObject(Find("NonePanel")).SetActive(CurMenu == GuiScreens::PipBoy::MenuMode::None);
-            GuiScreensExt::NeedObject(Find("StatusPanel")).SetActive(CurMenu == GuiScreens::PipBoy::MenuMode::Status);
-            GuiScreensExt::NeedObject(Find("AutoMapsGrid")).SetActive(CurMenu == GuiScreens::PipBoy::MenuMode::Automaps);
-            GuiScreensExt::NeedObject(Find("ArchivesPanel")).SetActive(CurMenu == GuiScreens::PipBoy::MenuMode::Archives);
-            GuiScreensExt::NeedObject(Find("DescText")).SetActive(CurMenu == GuiScreens::PipBoy::MenuMode::Text);
-            GuiScreensExt::NeedObject(Find("DrawMapPanel")).SetActive(CurMenu == GuiScreens::PipBoy::MenuMode::MapPanel);
+            ::GuiScreensExt::NeedObject(Find("NonePanel")).SetActive(CurMenu == ::GuiScreens::PipBoy::MenuMode::None);
+            ::GuiScreensExt::NeedObject(Find("StatusPanel")).SetActive(CurMenu == ::GuiScreens::PipBoy::MenuMode::Status);
+            ::GuiScreensExt::NeedObject(Find("AutoMapsGrid")).SetActive(CurMenu == ::GuiScreens::PipBoy::MenuMode::Automaps);
+            ::GuiScreensExt::NeedObject(Find("ArchivesPanel")).SetActive(CurMenu == ::GuiScreens::PipBoy::MenuMode::Archives);
+            ::GuiScreensExt::NeedObject(Find("DescText")).SetActive(CurMenu == ::GuiScreens::PipBoy::MenuMode::Text);
+            ::GuiScreensExt::NeedObject(Find("DrawMapPanel")).SetActive(CurMenu == ::GuiScreens::PipBoy::MenuMode::MapPanel);
         }
     }
 }
@@ -319,7 +319,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPipStatus)
+            ::MsgStr::GetGameText(::MsgStr::StrPipStatus)
         }
     }
 }
@@ -384,7 +384,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPipReplicationMoney)
+            ::MsgStr::GetGameText(::MsgStr::StrPipReplicationMoney)
         }
     }
 }
@@ -465,7 +465,7 @@
             if (!HasChosen) {
                 return "";
             }
-            string text = MsgStr::GetGameText(MsgStr::StrPipReplicationMoneyVal);
+            string text = ::MsgStr::GetGameText(::MsgStr::StrPipReplicationMoneyVal);
             text = Game.ReplaceText(text, "%d", Chosen.ReplicationMoney);
             return text;
         }
@@ -537,7 +537,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPipReplicationCost)
+            ::MsgStr::GetGameText(::MsgStr::StrPipReplicationCost)
         }
     }
 }
@@ -606,7 +606,7 @@
             if (!HasChosen) {
                 return "";
             }
-            string text = MsgStr::GetGameText(MsgStr::StrPipReplicationCostVal);
+            string text = ::MsgStr::GetGameText(::MsgStr::StrPipReplicationCostVal);
             text = Game.ReplaceText(text, "%d", Chosen.ReplicationCost);
             return text;
         }
@@ -672,7 +672,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPipReplicationCount)
+            ::MsgStr::GetGameText(::MsgStr::StrPipReplicationCount)
         }
     }
 }
@@ -741,7 +741,7 @@
             if (!HasChosen) {
                 return "";
             }
-            string text = MsgStr::GetGameText(MsgStr::StrPipReplicationCountVal);
+            string text = ::MsgStr::GetGameText(::MsgStr::StrPipReplicationCountVal);
             text = Game.ReplaceText(text, "%d", Chosen.ReplicationCount);
             return text;
         }
@@ -860,7 +860,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPipTimeouts)
+            ::MsgStr::GetGameText(::MsgStr::StrPipTimeouts)
         }
     }
 }
@@ -1106,7 +1106,7 @@
     {
         {
             CritterProperty prop = cast<TimeoutsGrid>(Grid).Timeouts[cellIndex];
-            SetText(MsgStr::GetParamNameText(prop));
+            SetText(::MsgStr::GetParamNameText(prop));
         }
     }
 }
@@ -1123,7 +1123,7 @@
             if (!HasChosen) {
                 return "";
             }
-            string text = MsgStr::GetGameText(MsgStr::StrTimeoutSeconds);
+            string text = ::MsgStr::GetGameText(::MsgStr::StrTimeoutSeconds);
             CritterProperty prop = cast<TimeoutsGrid>(Grid).Timeouts[CellIndex];
             auto timeValue = synctime(Chosen.GetAsAny(prop));
             if (Time::IsTimeoutActive(timeValue)) {
@@ -1254,7 +1254,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPipQuests)
+            ::MsgStr::GetGameText(::MsgStr::StrPipQuests)
         }
     }
 }
@@ -1354,7 +1354,7 @@
                 if (Chosen.GetAsInt(quest) == 0) {
                     continue;
                 }
-                string questName = MsgStr::GetQuestText(MsgStr::QuestNameTextId(quest));
+                string questName = ::MsgStr::GetQuestText(::MsgStr::QuestNameTextId(quest));
                 if (!CityQuest.exists(questName)) {
                     CityQuest.insertLast(questName);
                 }
@@ -1472,18 +1472,18 @@
                 if (chosen.GetAsInt(quest) == 0) {
                     continue;
                 }
-                string questName = MsgStr::GetQuestText(MsgStr::QuestNameTextId(quest));
+                string questName = ::MsgStr::GetQuestText(::MsgStr::QuestNameTextId(quest));
                 if (questName != cityQuest) {
                     continue;
                 }
 
-                result += Game.ReplaceText(MsgStr::GetQuestText(MsgStr::StrQuestNumber), "%d", "" + count);
-                result += MsgStr::GetQuestText(MsgStr::QuestDescTextId(quest)) + "\\n";
-                result += MsgStr::GetQuestText(MsgStr::StrQuestProcess);
-                result += MsgStr::GetQuestText(MsgStr::QuestStatusTextId(quest, chosen.GetAsInt(quest))) + "\\n\\n";
+                result += Game.ReplaceText(::MsgStr::GetQuestText(::MsgStr::StrQuestNumber), "%d", "" + count);
+                result += ::MsgStr::GetQuestText(::MsgStr::QuestDescTextId(quest)) + "\\n";
+                result += ::MsgStr::GetQuestText(::MsgStr::StrQuestProcess);
+                result += ::MsgStr::GetQuestText(::MsgStr::QuestStatusTextId(quest, chosen.GetAsInt(quest))) + "\\n\\n";
                 count++;
             }
-            CurMenu = GuiScreens::PipBoy::MenuMode::Text;
+            CurMenu = ::GuiScreens::PipBoy::MenuMode::Text;
             CurText.SetTextFlags(FontFlag(0));
             CurText.Text = result;
         }
@@ -1523,7 +1523,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPipScores)
+            ::MsgStr::GetGameText(::MsgStr::StrPipScores)
         }
     }
 }
@@ -1575,17 +1575,17 @@
                 if (score[i] == "") {
                     continue;
                 }
-                if (MsgStr::HasGameText(MsgStr::ScoresTitleTextId(i))) {
-                    result += MsgStr::GetGameText(MsgStr::ScoresTitleTextId(i)) + "\\n\\n";
+                if (::MsgStr::HasGameText(::MsgStr::ScoresTitleTextId(i))) {
+                    result += ::MsgStr::GetGameText(::MsgStr::ScoresTitleTextId(i)) + "\\n\\n";
                 }
 
-                if (MsgStr::HasGameText(MsgStr::ScoresNameTextId(i))) {
-                    result += MsgStr::GetGameText(MsgStr::ScoresNameTextId(i)) + "\\n";
+                if (::MsgStr::HasGameText(::MsgStr::ScoresNameTextId(i))) {
+                    result += ::MsgStr::GetGameText(::MsgStr::ScoresNameTextId(i)) + "\\n";
                     result += score[i] + "\\n\\n";
                 }
             }
             CurText.SetTextFlags(FontFlag(int(FontFlag::CenterX)));
-            CurMenu = GuiScreens::PipBoy::MenuMode::Text;
+            CurMenu = ::GuiScreens::PipBoy::MenuMode::Text;
             CurText.Text = result;
         }
     }
@@ -1604,7 +1604,7 @@
     {
         {
             if (Active) {
-                Gui::Object obj = GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("QuestStatus"));
+                Gui::Object obj = ::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("QuestStatus"));
                 ipos pos;
                 isize size;
                 obj.GetWholeSize(pos, size, true);
@@ -1681,7 +1681,7 @@
                 hstring locPid = pids[i];
                 CurShowMaps.insertLast(ShowMaps(locPid, -1));
                 int j = 0;
-                while (Game.IsTextPresent(MsgStr::LocMapNameKey(locPid, j))) {
+                while (Game.IsTextPresent(::MsgStr::LocMapNameKey(locPid, j))) {
                     CurShowMaps.insertLast(ShowMaps(locPid, j));
                     j++;
                 }
@@ -1788,15 +1788,15 @@
         {
             ShowMaps showMaps = cast<AutoMapsGrid>(Grid).CurShowMaps[CellIndex];
             if (showMaps.MapIndex != -1) {
-                CurMenu = GuiScreens::PipBoy::MenuMode::MapPanel;
-                auto map = cast<DrawMapPanel>(GuiScreensExt::NeedObject(GuiScreensExt::NeedScreen(Screen).Find("DrawMapPanel")));
+                CurMenu = ::GuiScreens::PipBoy::MenuMode::MapPanel;
+                auto map = cast<DrawMapPanel>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedScreen(Screen).Find("DrawMapPanel")));
                 map.LocProtoId = showMaps.ProtoId;
                 map.MapIndex = showMaps.MapIndex;
             }
             else {
                 CurText.SetTextFlags(FontFlag(0));
-                CurText.Text = Game.GetText(MsgStr::LocInfoKey(showMaps.ProtoId));
-                CurMenu = GuiScreens::PipBoy::MenuMode::Text;
+                CurText.Text = Game.GetText(::MsgStr::LocInfoKey(showMaps.ProtoId));
+                CurMenu = ::GuiScreens::PipBoy::MenuMode::Text;
             }
         }
     }
@@ -1827,10 +1827,10 @@
             ShowMaps showMaps = cast<AutoMapsGrid>(Grid).CurShowMaps[cellIndex];
             string result;
             if (showMaps.MapIndex == -1) {
-                result = Game.GetText(MsgStr::LocNameKey(showMaps.ProtoId));
+                result = Game.GetText(::MsgStr::LocNameKey(showMaps.ProtoId));
             }
             else {
-                result = Game.GetText(MsgStr::LocMapNameKey(showMaps.ProtoId, showMaps.MapIndex));
+                result = Game.GetText(::MsgStr::LocMapNameKey(showMaps.ProtoId, showMaps.MapIndex));
             }
             SetText(result);
         }
@@ -1906,7 +1906,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrPipInfo)
+            ::MsgStr::GetGameText(::MsgStr::StrPipInfo)
         }
     }
 }
@@ -2104,8 +2104,8 @@
                 return;
             }
             CurText.SetTextFlags(FontFlag(0));
-            CurText.Text = MsgStr::GetHoloText(MsgStr::HoloInfoDescTextId(Chosen.HoloInfo[CellIndex]));
-            CurMenu = GuiScreens::PipBoy::MenuMode::Text;
+            CurText.Text = ::MsgStr::GetHoloText(::MsgStr::HoloInfoDescTextId(Chosen.HoloInfo[CellIndex]));
+            CurMenu = ::GuiScreens::PipBoy::MenuMode::Text;
         }
     }
 }
@@ -2129,7 +2129,7 @@
             if (!HasChosen) {
                 return;
             }
-            string text = MsgStr::GetHoloText(MsgStr::HoloInfoNameTextId(Chosen.HoloInfo[cellIndex]));
+            string text = ::MsgStr::GetHoloText(::MsgStr::HoloInfoNameTextId(Chosen.HoloInfo[cellIndex]));
             SetText(text);
         }
     }
@@ -2738,7 +2738,7 @@
 {
     {
         {
-            CurMenu = GuiScreens::PipBoy::MenuMode::Status;
+            CurMenu = ::GuiScreens::PipBoy::MenuMode::Status;
         }
     }
 }
@@ -2804,7 +2804,7 @@
 {
     {
         {
-            CurMenu = GuiScreens::PipBoy::MenuMode::Automaps;
+            CurMenu = ::GuiScreens::PipBoy::MenuMode::Automaps;
         }
     }
 }
@@ -2870,7 +2870,7 @@
 {
     {
         {
-            CurMenu = GuiScreens::PipBoy::MenuMode::Archives;
+            CurMenu = ::GuiScreens::PipBoy::MenuMode::Archives;
         }
     }
 }

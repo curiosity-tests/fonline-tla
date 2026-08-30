@@ -24,7 +24,7 @@
 //   "ClassFields":
 {
     {
-        int ItemsCollection = ClientDefines::ITEMS_INVENTORY;
+        int ItemsCollection = ::ClientDefines::ITEMS_INVENTORY;
         SelectCallbackFunc? SelectCallback;
 
         void SetSelectCallback(SelectCallbackFunc callback)
@@ -67,13 +67,13 @@
 //     {
 //       "$type": "ItemView",
 //       "UserData": null,
-//       "UserDataExt": "ClientDefines::ITEMS_INVENTORY",
+//       "UserDataExt": "::ClientDefines::ITEMS_INVENTORY",
 //       "UseSorting": true,
 //       "OnGetItems":
 {
     {
         {
-            Item[] items = ClientItems::RefreshItemsCollection(ClientItems::Collection(UserDataExt));
+            Item[] items = ::ClientItems::RefreshItemsCollection(::ClientItems::Collection(UserDataExt));
 
             return items;
         }
@@ -123,7 +123,7 @@
 {
     {
         {
-            SetUserDataExt(cast<ItemsContainer>(GuiScreensExt::NeedObject(Parent)).ItemsCollection);
+            SetUserDataExt(cast<ItemsContainer>(::GuiScreensExt::NeedObject(Parent)).ItemsCollection);
             Resort();
         }
     }
@@ -211,10 +211,10 @@
     {
         {
             if (Gui::Cursor == CursorType::Default) {
-                ItemsContainer cont = cast<ItemsContainer>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent));
+                ItemsContainer cont = cast<ItemsContainer>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent));
                 SelectCallbackFunc? selectCb = cont.SelectCallback;
                 if (selectCb != null) {
-                    Gui::ItemView itemView = cast<Gui::ItemView>(GuiScreensExt::NeedObject(Parent));
+                    Gui::ItemView itemView = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(Parent));
                     Item? item = itemView.GetItem(CellIndex);
                     selectCb(item);
                 }
@@ -276,7 +276,7 @@
 {
     {
         {
-            SetSize(GuiScreensExt::NeedObject(Parent).Size.width, GuiScreensExt::NeedObject(Parent).Size.height);
+            SetSize(::GuiScreensExt::NeedObject(Parent).Size.width, ::GuiScreensExt::NeedObject(Parent).Size.height);
         }
     }
 }
@@ -310,10 +310,10 @@
     {
         {
             if (!IsDragged) {
-                SetSize(GuiScreensExt::NeedObject(Parent).Size.width, GuiScreensExt::NeedObject(Parent).Size.height);
+                SetSize(::GuiScreensExt::NeedObject(Parent).Size.width, ::GuiScreensExt::NeedObject(Parent).Size.height);
             }
             else {
-                SetSize(GuiScreensExt::NeedObject(Parent).Size.width * 2, GuiScreensExt::NeedObject(Parent).Size.height * 2);
+                SetSize(::GuiScreensExt::NeedObject(Parent).Size.width * 2, ::GuiScreensExt::NeedObject(Parent).Size.height * 2);
             }
         }
     }
@@ -442,7 +442,7 @@
 {
     {
         {
-            Gui::ItemView contItems = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ContainerItemView", false)));
+            Gui::ItemView contItems = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("ContainerItemView", false)));
             SetCondition(contItems.CanModifyScroll(-1, 0));
         }
     }
@@ -456,7 +456,7 @@
 {
     {
         {
-            Gui::ItemView contItems = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ContainerItemView", false)));
+            Gui::ItemView contItems = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("ContainerItemView", false)));
             contItems.ModifyScroll(-10, 0);
         }
     }
@@ -517,7 +517,7 @@
 {
     {
         {
-            Gui::ItemView contItems = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ContainerItemView", false)));
+            Gui::ItemView contItems = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("ContainerItemView", false)));
             SetCondition(contItems.CanModifyScroll(1, 0));
         }
     }
@@ -531,7 +531,7 @@
 {
     {
         {
-            Gui::ItemView contItems = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ContainerItemView", false)));
+            Gui::ItemView contItems = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("ContainerItemView", false)));
             contItems.ModifyScroll(10, 0);
         }
     }

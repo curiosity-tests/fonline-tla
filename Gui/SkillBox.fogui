@@ -40,7 +40,7 @@
 
     string FormatXXX(int value)
     {
-        value = Tla::Clamp(value, 0, 999);
+        value = ::Tla::Clamp(value, 0, 999);
         string text = "";
         if (value < 100) {
             text += "0";
@@ -103,7 +103,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaSkills)
+            ::MsgStr::GetGameText(::MsgStr::StrChaSkills)
         }
     }
 }
@@ -340,10 +340,10 @@
         {
             Gui::HideScreen();
 
-            CritterProperty Prop = cast<SkillsPanel>(GuiScreensExt::NeedObject(Parent)).Prop;
+            CritterProperty Prop = cast<SkillsPanel>(::GuiScreensExt::NeedObject(Parent)).Prop;
             if (TargetCritterId == ZERO_IDENT && TargetItemId == ZERO_IDENT) {
                 if (Prop == CritterProperty::SkillSneak) {
-                    ChosenActions::SetChosenActions({Tla::ChosenUseSklOnCritter, int(CritterProperty::SkillSneak), 0, 0, 0, 0, 0});
+                    ::ChosenActions::SetChosenActions({::Tla::ChosenUseSklOnCritter, int(CritterProperty::SkillSneak), 0, 0, 0, 0, 0});
                 }
                 else {
                     Gui::Cursor = CursorType::UseSkill;
@@ -354,17 +354,17 @@
                 if (TargetCritterId != ZERO_IDENT) {
                     Critter? cr = Game.GetCritter(TargetCritterId);
                     if (cr != null) {
-                        ChosenActions::SetChosenActions({Tla::ChosenUseSklOnCritter, int(Prop), TargetCritterId, 0, 0, 0, 0});
+                        ::ChosenActions::SetChosenActions({::Tla::ChosenUseSklOnCritter, int(Prop), TargetCritterId, 0, 0, 0, 0});
                     }
                 }
                 else {
                     Item? item = Game.GetItem(TargetItemId);
                     if (item != null) {
                         if (item.Type != ItemType::Generic && item.Type != ItemType::Grid) {
-                            ChosenActions::SetChosenActions({Tla::ChosenUseSklOnItem, int(Prop), TargetItemId, IsInventory ? 1 : 0, 0, 0, 0});
+                            ::ChosenActions::SetChosenActions({::Tla::ChosenUseSklOnItem, int(Prop), TargetItemId, IsInventory ? 1 : 0, 0, 0, 0});
                         }
                         else {
-                            ChosenActions::SetChosenActions({Tla::ChosenUseSklOnScen, int(Prop), item.ProtoId, item.Hex.x, item.Hex.y, 0, 0});
+                            ::ChosenActions::SetChosenActions({::Tla::ChosenUseSklOnScen, int(Prop), item.ProtoId, item.Hex.x, item.Hex.y, 0, 0});
                         }
                     }
                 }
@@ -431,7 +431,7 @@
 {
     {
         {
-            Text = MsgStr::GetParamNameText(cast<SkillsPanel>(GuiScreensExt::NeedObject(Parent)).Prop);
+            Text = ::MsgStr::GetParamNameText(cast<SkillsPanel>(::GuiScreensExt::NeedObject(Parent)).Prop);
         }
     }
 }
@@ -474,7 +474,7 @@
     {
         {
             if (HasChosen) {
-                return FormatXXX(Chosen.GetAsInt(cast<SkillsPanel>(GuiScreensExt::NeedObject(Parent)).Prop));
+                return FormatXXX(Chosen.GetAsInt(cast<SkillsPanel>(::GuiScreensExt::NeedObject(Parent)).Prop));
             }
             return "";
         }
@@ -609,7 +609,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrChaCancel)
+            ::MsgStr::GetGameText(::MsgStr::StrChaCancel)
         }
     }
 }

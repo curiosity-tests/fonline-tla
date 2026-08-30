@@ -27,7 +27,7 @@
 {
     string FormatXX(int value)
     {
-        value = Tla::Clamp(value, 0, 99);
+        value = ::Tla::Clamp(value, 0, 99);
         return value < 10 ? "0" + value : "" + value;
     }
     int GMWidth;
@@ -38,7 +38,7 @@
 {
     {
         {
-            auto globalMapObjects = GuiScreensExt::NeedPanel(FindPanel("GMObjects"));
+            auto globalMapObjects = ::GuiScreensExt::NeedPanel(FindPanel("GMObjects"));
             globalMapObjects.SetPosition(0, 0);
             cast<GMObjects>(globalMapObjects).ChangeGMZoom(0, true);
         }
@@ -183,8 +183,8 @@
                 return;
             }
             float zoomMax = 4.0f;
-            float zoomMin =
-                2 * Math::MaxF(1.0f * GuiScreensExt::NeedObject(Parent).Size.height / GMHeight, 1.0f * GuiScreensExt::NeedObject(Parent).Size.width / GMWidth);
+            float zoomMin = 2 * Math::MaxF(1.0f * ::GuiScreensExt::NeedObject(Parent).Size.height / GMHeight,
+                                           1.0f * ::GuiScreensExt::NeedObject(Parent).Size.width / GMWidth);
 
             if (GlobalZoom > 2) {
                 zoom *= 2;
@@ -201,17 +201,17 @@
                 GlobalZoom = 1.0f;
             }
 
-            auto globalMapBase = cast<GlobalMapBase>(GuiScreensExt::NeedObject(Parent));
+            auto globalMapBase = cast<GlobalMapBase>(::GuiScreensExt::NeedObject(Parent));
             int curX = NormalX2(Game.MousePos.x - Pos.x - globalMapBase.AbsolutePos.x);
             int curY = NormalY2(Game.MousePos.y - Pos.y - globalMapBase.AbsolutePos.y);
 
             SetSize(int(GMWidth * GlobalZoom), int(GMHeight * GlobalZoom));
 
-            curX = Math::Clamp(Game.MousePos.x - globalMapBase.AbsolutePos.x - NormalX(curX), GuiScreensExt::NeedObject(Parent).Size.width - Size.width, 0);
-            curY = Math::Clamp(Game.MousePos.y - globalMapBase.AbsolutePos.y - NormalY(curY), GuiScreensExt::NeedObject(Parent).Size.height - Size.height, 0);
+            curX = Math::Clamp(Game.MousePos.x - globalMapBase.AbsolutePos.x - NormalX(curX), ::GuiScreensExt::NeedObject(Parent).Size.width - Size.width, 0);
+            curY = Math::Clamp(Game.MousePos.y - globalMapBase.AbsolutePos.y - NormalY(curY), ::GuiScreensExt::NeedObject(Parent).Size.height - Size.height, 0);
             SetPosition(curX, curY);
 
-            auto grid = cast<Gui::Grid>(GuiScreensExt::NeedObject(Find("GMTiledBGGrid")));
+            auto grid = cast<Gui::Grid>(::GuiScreensExt::NeedObject(Find("GMTiledBGGrid")));
             for (int i = 0; i < grid.Cells.length(); i++) {
                 auto cell = cast<GMTileTemplate>(grid.Cells[i]);
                 cell.SetSize(int(cell.PictureWidth * GlobalZoom), int(cell.PictureHeight * GlobalZoom));
@@ -219,7 +219,7 @@
 
             grid.RefreshContentPositions();
 
-            auto locGrid = cast<LocationsGrid>(GuiScreensExt::NeedObject(Find("LocationsGrid")));
+            auto locGrid = cast<LocationsGrid>(::GuiScreensExt::NeedObject(Find("LocationsGrid")));
 
             for (int i = 0; i < locGrid.Cells.length(); i++) {
                 auto cell = cast<LocationPic>(locGrid.Cells[i]);
@@ -253,9 +253,9 @@
 {
     {
         {
-            auto info = GlobalmapGroup::GetCurrentGroup();
-            GuiScreensExt::NeedButton(FindButton("PositionButton")).SetActive(!info.IsMoving && !info.IsEncounter);
-            GuiScreensExt::NeedPanel(FindPanel("PositionMove")).SetActive(info.IsMoving);
+            auto info = ::GlobalmapGroup::GetCurrentGroup();
+            ::GuiScreensExt::NeedButton(FindButton("PositionButton")).SetActive(!info.IsMoving && !info.IsEncounter);
+            ::GuiScreensExt::NeedPanel(FindPanel("PositionMove")).SetActive(info.IsMoving);
         }
     }
 }
@@ -275,8 +275,8 @@
     {
         {
             CurPlayer.ServerCall.ProcessGlobalMapCommand(1,
-                                                         NormalX2(Game.MousePos.x - Pos.x - GuiScreensExt::NeedObject(Parent).AbsolutePos.x),
-                                                         NormalY2(Game.MousePos.y - Pos.y - GuiScreensExt::NeedObject(Parent).AbsolutePos.y));
+                                                         NormalX2(Game.MousePos.x - Pos.x - ::GuiScreensExt::NeedObject(Parent).AbsolutePos.x),
+                                                         NormalY2(Game.MousePos.y - Pos.y - ::GuiScreensExt::NeedObject(Parent).AbsolutePos.y));
         }
     }
 }
@@ -303,8 +303,8 @@
             int NewPosX = Pos.x + (Game.MousePos.x - LastX);
             int NewPosY = Pos.y + (Game.MousePos.y - LastY);
 
-            NewPosX = Math::Clamp(NewPosX, GuiScreensExt::NeedObject(Parent).Size.width - Size.width, 0);
-            NewPosY = Math::Clamp(NewPosY, GuiScreensExt::NeedObject(Parent).Size.height - Size.height, 0);
+            NewPosX = Math::Clamp(NewPosX, ::GuiScreensExt::NeedObject(Parent).Size.width - Size.width, 0);
+            NewPosY = Math::Clamp(NewPosY, ::GuiScreensExt::NeedObject(Parent).Size.height - Size.height, 0);
 
             SetPosition(NewPosX, NewPosY);
 
@@ -481,7 +481,7 @@
     {
         string FormatXX(int value)
         {
-            value = Tla::Clamp(value, 0, 99);
+            value = ::Tla::Clamp(value, 0, 99);
             return value < 10 ? "0" + value : "" + value;
         }
         float PictureHeight = 300;
@@ -571,7 +571,7 @@
                 return;
             }
 
-            ResizeGrid(GlobalMapLocations::GMLocations.length());
+            ResizeGrid(::GlobalMapLocations::GMLocations.length());
         }
     }
 }
@@ -632,7 +632,7 @@
 //                   "ClassFields":
 {
     {
-        GlobalMapLocations::LocationData Location;
+        ::GlobalMapLocations::LocationData Location;
 
         void SetLocPosition(float zoom)
         {
@@ -670,7 +670,7 @@
 {
     {
         {
-            GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent).OnLMousePressed();
+            ::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent).OnLMousePressed();
         }
     }
 }
@@ -678,7 +678,7 @@
 {
     {
         {
-            GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent).OnRMousePressed();
+            ::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent).OnRMousePressed();
         }
     }
 }
@@ -701,7 +701,7 @@
 {
     {
         {
-            Location = GlobalMapLocations::GMLocations[cellIndex];
+            Location = ::GlobalMapLocations::GMLocations[cellIndex];
         }
     }
 }
@@ -742,8 +742,8 @@
             if (!HasChosen) {
                 return;
             }
-            SetPosition(cast<GMObjects>(GuiScreensExt::NeedObject(Parent)).NormalX(int(Chosen.WorldPos.x)),
-                        cast<GMObjects>(GuiScreensExt::NeedObject(Parent)).NormalY(int(Chosen.WorldPos.y)));
+            SetPosition(cast<GMObjects>(::GuiScreensExt::NeedObject(Parent)).NormalX(int(Chosen.WorldPos.x)),
+                        cast<GMObjects>(::GuiScreensExt::NeedObject(Parent)).NormalY(int(Chosen.WorldPos.y)));
         }
     }
 }
@@ -814,7 +814,7 @@
 {
     {
         {
-            if (!GlobalMapLocations::TryEnterHoveredLocation()) {
+            if (!::GlobalMapLocations::TryEnterHoveredLocation()) {
                 CurPlayer.ServerCall.ProcessGlobalMapCommand(3, 0, 0);
             }
         }
@@ -958,23 +958,23 @@
         {
             string text;
 
-            auto hoveredLocation = cast<GuiScreens::GlobalMap::LocationPic?>(Gui::GetHoveredObject());
+            auto hoveredLocation = cast < ::GuiScreens::GlobalMap::LocationPic ? > (Gui::GetHoveredObject());
             if (hoveredLocation != null) {
-                text += Game.GetText(MsgStr::LocNameKey(hoveredLocation.Location.LocPid)) + "\\n";
+                text += Game.GetText(::MsgStr::LocNameKey(hoveredLocation.Location.LocPid)) + "\\n";
             }
 
-            auto gmBase = cast<GlobalMapBase>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent));
-            auto globalMapObjects = cast<GMObjects>(GuiScreensExt::NeedObject(Parent));
+            auto gmBase = cast<GlobalMapBase>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent));
+            auto globalMapObjects = cast<GMObjects>(::GuiScreensExt::NeedObject(Parent));
 
-            GlobalMapFog::DrawFog(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent).Pos + GuiScreensExt::NeedObject(Parent).Pos,
-                                  Settings.GlobalMap.GlobalMapZoneLength * globalMapObjects.GlobalZoom,
-                                  FogFull.Id);
+            ::GlobalMapFog::DrawFog(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent).Pos + ::GuiScreensExt::NeedObject(Parent).Pos,
+                                    Settings.GlobalMap.GlobalMapZoneLength * globalMapObjects.GlobalZoom,
+                                    FogFull.Id);
 
-            if (GuiScreensExt::NeedObject(Parent).IsMouseHit()) {
-                int CoordX = globalMapObjects.NormalX2(Game.MousePos.x - GuiScreensExt::NeedObject(Parent).Pos.x - gmBase.AbsolutePos.x);
-                int CoordY = globalMapObjects.NormalY2(Game.MousePos.y - GuiScreensExt::NeedObject(Parent).Pos.y - gmBase.AbsolutePos.y);
+            if (::GuiScreensExt::NeedObject(Parent).IsMouseHit()) {
+                int CoordX = globalMapObjects.NormalX2(Game.MousePos.x - ::GuiScreensExt::NeedObject(Parent).Pos.x - gmBase.AbsolutePos.x);
+                int CoordY = globalMapObjects.NormalY2(Game.MousePos.y - ::GuiScreensExt::NeedObject(Parent).Pos.y - gmBase.AbsolutePos.y);
 
-                string Coordinates = MsgStr::GetGameText(MsgStr::StrGlobalMapCoordInfo);
+                string Coordinates = ::MsgStr::GetGameText(::MsgStr::StrGlobalMapCoordInfo);
                 Coordinates = Game.ReplaceText(Coordinates, "%dx", CoordX);
                 Coordinates = Game.ReplaceText(Coordinates, "%dy", CoordY);
                 Coordinates = Game.ReplaceText(Coordinates, "%s", "\\n");
@@ -990,19 +990,19 @@
                               TextFormat(FontType::Default, FontFlag(int(FontFlag::Bordered)), 0));
             }
 
-            auto info = GlobalmapGroup::GetCurrentGroup();
+            auto info = ::GlobalmapGroup::GetCurrentGroup();
             if (info.IsMoving) {
-                GMTarget.Draw(ipos(globalMapObjects.NormalX(info.ToX) + gmBase.AbsolutePos.x + GuiScreensExt::NeedObject(Parent).Pos.x,
-                                   globalMapObjects.NormalY(info.ToY) + gmBase.AbsolutePos.y + GuiScreensExt::NeedObject(Parent).Pos.y),
+                GMTarget.Draw(ipos(globalMapObjects.NormalX(info.ToX) + gmBase.AbsolutePos.x + ::GuiScreensExt::NeedObject(Parent).Pos.x,
+                                   globalMapObjects.NormalY(info.ToY) + gmBase.AbsolutePos.y + ::GuiScreensExt::NeedObject(Parent).Pos.y),
                               isize(),
                               0,
                               0);
 
-                auto group = GlobalmapGroup::GetCurrentGroup();
+                auto group = ::GlobalmapGroup::GetCurrentGroup();
                 int[] points = array<int>(group.Points);
                 for (int i = 0; i < points.length(); i = i + 3) {
-                    points[i] = globalMapObjects.NormalX(points[i]) + gmBase.AbsolutePos.x + GuiScreensExt::NeedObject(Parent).Pos.x;
-                    points[i + 1] = globalMapObjects.NormalY(points[i + 1]) + gmBase.AbsolutePos.y + GuiScreensExt::NeedObject(Parent).Pos.y;
+                    points[i] = globalMapObjects.NormalX(points[i]) + gmBase.AbsolutePos.x + ::GuiScreensExt::NeedObject(Parent).Pos.x;
+                    points[i + 1] = globalMapObjects.NormalY(points[i + 1]) + gmBase.AbsolutePos.y + ::GuiScreensExt::NeedObject(Parent).Pos.y;
                 }
                 Game.DrawPrimitive(RenderPrimitiveType::PointList, points);
             }
@@ -1606,7 +1606,7 @@
 {
     {
         {
-            return FormatXX(GameTime::GetDay());
+            return FormatXX(::GameTime::GetDay());
         }
     }
 }
@@ -1671,7 +1671,7 @@
 {
     {
         {
-            return CodeMonth[GameTime::GetMonth()];
+            return CodeMonth[::GameTime::GetMonth()];
         }
     }
 }
@@ -1741,7 +1741,7 @@
 {
     {
         {
-            return "" + GameTime::GetYear();
+            return "" + ::GameTime::GetYear();
         }
     }
 }
@@ -1806,7 +1806,7 @@
 {
     {
         {
-            return FormatXX(GameTime::GetHour()) + FormatXX(GameTime::GetMinute());
+            return FormatXX(::GameTime::GetHour()) + FormatXX(::GameTime::GetMinute());
         }
     }
 }
@@ -1899,8 +1899,8 @@
 {
     {
         {
-            int timeInMinut = GameTime::GetHour() * 60 + GameTime::GetMinute();
-            GuiScreensExt::NeedSprite(BackgroundImage).SetFrame(timeInMinut / float(24 * 60));
+            int timeInMinut = ::GameTime::GetHour() * 60 + ::GameTime::GetMinute();
+            ::GuiScreensExt::NeedSprite(BackgroundImage).SetFrame(timeInMinut / float(24 * 60));
         }
     }
 }
@@ -2038,7 +2038,7 @@
             KnownCityLocations = array<hstring>();
             for (int i = 0; i < chosen.KnownLocProtoId.length(); i++) {
                 // Не для всех городов и локаций есть ярлыки
-                if (!Game.GetText(MsgStr::LocLabelPicKey(chosen.KnownLocProtoId[i])).isEmpty()) {
+                if (!Game.GetText(::MsgStr::LocLabelPicKey(chosen.KnownLocProtoId[i])).isEmpty()) {
                     KnownCityLocations.insertLast(chosen.KnownLocProtoId[i]);
                 }
             }
@@ -2180,7 +2180,7 @@
             if (!HasChosen) {
                 return;
             }
-            SetActive(cellIndex >= cast<KnownProtoLocs>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent)).KnownCityLocations.length());
+            SetActive(cellIndex >= cast<KnownProtoLocs>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent)).KnownCityLocations.length());
         }
     }
 }
@@ -2242,7 +2242,7 @@
             if (!HasChosen) {
                 return;
             }
-            SetActive(cellIndex < cast<KnownProtoLocs>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent)).KnownCityLocations.length());
+            SetActive(cellIndex < cast<KnownProtoLocs>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent)).KnownCityLocations.length());
         }
     }
 }
@@ -2303,13 +2303,13 @@
             if (!HasChosen) {
                 return;
             }
-            auto locs =
-                cast<KnownProtoLocs>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent).Parent)).KnownCityLocations;
+            auto locs = cast<KnownProtoLocs>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent).Parent))
+                            .KnownCityLocations;
             if (cellIndex >= locs.length()) {
                 return;
             }
             hstring proto = locs[cellIndex];
-            string picName = Game.GetText(MsgStr::LocLabelPicKey(proto));
+            string picName = Game.GetText(::MsgStr::LocLabelPicKey(proto));
             if (picName != "error") {
                 SetBackgroundImage(picName);
             }
@@ -2372,8 +2372,8 @@
             if (!HasChosen) {
                 return;
             }
-            auto locs =
-                cast<KnownProtoLocs>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Parent).Parent)).KnownCityLocations;
+            auto locs = cast<KnownProtoLocs>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Parent).Parent))
+                            .KnownCityLocations;
             if (LocIndex >= locs.length()) {
                 return;
             }
@@ -2381,7 +2381,7 @@
 
             int x = 0, y = 0;
 
-            if (GlobalMapLocations::GetLocationCoordinates(proto, x, y)) {
+            if (::GlobalMapLocations::GetLocationCoordinates(proto, x, y)) {
                 CurPlayer.ServerCall.ProcessGlobalMapCommand(1, x, y);
             }
         }
@@ -2459,7 +2459,7 @@
 {
     {
         {
-            Gui::Panel panel = GuiScreensExt::NeedPanel(GuiScreensExt::NeedObject(Parent).FindPanel("KnownProtoLocs"));
+            Gui::Panel panel = ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedObject(Parent).FindPanel("KnownProtoLocs"));
             panel.ModifyScroll(-10, 0);
         }
     }
@@ -2526,7 +2526,7 @@
 {
     {
         {
-            Gui::Panel panel = GuiScreensExt::NeedPanel(GuiScreensExt::NeedObject(Parent).FindPanel("KnownProtoLocs"));
+            Gui::Panel panel = ::GuiScreensExt::NeedPanel(::GuiScreensExt::NeedObject(Parent).FindPanel("KnownProtoLocs"));
             panel.ModifyScroll(10, 0);
         }
     }
@@ -2600,10 +2600,10 @@
         {
             //CurPlayer.ServerCall.Rpc_ShowGMTown();
 
-            auto group = GlobalmapGroup::GetCurrentGroup();
+            auto group = ::GlobalmapGroup::GetCurrentGroup();
             if (!group.IsMoving && !group.IsEncounter) {
-                auto locInfo = GlobalMapLocations::GetHoveredLocationData(group.CurX, group.CurY);
-                if (locInfo != null && Game.GetText(MsgStr::LocPicKey(locInfo.LocPid)) != "error") {
+                auto locInfo = ::GlobalMapLocations::GetHoveredLocationData(group.CurX, group.CurY);
+                if (locInfo != null && Game.GetText(::MsgStr::LocPicKey(locInfo.LocPid)) != "error") {
                     CurPlayer.ServerCall.ProcessGlobalMapCommand(9, locInfo.LocId, 0); //GM_CMD_ENTRANCES
                 }
             }
@@ -2882,12 +2882,12 @@
 {
     {
         {
-            auto critters = cast<GlobalGroupGrid>(GuiScreensExt::NeedObject(Parent)).CrittersIds;
+            auto critters = cast<GlobalGroupGrid>(::GuiScreensExt::NeedObject(Parent)).CrittersIds;
             auto critter = Game.GetCritter(critters[cellIndex]);
             if (critter != null) {
                 CritterId = critter.Id;
-                GuiScreensExt::NeedText(FindText("CritterName")).Text = critter.Name;
-                GuiScreensExt::NeedText(FindText("CritterCond")).Text = (critter.IsOffline() ? "offline" : "online");
+                ::GuiScreensExt::NeedText(FindText("CritterName")).Text = critter.Name;
+                ::GuiScreensExt::NeedText(FindText("CritterCond")).Text = (critter.IsOffline() ? "offline" : "online");
             }
         }
     }

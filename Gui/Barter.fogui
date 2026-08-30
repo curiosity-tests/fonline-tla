@@ -33,13 +33,13 @@
 
         string GetItemsInfoStr(int collection)
         {
-            return "$" + ClientItems::GetBarterCollectionCost(collection);
+            return "$" + ::ClientItems::GetBarterCollectionCost(collection);
         }
 
         void SetDialogText(string msg)
         {
-            auto panel = GuiScreensExt::NeedPanel(FindPanel("DiscPanel"));
-            auto text = GuiScreensExt::NeedText(panel.FindText("DescText"));
+            auto panel = ::GuiScreensExt::NeedPanel(FindPanel("DiscPanel"));
+            auto text = ::GuiScreensExt::NeedText(panel.FindText("DescText"));
             text.SetText(msg);
         }
     }
@@ -59,7 +59,7 @@
 {
     {
         {
-            ClientItems::RefreshItemsCollection(ClientDefines::ITEMS_INVENTORY);
+            ::ClientItems::RefreshItemsCollection(::ClientDefines::ITEMS_INVENTORY);
             if (ResumeDialogRequested) {
                 ResumeDialogRequested = false;
             }
@@ -208,7 +208,7 @@
                 return;
             }
 
-            string text = ClientMain::ItemDescription(item, ItemLookTypes::Barter);
+            string text = ::ClientMain::ItemDescription(item, ItemLookTypes::Barter);
             int tw = 0, th = 0, lines = 0;
             Game.GetTextInfo(text, isize(Size.width, 1000), TextFormat(FontType(int(TextFont)), FontFlag(TextFlags), 0), isize(tw, th), lines);
             SetSize(Size.width, th);
@@ -376,7 +376,7 @@
 {
     {
         {
-            GuiScreens::Preview::CreateHierarchy(this);
+            ::GuiScreens::Preview::CreateHierarchy(this);
         }
     }
 }
@@ -414,13 +414,13 @@
 //             {
 //               "$type": "ItemView",
 //               "UserData": null,
-//               "UserDataExt": "ClientDefines::ITEMS_BARTER",
+//               "UserDataExt": "::ClientDefines::ITEMS_BARTER",
 //               "UseSorting": true,
 //               "OnGetItems":
 {
     {
         {
-            Item[] items = ClientItems::RefreshItemsCollection(UserDataExt);
+            Item[] items = ::ClientItems::RefreshItemsCollection(UserDataExt);
 
             return items;
         }
@@ -543,7 +543,7 @@
 {
     {
         {
-            Gui::ItemView itemView = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ChosenInv")));
+            Gui::ItemView itemView = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("ChosenInv")));
             itemView.ModifyScroll(-10, 0);
         }
     }
@@ -610,7 +610,7 @@
 {
     {
         {
-            Gui::ItemView itemView = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ChosenInv")));
+            Gui::ItemView itemView = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("ChosenInv")));
             itemView.ModifyScroll(10, 0);
         }
     }
@@ -638,13 +638,13 @@
 //             {
 //               "$type": "ItemView",
 //               "UserData": null,
-//               "UserDataExt": "ClientDefines::ITEMS_BARTER_OFFER",
+//               "UserDataExt": "::ClientDefines::ITEMS_BARTER_OFFER",
 //               "UseSorting": true,
 //               "OnGetItems":
 {
     {
         {
-            Item[] items = ClientItems::RefreshItemsCollection(UserDataExt);
+            Item[] items = ::ClientItems::RefreshItemsCollection(UserDataExt);
             Game.Log("refreshing items " + UserDataExt);
             return items;
         }
@@ -761,7 +761,7 @@
 {
     {
         {
-            Gui::ItemView itemView = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ChosenOffer")));
+            Gui::ItemView itemView = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("ChosenOffer")));
             itemView.ModifyScroll(-10, 0);
         }
     }
@@ -828,7 +828,7 @@
 {
     {
         {
-            Gui::ItemView itemView = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ChosenOffer")));
+            Gui::ItemView itemView = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("ChosenOffer")));
             itemView.ModifyScroll(10, 0);
         }
     }
@@ -945,7 +945,7 @@
             if (true) {
                 picInv = item.PicInv;
             }
-            GuiScreensExt::NeedSprite(BackgroundImage).Load(picInv);
+            ::GuiScreensExt::NeedSprite(BackgroundImage).Load(picInv);
         }
     }
 }
@@ -1056,7 +1056,7 @@
 {
     {
         {
-            SetText(cast<Barter>(GuiScreensExt::NeedScreen(Screen)).GetItemsInfoStr(ClientDefines::ITEMS_BARTER_OFFER));
+            SetText(cast<Barter>(::GuiScreensExt::NeedScreen(Screen)).GetItemsInfoStr(::ClientDefines::ITEMS_BARTER_OFFER));
         }
     }
 }
@@ -1163,7 +1163,7 @@
 {
     {
         {
-            GuiScreens::Preview::CreateHierarchy(this);
+            ::GuiScreens::Preview::CreateHierarchy(this);
         }
     }
 }
@@ -1171,8 +1171,8 @@
 {
     {
         {
-            auto @preview = cast<GuiScreens::Preview::Preview>(GetChild(0));
-            preview.PreviewCritterId = cast<Barter>(GuiScreensExt::NeedScreen(Screen)).CritterId;
+            auto @preview = cast<::GuiScreens::Preview::Preview>(GetChild(0));
+            preview.PreviewCritterId = cast<Barter>(::GuiScreensExt::NeedScreen(Screen)).CritterId;
         }
     }
 }
@@ -1209,13 +1209,13 @@
 //             {
 //               "$type": "ItemView",
 //               "UserData": null,
-//               "UserDataExt": "ClientDefines::ITEMS_BARTER_OPPONENT",
+//               "UserDataExt": "::ClientDefines::ITEMS_BARTER_OPPONENT",
 //               "UseSorting": true,
 //               "OnGetItems":
 {
     {
         {
-            Item[] items = ClientItems::RefreshItemsCollection(UserDataExt);
+            Item[] items = ::ClientItems::RefreshItemsCollection(UserDataExt);
 
             return items;
         }
@@ -1332,7 +1332,7 @@
 {
     {
         {
-            Gui::ItemView itemView = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("OtherInv")));
+            Gui::ItemView itemView = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("OtherInv")));
             itemView.ModifyScroll(-10, 0);
         }
     }
@@ -1399,7 +1399,7 @@
 {
     {
         {
-            Gui::ItemView itemView = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("OtherInv")));
+            Gui::ItemView itemView = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("OtherInv")));
             itemView.ModifyScroll(10, 0);
         }
     }
@@ -1427,13 +1427,13 @@
 //             {
 //               "$type": "ItemView",
 //               "UserData": null,
-//               "UserDataExt": "ClientDefines::ITEMS_BARTER_OPPONENT_OFFER",
+//               "UserDataExt": "::ClientDefines::ITEMS_BARTER_OPPONENT_OFFER",
 //               "UseSorting": true,
 //               "OnGetItems":
 {
     {
         {
-            Item[] items = ClientItems::RefreshItemsCollection(UserDataExt);
+            Item[] items = ::ClientItems::RefreshItemsCollection(UserDataExt);
 
             return items;
         }
@@ -1550,7 +1550,7 @@
 {
     {
         {
-            Gui::ItemView itemView = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("OtherOffer")));
+            Gui::ItemView itemView = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("OtherOffer")));
             itemView.ModifyScroll(-10, 0);
         }
     }
@@ -1617,7 +1617,7 @@
 {
     {
         {
-            Gui::ItemView itemView = cast<Gui::ItemView>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("OtherOffer")));
+            Gui::ItemView itemView = cast<Gui::ItemView>(::GuiScreensExt::NeedObject(::GuiScreensExt::NeedObject(Parent).Find("OtherOffer")));
             itemView.ModifyScroll(10, 0);
         }
     }
@@ -1722,7 +1722,7 @@
             if (true) {
                 picInv = item.PicInv;
             }
-            GuiScreensExt::NeedSprite(BackgroundImage).Load(picInv);
+            ::GuiScreensExt::NeedSprite(BackgroundImage).Load(picInv);
         }
     }
 }
@@ -1833,7 +1833,7 @@
 {
     {
         {
-            SetText(cast<Barter>(GuiScreensExt::NeedScreen(Screen)).GetItemsInfoStr(ClientDefines::ITEMS_BARTER_OPPONENT_OFFER));
+            SetText(cast<Barter>(::GuiScreensExt::NeedScreen(Screen)).GetItemsInfoStr(::ClientDefines::ITEMS_BARTER_OPPONENT_OFFER));
         }
     }
 }
@@ -1910,8 +1910,8 @@
 {
     {
         {
-            Barter barter = cast<Barter>(GuiScreensExt::NeedScreen(Screen));
-            ClientItems::BarterOffer(barter.TransferSession);
+            Barter barter = cast<Barter>(::GuiScreensExt::NeedScreen(Screen));
+            ::ClientItems::BarterOffer(barter.TransferSession);
         }
     }
 }
@@ -1937,7 +1937,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrBarterOffer)
+            ::MsgStr::GetGameText(::MsgStr::StrBarterOffer)
         }
     }
 }
@@ -2043,7 +2043,7 @@
 {
     {
         {
-            Barter barter = cast<Barter>(GuiScreensExt::NeedScreen(Screen));
+            Barter barter = cast<Barter>(::GuiScreensExt::NeedScreen(Screen));
             barter.ResumeDialogRequested = true;
             CurPlayer.ServerCall.ResumeDialogFromBarter(barter.CritterId, barter.TransferSession);
             Gui::HideScreen();
@@ -2072,7 +2072,7 @@
 {
     {
         {
-            MsgStr::GetGameText(MsgStr::StrBarterTalk)
+            ::MsgStr::GetGameText(::MsgStr::StrBarterTalk)
         }
     }
 }

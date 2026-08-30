@@ -185,7 +185,7 @@
                     return;
                 }
 
-                int attackDist = Parameters::GetActiveItemAttackDistance(chosen);
+                int attackDist = ::Parameters::GetActiveItemAttackDistance(chosen);
                 if (attackDist == 0) {
                     return;
                 }
@@ -204,8 +204,8 @@
                 }
 
                 Item? item = chosen.GetItem(ItemProperty::CritterSlot, CritterItemSlot::Main);
-                ProtoItem? proto = CritterItem::GetSlotItemProto(chosen);
-                int hit = ClientMain::ToHit(chosen, cr, proto, item == null ? chosen.HandsItemMode : item.Mode);
+                ProtoItem? proto = ::CritterItem::GetSlotItemProto(chosen);
+                int hit = ::ClientMain::ToHit(chosen, cr, proto, item == null ? chosen.HandsItemMode : item.Mode);
                 if (hit == 0) {
                     return;
                 }

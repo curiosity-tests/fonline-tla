@@ -44,7 +44,7 @@
             ExpectedContainerId = params["TransferContainerId"];
             ExpectedTransferSession = params["TransferSession"];
             TransferTypes transfer = Chosen.TransferType;
-            GuiScreensExt::NeedButton(FindButton("TakeAllButton")).SetActive(transfer != TransferTypes::CritSteal);
+            ::GuiScreensExt::NeedButton(FindButton("TakeAllButton")).SetActive(transfer != TransferTypes::CritSteal);
         }
     }
 }
@@ -110,8 +110,8 @@
 {
     {
         {
-            auto @itemsContainer = GuiScreens::ItemsContainer::CreateHierarchy(this);
-            itemsContainer.ItemsCollection = ClientDefines::ITEMS_PICKUP_FROM;
+            auto @itemsContainer = ::GuiScreens::ItemsContainer::CreateHierarchy(this);
+            itemsContainer.ItemsCollection = ::ClientDefines::ITEMS_PICKUP_FROM;
         }
     }
 }
@@ -170,8 +170,8 @@
 {
     {
         {
-            Gui::Object cont = GuiScreens::ItemsContainer::CreateHierarchy(this);
-            cast<GuiScreens::ItemsContainer::ItemsContainer>(cont).ItemsCollection = ClientDefines::ITEMS_PICKUP;
+            Gui::Object cont = ::GuiScreens::ItemsContainer::CreateHierarchy(this);
+            cast<::GuiScreens::ItemsContainer::ItemsContainer>(cont).ItemsCollection = ::ClientDefines::ITEMS_PICKUP;
         }
     }
 }
@@ -230,7 +230,7 @@
 {
     {
         {
-            GuiScreens::Preview::CreateHierarchy(this);
+            ::GuiScreens::Preview::CreateHierarchy(this);
         }
     }
 }
@@ -238,7 +238,7 @@
 {
     {
         {
-            GuiScreens::Preview::Preview preview = cast<GuiScreens::Preview::Preview>(GetChild(0));
+            ::GuiScreens::Preview::Preview preview = cast<::GuiScreens::Preview::Preview>(GetChild(0));
             preview.PreviewCritterId = params["TargetCritterId"];
             preview.PreviewItemId = params["TargetItemId"];
         }
@@ -320,13 +320,13 @@
     {
         {
             any[] actions = {};
-            ChosenActions::GetChosenActions(actions);
-            PickUp pickUp = cast<PickUp>(GuiScreensExt::NeedScreen(Screen));
-            any[] useItemAction = {Tla::ChosenTakeAll, 0, 0, 0, pickUp.ExpectedTransferType, pickUp.ExpectedContainerId, pickUp.ExpectedTransferSession};
+            ::ChosenActions::GetChosenActions(actions);
+            PickUp pickUp = cast<PickUp>(::GuiScreensExt::NeedScreen(Screen));
+            any[] useItemAction = {::Tla::ChosenTakeAll, 0, 0, 0, pickUp.ExpectedTransferType, pickUp.ExpectedContainerId, pickUp.ExpectedTransferSession};
             for (int i = 0; i < useItemAction.length(); i++) {
                 actions.insertLast(useItemAction[i]);
             }
-            ChosenActions::SetChosenActions(actions);
+            ::ChosenActions::SetChosenActions(actions);
         }
     }
 }
