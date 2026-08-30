@@ -408,7 +408,7 @@ namespace CritterProps
 ///@ Property Critter Common uint8 DenLeannaCondom Mutable OwnerSync Persistent Group = Quests Quest = 3100 Max = 3
 ///@ Property Critter Common uint8 QDenAnanDoll Mutable OwnerSync Persistent Group = Quests Quest = 3145 Max = 3
 ///@ Property Critter Common uint8 DenAnanRedoll Mutable OwnerSync Persistent Group = Quests Quest = 3146 Max = 3
-///@ Property Critter Common uint8 DenGhost Mutable OwnerSync Persistent Group = Quests Quest = 3103 Max = 11
+///@ Property Critter Common uint8 DenGhost Mutable OwnerSync Persistent Group = Quests Quest = 3103 Max = 13
 ///@ Property Critter Common uint8 DenBillRacingOpening Mutable OwnerSync Persistent Group = Quests Quest = 3151 Max = 2
 ///@ Property Critter Common uint8 DenCarstopJeffry Mutable OwnerSync Persistent Group = Quests Quest = 3106 Max = 4
 ///@ Property Critter Common uint8 DenCarstopBrahmin Mutable OwnerSync Persistent Group = Quests Quest = 3127 Max = 11
@@ -448,7 +448,7 @@ namespace CritterProps
 ///@ Property Critter Common uint8 ModJoeFarm Mutable OwnerSync Persistent Group = Quests Quest = 3306 Max = 3
 ///@ Property Critter Common uint8 ModHose Mutable OwnerSync Persistent Group = Quests Quest = 3300 Max = 3
 ///@ Property Critter Common uint8 ModBaltasGecko Mutable OwnerSync Persistent Group = Quests Quest = 3302 Max = 3
-///@ Property Critter Common uint8 ModLourenceRatsColony Mutable OwnerSync Persistent Group = Quests Quest = 3324 Max = 4
+///@ Property Critter Common uint8 ModLourenceRatsColony Mutable OwnerSync Persistent Group = Quests Quest = 3324 Max = 5
 ///@ Property Critter Common uint8 ModLourenceFloater Mutable OwnerSync Persistent Group = Quests Quest = 3320 Max = 4
 ///@ Property Critter Common uint8 ModJoeVampire Mutable OwnerSync Persistent Group = Quests Quest = 3308 Max = 11
 ///@ Property Critter Common uint8 BHMarcusEscort Mutable OwnerSync Persistent Group = Quests Quest = 3608 Max = 5
@@ -598,7 +598,7 @@ namespace CritterProps
 ///@ Property Critter Server uint8 SFHubJudgementIgnatStory Mutable Persistent Max = 1
 ///@ Property Critter Server uint8 ReddMinesPlayerThief Mutable Persistent Max = 1
 ///@ Property Critter Server uint8 ReddDocMedicals Mutable Persistent Max = 100
-///@ Property Critter Server uint8 NcrWestinPills Mutable Persistent Max = 2
+///@ Property Critter Server uint8 NcrWestinPills Mutable Persistent Max = 5
 ///@ Property Critter Server uint8 SFHubbStatus Mutable Persistent Max = 9
 ///@ Property Critter Server uint8 SFInvasionSandbagsTaken Mutable Persistent Max = 6
 ///@ Property Critter Server uint8 SFInvasionSandbagsGiven Mutable Persistent Max = 50
