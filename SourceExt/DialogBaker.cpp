@@ -259,15 +259,19 @@ void DialogTextBaker::BakeFiles(const FileCollection& files, string_view target_
         }
     }
 
+    // A bake language entry may carry a fallback declaration ("ru18:russ"), so both the ordering and the pack
+    // fixup go through the parsed config instead of the raw setting strings
+    BakeLanguageConfig bake_languages = TextPack::ParseBakeLanguages(_context->Settings->BakeLanguages);
+
     std::ranges::stable_sort(lang_packs, [&](const auto& l, const auto& r) {
-        const auto li = std::ranges::find(_context->Settings->BakeLanguages, l.first);
-        const auto ri = std::ranges::find(_context->Settings->BakeLanguages, r.first);
-        const auto lrank = li != _context->Settings->BakeLanguages.end() ? static_cast<size_t>(std::distance(_context->Settings->BakeLanguages.begin(), li)) : std::numeric_limits<size_t>::max();
-        const auto rrank = ri != _context->Settings->BakeLanguages.end() ? static_cast<size_t>(std::distance(_context->Settings->BakeLanguages.begin(), ri)) : std::numeric_limits<size_t>::max();
+        const auto li = std::ranges::find(bake_languages.Languages, l.first);
+        const auto ri = std::ranges::find(bake_languages.Languages, r.first);
+        const auto lrank = li != bake_languages.Languages.end() ? static_cast<size_t>(std::distance(bake_languages.Languages.begin(), li)) : std::numeric_limits<size_t>::max();
+        const auto rrank = ri != bake_languages.Languages.end() ? static_cast<size_t>(std::distance(bake_languages.Languages.begin(), ri)) : std::numeric_limits<size_t>::max();
         return lrank < rrank;
     });
 
-    TextPack::FixPacks(_context->Settings->BakeLanguages, lang_packs);
+    TextPack::FixPacks(bake_languages, lang_packs);
 
     if (errors != 0) {
         throw DialogBakerException("Errors during dialogs text baking");

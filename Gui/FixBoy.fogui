@@ -142,7 +142,7 @@
 
                 int craftId = params["CraftId"];
                 if (craftId == 0) {
-                    any[] data = FixBoy::g_PendingFixBoyData;
+                    any[] data = ::FixBoy::g_PendingFixBoyData;
                     CraftList.clear();
                     int index = 0;
                     while (index + 5 <= data.length()) {
@@ -160,7 +160,7 @@
                 else {
                     Game.Log("Crafft id!");
                     int index = 0;
-                    any[] data = FixBoy::g_PendingFixBoyData;
+                    any[] data = ::FixBoy::g_PendingFixBoyData;
                     if (data.length() == 0) {
                         return;
                     }

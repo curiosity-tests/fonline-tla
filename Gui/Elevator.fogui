@@ -48,7 +48,7 @@
                 return;
             }
             Type = params["ElevatorType"];
-            if (!Elevator::GetElevator(Type, Data)) {
+            if (!::Elevator::GetElevator(Type, Data)) {
                 Gui::HideScreen();
                 return;
             }
@@ -214,7 +214,7 @@
             }
 
             SetPosition(int(elevator.Data[10]), int(elevator.Data[11]));
-            GuiScreensExt::NeedSprite(BackgroundImage).SetFrame(Elevator::GetElevatorIndicatorFrameTime(int(elevator.Data[0])));
+            GuiScreensExt::NeedSprite(BackgroundImage).SetFrame(::Elevator::GetElevatorIndicatorFrameTime(int(elevator.Data[0])));
         }
     }
 }
@@ -292,7 +292,7 @@
                 int right = int(elevator.Data[index + 2]);
                 int bottom = int(elevator.Data[index + 3]);
                 button.SetPosition(left, top);
-                button.SetSize(Elevator::GetElevatorRectExtent(left, right), Elevator::GetElevatorRectExtent(top, bottom));
+                button.SetSize(::Elevator::GetElevatorRectExtent(left, right), ::Elevator::GetElevatorRectExtent(top, bottom));
                 button.SetPressedImage(hstring(elevator.Data[12]));
                 button.SetActive(true);
             }

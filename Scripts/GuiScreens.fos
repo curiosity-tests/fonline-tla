@@ -11733,7 +11733,7 @@ namespace FixBoy
 
                 int craftId = params["CraftId"];
                 if (craftId == 0) {
-                    any[] data = FixBoy::g_PendingFixBoyData;
+                    any[] data = ::FixBoy::g_PendingFixBoyData;
                     CraftList.clear();
                     int index = 0;
                     while (index + 5 <= data.length()) {
@@ -11751,7 +11751,7 @@ namespace FixBoy
                 else {
                     Game.Log("Crafft id!");
                     int index = 0;
-                    any[] data = FixBoy::g_PendingFixBoyData;
+                    any[] data = ::FixBoy::g_PendingFixBoyData;
                     if (data.length() == 0) {
                         return;
                     }
@@ -14376,7 +14376,7 @@ namespace Elevator
                 return;
             }
             Type = params["ElevatorType"];
-            if (!Elevator::GetElevator(Type, Data)) {
+            if (!::Elevator::GetElevator(Type, Data)) {
                 Gui::HideScreen();
                 return;
             }
@@ -14450,7 +14450,7 @@ namespace Elevator
             }
 
             SetPosition(int(elevator.Data[10]), int(elevator.Data[11]));
-            GuiScreensExt::NeedSprite(BackgroundImage).SetFrame(Elevator::GetElevatorIndicatorFrameTime(int(elevator.Data[0])));
+            GuiScreensExt::NeedSprite(BackgroundImage).SetFrame(::Elevator::GetElevatorIndicatorFrameTime(int(elevator.Data[0])));
         }
     };
 
@@ -14481,7 +14481,7 @@ namespace Elevator
                 int right = int(elevator.Data[index + 2]);
                 int bottom = int(elevator.Data[index + 3]);
                 button.SetPosition(left, top);
-                button.SetSize(Elevator::GetElevatorRectExtent(left, right), Elevator::GetElevatorRectExtent(top, bottom));
+                button.SetSize(::Elevator::GetElevatorRectExtent(left, right), ::Elevator::GetElevatorRectExtent(top, bottom));
                 button.SetPressedImage(hstring(elevator.Data[12]));
                 button.SetActive(true);
             }
@@ -15973,8 +15973,8 @@ namespace TownView
         void OnLMouseClick() override
         {
             TownView townView = cast<TownView>(GuiScreensExt::NeedScreen(Screen));
-            ident locId = GMTown::CurrentLocationId;
-            int entrance = GMTown::CurrentEntrance;
+            ident locId = ::GMTown::CurrentLocationId;
+            int entrance = ::GMTown::CurrentEntrance;
             CurPlayer.ServerCall.ProcessGlobalMapCommand(3, locId, entrance); //GM_CMD_TOLOCAL
         }
     };
@@ -16558,10 +16558,10 @@ namespace Radio
         {
             RadioId = params["ItemId"];
             auto checkbox = cast<Gui::CheckBox>(GuiScreensExt::NeedObject(Find("BroadcastOnOff")));
-            checkbox.SetChecked(Radio::GetRadioActivity(RadioId, true));
+            checkbox.SetChecked(::Radio::GetRadioActivity(RadioId, true));
             checkbox = cast<Gui::CheckBox>(GuiScreensExt::NeedObject(Find("ReceiveOnOff")));
-            checkbox.SetChecked(Radio::GetRadioActivity(RadioId, false));
-            Item? item = Radio::GetItemRadio(RadioId);
+            checkbox.SetChecked(::Radio::GetRadioActivity(RadioId, false));
+            Item? item = ::Radio::GetItemRadio(RadioId);
 
             if (item == null) {
                 Gui::HideScreen();
@@ -16607,16 +16607,16 @@ namespace Radio
 
         void OnInput(KeyCode key, string text) override
         {
-            Item? item = Radio::GetItemRadio(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId);
+            Item? item = ::Radio::GetItemRadio(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId);
             if (item == null) {
                 return;
             }
 
             if (!item.Radio.FixedChannel) {
-                SetChannel(Radio::ParseChannel(Text));
+                SetChannel(::Radio::ParseChannel(Text));
 
                 if (key == KeyCode::Return || key == KeyCode::Numpadenter) {
-                    Radio::ChangeRadioChannel(item.Id, RadioChannel);
+                    ::Radio::ChangeRadioChannel(item.Id, RadioChannel);
                 }
             }
             else {
@@ -16638,7 +16638,7 @@ namespace Radio
         void OnLMouseClick() override
         {
             auto channelTextBox = cast<ChannelNumber>(GuiScreensExt::NeedObject(GuiScreensExt::NeedObject(Parent).Find("ChannelNumber")));
-            Radio::ChangeRadioChannel(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId, channelTextBox.RadioChannel);
+            ::Radio::ChangeRadioChannel(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId, channelTextBox.RadioChannel);
         }
     };
 
@@ -16662,7 +16662,7 @@ namespace Radio
                 }
             }
             SetBackgroundImage("art/intrface/Radio/radio_dial" + BroadCastType + ".png");
-            Radio::ChangeRadioBroadcastType(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId, BroadCastType);
+            ::Radio::ChangeRadioBroadcastType(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId, BroadCastType);
         }
 
         void OnConstruct() override
@@ -16702,7 +16702,7 @@ namespace Radio
 
         void OnLMouseClick() override
         {
-            SetChecked(Radio::ChangeRadioActivity(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId, true));
+            SetChecked(::Radio::ChangeRadioActivity(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId, true));
         }
     };
 
@@ -16717,7 +16717,7 @@ namespace Radio
 
         void OnLMouseClick() override
         {
-            SetChecked(Radio::ChangeRadioActivity(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId, false));
+            SetChecked(::Radio::ChangeRadioActivity(cast<Radio>(GuiScreensExt::NeedObject(Parent)).RadioId, false));
         }
     };
 

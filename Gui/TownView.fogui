@@ -256,8 +256,8 @@
     {
         {
             TownView townView = cast<TownView>(GuiScreensExt::NeedScreen(Screen));
-            ident locId = GMTown::CurrentLocationId;
-            int entrance = GMTown::CurrentEntrance;
+            ident locId = ::GMTown::CurrentLocationId;
+            int entrance = ::GMTown::CurrentEntrance;
             CurPlayer.ServerCall.ProcessGlobalMapCommand(3, locId, entrance); //GM_CMD_TOLOCAL
         }
     }

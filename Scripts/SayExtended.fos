@@ -10,7 +10,7 @@ namespace SayExtended
 #if SERVER || CLIENT
 
 ///@ RemoteCall Client ShowSayExtended(int32 msgIdHeader, int32 p1, int32 p2)
-///@ RemoteCall Client ShowSayExtendedScreenFromScenery(int32 msgIdHeader, int32 msgIdInputText, hstring sceneryPid, mpos hex);
+///@ RemoteCall Client ShowSayExtendedScreenFromScenery(int32 msgIdHeader, int32 msgIdInputText, hstring sceneryPid, mpos hex)
 
 // Перевести диалог на указанный результат
 ///@ RemoteCall Client ForceDialogResult(ident talkerId, hstring dialogId, bool isNpc, int32 result, bool refresh)
