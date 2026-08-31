@@ -310,7 +310,7 @@ static void LoadDialogTextSection(const EngineMetadata& meta, ptr<DialogPack> pa
     pack->Texts.emplace_back(lang_section_name, TextPack {&meta.Hashes});
     const size_t text_pack_index = pack->Texts.size() - 1;
 
-    istringstream lang_lines {string(lang_buf)};
+    istringstream lang_lines {make_stream_string(lang_buf)};
     string lang_line;
     bool collecting_multiline = false;
     string current_key1;
@@ -326,7 +326,7 @@ static void LoadDialogTextSection(const EngineMetadata& meta, ptr<DialogPack> pa
         pack->Texts.at(text_pack_index).second.AddStr(TextPackKey::FromParts(meta.Hashes, "Dialogs", string(pack_name), key1, key2), std::move(text));
     };
 
-    while (std::getline(lang_lines, lang_line)) {
+    while (getline(lang_lines, lang_line)) {
         if (!collecting_multiline) {
             string key1;
             string key2;
@@ -593,10 +593,10 @@ auto DialogManager::ParseDialog(string_view pack_name, string_view data) const -
         }
     };
 
-    istringstream lines {new_dlg_data};
+    istringstream lines {make_stream_string(new_dlg_data)};
     string line;
 
-    while (std::getline(lines, line)) {
+    while (getline(lines, line)) {
         if (IsDialogCommentOrEmpty(line)) {
             continue;
         }
@@ -607,7 +607,7 @@ auto DialogManager::ParseDialog(string_view pack_name, string_view data) const -
             continue;
         }
 
-        istringstream cmd_input(trimmed);
+        istringstream cmd_input(make_stream_string(trimmed));
         string command;
         cmd_input >> command;
 
@@ -709,7 +709,7 @@ auto DialogManager::ParseDialog(string_view pack_name, string_view data) const -
 
             const bool is_demand = strvex(command).compare_ignore_case("Demand");
             const string payload = strvex(rest).trim().str();
-            istringstream dr_input(payload);
+            istringstream dr_input(make_stream_string(payload));
             auto req = LoadDemandResult(dr_input, is_demand);
 
             if (is_demand) {

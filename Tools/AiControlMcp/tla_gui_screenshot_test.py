@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
+import ai_control_mcp
 from ai_control_runner import (
     ADAPTER_PATH,
     McpProcess,
@@ -139,6 +140,10 @@ def capture_tga_path(capture: dict[str, Any]) -> Path | None:
 
 def read_uncompressed_true_color_tga(path: Path) -> tuple[bytes, int, int, int, int, bool, bool]:
     data = path.read_bytes()
+    # The engine writes screenshots as PNG whatever the requested extension, so the region checks below
+    # get the same true-color buffer they were written against
+    if data[: len(ai_control_mcp.PNG_MAGIC)] == ai_control_mcp.PNG_MAGIC:
+        data = ai_control_mcp.decode_simple_png_to_tga(data)
     if len(data) < 18:
         raise ValueError("TGA header is truncated")
 

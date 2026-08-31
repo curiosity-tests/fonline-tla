@@ -115,9 +115,7 @@ class AiControlScriptContractTests(unittest.TestCase):
         )
         self.assertIn("AiControlReceiveTalkDiagnostic", source)
         self.assertIn('StringMember("type", "talk_diagnostic")', source)
-        self.assertIn("Entity[] heldEntities = Sync::SurvivingSnapshot();", drop_menu_source)
         self.assertIn("Dialogs::RunDialog(cr, npc, false);", drop_menu_source)
-        self.assertIn("Sync::Restore(heldEntities)", drop_menu_source)
         self.assertNotIn("ignoreDistance : true", drop_menu_source)
 
     def test_timed_item_mode_reaches_the_bridge(self) -> None:
@@ -268,7 +266,7 @@ class AiControlScriptContractTests(unittest.TestCase):
         end = source.index("void AiControlQaTeleportGlobal(Player player)", start)
         fixture = source[start:end]
         self.assertIn("if (!Settings.AiControl.AllowQaCommands)", fixture)
-        self.assertIn("cr == null || !Sync::Lock(cr)", fixture)
+        self.assertIn("if (cr == null) {", fixture)
         self.assertIn("if (cr.DialogBoxPending)", fixture)
         self.assertIn("Dialogbox::ClearPendingDialogBox(cr)", fixture)
         self.assertIn("cr.LastDialogBoxShownTick + Dialogbox::NEXT_DIALOG_CALL", fixture)

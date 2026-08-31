@@ -163,7 +163,7 @@ static auto FormatTags(ptr<ClientEngine> client, string_view text, string_view t
                 tag = tag.substr(5);
                 tag = strex(tag).erase('(').erase(')');
 
-                istringstream itag(tag);
+                istringstream itag(make_stream_string(tag));
                 string pack_name_str;
                 string key1;
                 string key2;

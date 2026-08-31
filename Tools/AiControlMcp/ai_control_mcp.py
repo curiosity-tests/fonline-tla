@@ -3140,6 +3140,133 @@ def resolve_engine_screenshot_path(workspace_root: Path, requested_path: Any) ->
     return path
 
 
+PNG_MAGIC = bytes((0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A))
+
+
+def decode_simple_png_to_tga(data: bytes) -> bytes:
+    """Repack a non-interlaced 8-bit RGB/RGBA PNG as uncompressed true-color TGA.
+
+    The engine writes screenshots with ImageWriter::WriteSimplePng, so the verifier decodes that shape and
+    reuses the TGA statistics path instead of carrying a second copy of the blank-frame heuristic.
+    """
+    import zlib
+
+    if len(data) < len(PNG_MAGIC) or data[: len(PNG_MAGIC)] != PNG_MAGIC:
+        raise ValueError("PNG signature is missing")
+
+    width = height = bit_depth = color_type = interlace = -1
+    idat = bytearray()
+    offset = len(PNG_MAGIC)
+
+    while offset + 8 <= len(data):
+        length = int.from_bytes(data[offset : offset + 4], "big")
+        chunk_type = data[offset + 4 : offset + 8]
+        body = data[offset + 8 : offset + 8 + length]
+        if len(body) < length:
+            raise ValueError("PNG chunk payload is truncated")
+        if chunk_type == b"IHDR":
+            if length < 13:
+                raise ValueError("PNG IHDR is truncated")
+            width = int.from_bytes(body[0:4], "big")
+            height = int.from_bytes(body[4:8], "big")
+            bit_depth = body[8]
+            color_type = body[9]
+            interlace = body[12]
+        elif chunk_type == b"IDAT":
+            idat += body
+        elif chunk_type == b"IEND":
+            break
+        offset += 12 + length
+
+    if width <= 0 or height <= 0:
+        raise ValueError(f"PNG dimensions must be positive, got {width}x{height}")
+    if bit_depth != 8:
+        raise ValueError(f"PNG bit depth must be 8, got {bit_depth}")
+    if color_type not in (2, 6):
+        raise ValueError(f"PNG color type must be RGB (2) or RGBA (6), got {color_type}")
+    if interlace != 0:
+        raise ValueError("Interlaced PNG is not supported for screenshot verification")
+    if not idat:
+        raise ValueError("PNG has no IDAT data")
+
+    channels = 3 if color_type == 2 else 4
+    stride = width * channels
+    raw = zlib.decompress(bytes(idat))
+    if len(raw) < (stride + 1) * height:
+        raise ValueError("PNG pixel payload is truncated")
+
+    out = bytearray(stride * height)
+    previous = bytearray(stride)
+
+    for row in range(height):
+        base = row * (stride + 1)
+        filter_type = raw[base]
+        line = bytearray(raw[base + 1 : base + 1 + stride])
+
+        if filter_type == 1:
+            for i in range(channels, stride):
+                line[i] = (line[i] + line[i - channels]) & 0xFF
+        elif filter_type == 2:
+            for i in range(stride):
+                line[i] = (line[i] + previous[i]) & 0xFF
+        elif filter_type == 3:
+            for i in range(stride):
+                left = line[i - channels] if i >= channels else 0
+                line[i] = (line[i] + ((left + previous[i]) >> 1)) & 0xFF
+        elif filter_type == 4:
+            for i in range(stride):
+                left = line[i - channels] if i >= channels else 0
+                upper_left = previous[i - channels] if i >= channels else 0
+                estimate = left + previous[i] - upper_left
+                dist_left = abs(estimate - left)
+                dist_up = abs(estimate - previous[i])
+                dist_upper_left = abs(estimate - upper_left)
+                if dist_left <= dist_up and dist_left <= dist_upper_left:
+                    predictor = left
+                elif dist_up <= dist_upper_left:
+                    predictor = previous[i]
+                else:
+                    predictor = upper_left
+                line[i] = (line[i] + predictor) & 0xFF
+        elif filter_type != 0:
+            raise ValueError(f"Unknown PNG filter type {filter_type}")
+
+        out[row * stride : (row + 1) * stride] = line
+        previous = line
+
+    pixel_depth = 24 if channels == 3 else 32
+    header = bytearray(18)
+    header[2] = 2
+    header[12] = width & 0xFF
+    header[13] = (width >> 8) & 0xFF
+    header[14] = height & 0xFF
+    header[15] = (height >> 8) & 0xFF
+    header[16] = pixel_depth
+    header[17] = 0x20 | (8 if channels == 4 else 0)
+
+    body_out = bytearray(len(out))
+    for i in range(0, len(out), channels):
+        body_out[i] = out[i + 2]
+        body_out[i + 1] = out[i + 1]
+        body_out[i + 2] = out[i]
+        if channels == 4:
+            body_out[i + 3] = out[i + 3]
+
+    return bytes(header + body_out)
+
+
+def inspect_screenshot_image(data: bytes) -> dict[str, Any]:
+    """Verify a screenshot the engine wrote, whatever container it chose for it."""
+    if data[: len(PNG_MAGIC)] == PNG_MAGIC:
+        inspection = inspect_uncompressed_true_color_tga(decode_simple_png_to_tga(data))
+        inspection["format"] = "png_true_color"
+        inspection["sizeBytes"] = len(data)
+        inspection["sha256"] = hashlib.sha256(data).hexdigest()
+        return inspection
+
+    return inspect_uncompressed_true_color_tga(data)
+
+
 def inspect_uncompressed_true_color_tga(data: bytes) -> dict[str, Any]:
     if len(data) < 18:
         raise ValueError("TGA header is truncated")
@@ -3345,7 +3472,7 @@ def save_verified_engine_screenshot(bridge: Any, arguments: dict[str, Any]) -> d
     try:
         if not path.is_file():
             return screenshot_failure_result(result, "file", "Screenshot command completed but the target file is missing")
-        inspection = inspect_uncompressed_true_color_tga(path.read_bytes())
+        inspection = inspect_screenshot_image(path.read_bytes())
     except (OSError, ValueError) as exc:
         return screenshot_failure_result(result, "file", str(exc))
 
