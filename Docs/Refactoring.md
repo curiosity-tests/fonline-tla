@@ -407,7 +407,8 @@ The same audit fixed eight other location-aware `ItemTrigger` callbacks in `Game
 `ModocVampire`, `NrWriKidnap`, and `SeAndroid`. Their covers now include the source and target maps, locations,
 affected NPCs, doors/containers, and inventory items as required. Script quality gained the zero-tolerance
 `item-trigger-location-sync` check plus four validator unit tests, so a callback that calls `GetLocation()` without
-both `[[Async]]` and an explicit `Sync::` cover is rejected before bake.
+both `[[Async]]` and an explicit `Sync::` cover is rejected before bake. Этот контракт снят вместе с переходом на
+`Server.SingleThreadedLogic`: скриптовая синхронизация удалена, а проверка и сюита `*_async_contracts` — вместе с ней.
 
 Three NPC AI modules (`PatternMedic`, `PatternSlayer`, and `PatternTerm`) also had nullable global pattern handles
 instead of constructed instances; explicit construction removes the null dereferences seen while generating a fresh
