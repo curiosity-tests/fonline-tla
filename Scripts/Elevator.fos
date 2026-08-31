@@ -238,7 +238,7 @@ void ShowElevator(Critter player, int elevatorType, hstring[] mapPids, int entry
 }
 
 // Отложенная очистка сохранённого описания лифта, если игрок не выбрал этаж вовремя.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ResetData(any[] values)
 {
     if (values.length() < 2) {
@@ -246,7 +246,7 @@ void ResetData(any[] values)
     }
 
     Map? map = Game.GetMap(ident(values[1]));
-    if (map == null || !Sync::Lock(map)) {
+    if (map == null) {
         return;
     }
 
@@ -296,7 +296,7 @@ void SelectLevel(Critter player, int answerI, string answerS)
 }
 
 // Основной (RPC) путь выбора этажа: проверяет сохранённые данные лифта и переносит игрока на выбранный этаж.
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void Rpc_SelectLevel(Player player, int level, int p1, int p2)
 {
     Critter? cr = player.GetControlledCritter();
@@ -306,10 +306,6 @@ void Rpc_SelectLevel(Player player, int level, int p1, int p2)
 
     Map? map = cr.GetMap();
     if (map == null) {
-        return;
-    }
-
-    if (!Sync::Lock(cr, map)) {
         return;
     }
 
@@ -334,10 +330,6 @@ void Rpc_SelectLevel(Player player, int level, int p1, int p2)
     int mapParamIndex = GetElevatorMapParamIndex(firstLevelNum, level);
 
     Location loc = map.GetLocation();
-    if (!Sync::Lock(cr, map, loc)) {
-        return;
-    }
-
     // Ищем карту нужного этажа по прото-id среди карт локации и переносим туда игрока.
     for (int i = 0, j = loc.GetMapCount(); i < j; i++) {
         // breadcrumb миграции: раньше карта бралась напрямую — Game.GetMap(params[i-firstLevelNum+2]);

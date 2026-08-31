@@ -68,13 +68,9 @@ void Explode(Critter player, Critter? npc)
 }
 
 // Отложенный подрыв динамита на месте NPC и последующая реплика через 2 сек.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ExplodeTimeEvent(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Map? map = cr.GetMap();
     if (map != null) {
         Explode::Explode(cr.GetMap(), cr.Hex, null, Content::Item::active_dynamite, cr.Var4, Game.Random(0, 50), Game.Random(0, 1));
@@ -85,13 +81,9 @@ void ExplodeTimeEvent(Critter cr)
 }
 
 // Реплика NPC после подрыва (строка 1 его диалога).
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Comment(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Messaging::Say(cr, MsgStr::DialogTextKey(cr.DialogId, 1));
     return;
 }
@@ -195,7 +187,7 @@ EventResult HoughBarter(Critter cr, Critter barterCr, bool attach, int barterCou
 }
 
 // Удаляет у владельца ранее выданные при барте предметы, если он их так и не забрал (values[0] — id криттера).
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DestroyItemsHough(any[] values)
 {
     if (values.length() < 2) {
@@ -208,17 +200,11 @@ void DestroyItemsHough(any[] values)
     }
 
     Item[] items = {};
-    Entity[] cover = {cr};
     for (int i = 1; i < values.length(); i++) {
         Item? item = Game.GetItem(values[i]);
         if (item != null) {
             items.insertLast(item);
-            Sync::AddUniqueEntity(cover, item);
         }
-    }
-
-    if (!Sync::Lock(cover)) {
-        return;
     }
 
     Item[] ownedItems = {};
@@ -368,13 +354,9 @@ void AwakeRats(Critter cr, Critter? npc)
 }
 
 // Реплика NPC после спавна крыс (строка 2 его диалога).
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Comment1(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Messaging::Say(cr, MsgStr::DialogTextKey(cr.DialogId, 2));
     return;
 }
@@ -419,22 +401,16 @@ EventResult LureUse(Item item, Critter cr, int param)
 }
 
 // Пока приманка активна — периодически заставляет случайного NPC рядом возмутиться запахом игрока.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Lure(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (cr.ModLourenceLureActive > Game.SynchronizedTime) {
         Map? map = cr.GetMap();
         if (map != null) {
             Critter[] npc = map.GetCrittersInRadius(cr.Hex, 5, CritterFindType::NonDeadNpc);
             if (!npc.isEmpty()) {
                 Critter speaker = npc[Game.Random(0, npc.length() - 1)];
-                Entity[] cover = Sync::Snapshot();
-                Sync::AddUniqueEntity(cover, speaker);
-                if (Sync::Lock(cover) && cr.MapId == map.Id && speaker.MapId == map.Id && speaker.IsAlive() && Game.GetDistance(cr, speaker) <= 5) {
+                if (cr.MapId == map.Id && speaker.MapId == map.Id && speaker.IsAlive() && Game.GetDistance(cr, speaker) <= 5) {
                     Messaging::Say(speaker, TextPackKey(TextPackName::Text, "" + (STR_FOO)), "|name:" + PlayerRegistration::GetPlayerName(cr.Id));
                 }
             }
@@ -449,84 +425,24 @@ void Lure(Critter cr, TimeEventContext event)
     return;
 }
 
-// Стабилизирует обе карты квестовой локации, до пяти живых враждебных крыс и всех
-// живых игроков/союзников карты назначения. Registry scan возвращает непокрытые
-// хэндлы, поэтому после ожидания перепроверяем роли, живучесть и текущие карты.
-[[Async]]
-bool LockRatMoveGraph(Location loc, Map? & sourceMap, Map? & destinationMap, Critter[] & rats, Critter[] & allies)
+// Собирает обе карты квестовой локации, до пяти живых враждебных крыс и всех живых
+// игроков/союзников карты назначения.
+void CollectRatMoveGraph(Location loc, Map? & sourceMap, Map? & destinationMap, Critter[] & rats, Critter[] & allies)
 {
-    sourceMap = null;
-    destinationMap = null;
-    rats.clear();
-    allies.clear();
+    sourceMap = loc.GetMapByIndex(1);
+    destinationMap = loc.GetMapByIndex(0);
 
-    for (int attempt = 0; attempt < 16; attempt++) {
-        if (!Sync::Lock(loc)) {
-            return false;
-        }
-
-        Map map = loc.GetMapByIndex(1);
-        Map mapTo = loc.GetMapByIndex(0);
-        ident mapId = map.Id;
-        ident mapToId = mapTo.Id;
-        if (!Sync::Lock(loc, map, mapTo)) {
-            continue;
-        }
-        if (loc.GetMapByIndex(1).Id != mapId || loc.GetMapByIndex(0).Id != mapToId) {
-            continue;
-        }
-
-        Critter[] currentRats = map.GetCritters(CritterProperty::NpcRole, HostileLocationQuest::NPC_ROLE_HOSTILE, CritterFindType::NonDeadNpc);
-        if (currentRats.length() > 5) {
-            currentRats.resize(5);
-        }
-        Critter[] currentAllies = mapTo.GetCritters(CritterFindType::NonDeadPlayers);
-        currentAllies.insertLast(mapTo.GetCritters(CritterProperty::NpcRole, HostileLocationQuest::NPC_ROLE_ALLY, CritterFindType::NonDeadNpc));
-
-        Critter[] participants = currentRats.clone();
-        participants.insertLast(currentAllies);
-        Entity[] fixedCover = {loc, map, mapTo};
-        if (!Sync::LockCrittersWithMaps(participants, fixedCover)) {
-            continue;
-        }
-
-        if (loc.GetMapByIndex(1).Id != mapId || loc.GetMapByIndex(0).Id != mapToId) {
-            continue;
-        }
-
-        bool topologyChanged = false;
-        for (int i = 0; i < currentRats.length(); i++) {
-            if (currentRats[i].MapId != mapId || currentRats[i].IsDead() || currentRats[i].NpcRole != HostileLocationQuest::NPC_ROLE_HOSTILE) {
-                topologyChanged = true;
-                break;
-            }
-        }
-        if (topologyChanged) {
-            continue;
-        }
-        for (int i = 0; i < currentAllies.length(); i++) {
-            if (currentAllies[i].MapId != mapToId || currentAllies[i].IsDead() ||
-                (!currentAllies[i].ControlledByPlayer && currentAllies[i].NpcRole != HostileLocationQuest::NPC_ROLE_ALLY)) {
-                topologyChanged = true;
-                break;
-            }
-        }
-        if (topologyChanged) {
-            continue;
-        }
-
-        sourceMap = map;
-        destinationMap = mapTo;
-        rats = currentRats;
-        allies = currentAllies;
-        return true;
+    rats = loc.GetMapByIndex(1).GetCritters(CritterProperty::NpcRole, HostileLocationQuest::NPC_ROLE_HOSTILE, CritterFindType::NonDeadNpc);
+    if (rats.length() > 5) {
+        rats.resize(5);
     }
 
-    return false;
+    allies = loc.GetMapByIndex(0).GetCritters(CritterFindType::NonDeadPlayers);
+    allies.insertLast(loc.GetMapByIndex(0).GetCritters(CritterProperty::NpcRole, HostileLocationQuest::NPC_ROLE_ALLY, CritterFindType::NonDeadNpc));
 }
 
 // Переносит до 5 крыс с карты-источника на целевую карту, делает их бездомными и натравливает на игроков/союзников.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void MoveRat(any value)
 {
     Location? loc = Game.GetLocation(ident(value));
@@ -538,11 +454,11 @@ void MoveRat(any value)
     Map? mapTo;
     Critter[] rats = {};
     Critter[] allies = {};
-    if (!LockRatMoveGraph(loc, map, mapTo, rats, allies) || map == null || mapTo == null || rats.isEmpty()) {
+    CollectRatMoveGraph(loc, map, mapTo, rats, allies);
+    if (map == null || mapTo == null || rats.isEmpty()) {
         return;
     }
 
-    Entity[] graphCover = Sync::Snapshot();
     for (int i = 0; i < rats.length(); i++) {
         Critter cr = rats[i];
         mpos hex;
@@ -550,10 +466,6 @@ void MoveRat(any value)
         if (!Entrance::GetFreeHex(mapTo, 3, hex)) {
             continue;
         }
-        if (!Sync::LockForTransferToMap(cr, mapTo, graphCover)) {
-            return;
-        }
-
         cr.TransferToMap(mapTo, hex, HDIR_Random);
         if (cr.MapId != mapTo.Id) {
             return;
@@ -573,13 +485,9 @@ void MoveRat(any value)
 }
 
 // Периодически ведёт перенесённую крысу к точке выхода ENTRY_MOVETO, пока та жива и без активных планов.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Move(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (cr.IsDead()) {
         return;
     }

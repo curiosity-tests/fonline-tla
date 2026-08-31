@@ -37,7 +37,6 @@ bool FindMovableHex(Map map, mpos& hex)
     return false;
 }
 
-[[Async]]
 void LocationLifecycle(Testing::TestContext ctx)
 {
     Location? loc = Testing::CreateTestLocation(ctx, Content::Location::desert_12);
@@ -55,7 +54,6 @@ void LocationLifecycle(Testing::TestContext ctx)
     // Уничтожение и контроль утечки выполняет Testing::CleanupTest после завершения теста
 }
 
-[[Async]]
 void NpcSpawn(Testing::TestContext ctx)
 {
     Location? loc = Testing::CreateTestLocation(ctx, Content::Location::desert_12);

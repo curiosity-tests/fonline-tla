@@ -136,13 +136,9 @@ void EliSmthDead(Critter cr, Critter fromCr, Critter? killer)
 
 // Периодический тик: пока Илай на карте и без активных планов — раз в 5 минут поёт песню.
 // На глобалке или при наличии планов таймер песни сбрасывается.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void EliIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (cr.GetMap() == null || !NpcPlanes::IsNoPlanes(cr)) {
         if (cr.EliTimeNextSing != ZERO_SYNCTIME) {
             cr.EliTimeNextSing = ZERO_SYNCTIME;
@@ -222,13 +218,9 @@ EventResult EliAttacked(Critter cr, Critter attacker)
 }
 
 // Самохил: восстанавливает HP, а при здоровье ниже половины максимума использует супер-стимпак.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void HealSelf(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     cr.CurrentHp += 50;
     if (cr.CurrentHp * 2 > cr.MaxLife) {
         return;

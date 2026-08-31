@@ -166,7 +166,7 @@ void SayEmoteOnHead(Critter cr, TextPackKey textKey, string textArgs = "")
 }
 
 // Реплика, пришедшая от игрока: проверяем на флуд и рассылаем как обычную речь его криттера.
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void ReceiveChosenSay(Player player, SayType sayType, string text)
 {
     text = text.trim();
@@ -194,7 +194,7 @@ void ReceiveChosenSay(Player player, SayType sayType, string text)
     }
 
     Critter? cr = player.GetControlledCritter();
-    if (cr == null || !Sync::LockCritterWithMap(cr)) {
+    if (cr == null) {
         return;
     }
 

@@ -1,6 +1,6 @@
 // DropMenuHandler — контекстное drop-меню действий над целью.
 // Ключевые обязанности: CLIENT — кнопки меню и Can*/Do* предикаты/действия; SERVER — ServerRemoteCall StartDialog.
-// Сторона: MIXED. Связи: TlaFixedDropMenu, ChosenActions, Gui, Tla, Lockers, Dialogs, Sync.
+// Сторона: MIXED. Связи: TlaFixedDropMenu, ChosenActions, Gui, Tla, Lockers, Dialogs.
 namespace DropMenuHandler
 {
 
@@ -246,14 +246,14 @@ void DoUnload(Critter? cr, Item? item)
 
 #if SERVER
 
-// Серверный запуск диалога: под явным скриптовым покрытием проверяем обычные игровые предусловия.
+// Серверный запуск диалога: проверяем обычные игровые предусловия.
 // В QA-режиме тот же путь дополнительно сообщает мосту точную причину отказа, не обходя механику.
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void StartDialog(Player player, ident npcId)
 {
     Critter? cr = player.GetControlledCritter();
     Critter? npc = Game.GetCritter(npcId);
-    if (cr == null || npc == null || !Sync::Lock(cr, npc)) {
+    if (cr == null || npc == null) {
         return;
     }
 
@@ -316,10 +316,9 @@ void StartDialog(Player player, ident npcId)
         return;
     }
 
-    Entity[] heldEntities = Sync::SurvivingSnapshot();
     Dialogs::RunDialog(cr, npc, false);
 
-    if (Settings.AiControl.AllowQaCommands && Sync::Restore(heldEntities) && !cr.IsDestroyed) {
+    if (Settings.AiControl.AllowQaCommands && !cr.IsDestroyed) {
         int finalStatus = cr.HasDialogContext && cr.DialogContext.Talking ? AiControl::TalkDiagnosticStarted : AiControl::TalkDiagnosticNoVisibleStartSpeech;
         cr.PlayerClientCall.AiControlReceiveTalkDiagnostic(npcId,
                                                            finalStatus,

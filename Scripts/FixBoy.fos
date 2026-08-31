@@ -1470,15 +1470,11 @@ void ProcessAdvancedCraft(any[] values)
     }
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void Rpc_CraftItem(Player player, int state, int craftId, int p2)
 {
     Critter? cr = player.GetControlledCritter();
     if (cr == null) {
-        return;
-    }
-
-    if (!Sync::LockCritterWithMap(cr)) {
         return;
     }
 

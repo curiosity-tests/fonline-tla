@@ -103,13 +103,9 @@ void DropPoison(Critter cr)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Poison(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (cr.IsDead()) {
         timespan delayTicks = Time::Seconds(100);
         if (delayTicks != ZERO_TIMESPAN) {

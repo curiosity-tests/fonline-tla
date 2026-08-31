@@ -152,13 +152,9 @@ class Monologue
 };
 
 // Начало диалога
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RunMonologueTimeEvent(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Monologue? m = GetMonologue(cr);
     if (m != null) {
         m.CurrentString = m.FirstString;
@@ -170,13 +166,9 @@ void RunMonologueTimeEvent(Critter cr, TimeEventContext event)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void SayNextMessage(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Monologue? m = GetMonologue(cr);
     if (m != null) {
         if (m.CurrentString > m.LastString) {

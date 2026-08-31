@@ -175,17 +175,13 @@ void CritterSetExperience(Critter cr, CritterProperty prop, int& newValue)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void UpdateExperienceLevel(any crId)
 {
     Critter? cr = Game.GetCritter(crId);
     if (cr == null) {
         return;
     }
-    if (!Sync::Lock(cr)) {
-        return;
-    }
-
     while (cr.Level < int(Settings.Player.LevelCap) && cr.Experience >= NextLevelNeedExp(cr)) {
         cr.Level += 1;
 

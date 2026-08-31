@@ -357,13 +357,9 @@ bool TermAttack(Critter term, Critter target)
     return pattern.Attack(term, target);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void TermIdle(Critter term)
 {
-    if (!Sync::LockCritterWithMap(term)) {
-        return;
-    }
-
     pattern.Idle(term);
 }
 

@@ -14,15 +14,11 @@ namespace NoPvpMaps
 #if SERVER
 
 // игрок с включенным NoPvp режимом может телепортироваться на глобал
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void Rpc_CritterToGlobal(Player player)
 {
     Critter? cr = player.GetControlledCritter();
     if (cr == null) {
-        return;
-    }
-
-    if (!Sync::LockCritterWithMap(cr)) {
         return;
     }
 
@@ -116,7 +112,7 @@ void OnCitterMapIn(Critter cr, Map map)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void NoPvpOff(Critter cr, TimeEventContext event)
 {
     if (!cr.IsNoPvp) {
@@ -124,10 +120,6 @@ void NoPvpOff(Critter cr, TimeEventContext event)
     }
 
     Map? map = cr.GetMap();
-    if (map != null && !Sync::Lock(cr, map)) {
-        return;
-    }
-
     if (map != null && IsNoPvpMap(map)) { // если карта с включенным НоПвп, откладываем снятие режима
         timespan delayTicks = CheckTime;
         if (delayTicks != ZERO_TIMESPAN) {

@@ -269,13 +269,9 @@ void WalkToPos(Critter smit, int pos)
     SetSmitPos(pos);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void SmitIdle(Critter smit)
 {
-    if (!Sync::LockCritterWithMap(smit)) {
-        return;
-    }
-
     DebugLog("EnterIdle" + SmitPosReservePos(GetSmitPos()));
     if (!IsSmitHomePos(GetSmitPos()) || !IsSmitRightPosition(smit, GetSmitPos())) {
         // DebugLog("WRONG Pos and no planes... ");
@@ -287,11 +283,6 @@ void SmitIdle(Critter smit)
             }
 
             if (SmitPosMapPid(SmitPosReservePos(GetSmitPos())) != map.ProtoId) {
-                Map? targetMap = Game.GetMap(SmitPosMapPid(SmitPosReservePos(GetSmitPos())));
-                if (targetMap != null && !Sync::Lock(smit, map, targetMap)) {
-                    return;
-                }
-
                 TransferToPos(smit, SmitPosReservePos(GetSmitPos()));
             }
             else {
@@ -438,11 +429,11 @@ void SetupRadioComm(Critter smit)
     Game.StartTimeEvent(GameTime::GetNearSynchronizedTime(0, 0, 0, 1, 0, 0) - Game.SynchronizedTime, BeginRadioComm, smit.Id); //SavedDeferredCall
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void BeginRadioComm(any value)
 {
     Critter? smit = Game.GetCritter(value);
-    if (smit == null || !Sync::LockCritterWithMap(smit)) {
+    if (smit == null) {
         return;
     }
 

@@ -40,11 +40,11 @@ EventResult PistolUse(Item item, Critter cr, int param)
     return EventResult::StopChain;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void HideLocation(any value)
 {
     Location? loc = Game.GetLocation(ident(value));
-    if (loc == null || !Sync::Lock(loc)) {
+    if (loc == null) {
         return;
     }
 

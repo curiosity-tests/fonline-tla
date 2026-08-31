@@ -83,7 +83,7 @@ bool MatchesFilter(int index)
     return fullName.find(Settings.Testing.Filter) != -1;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void NextTest(any value)
 {
     int index = int(value) + 1;
@@ -113,7 +113,7 @@ void NextTest(any value)
     Game.StartTimeEvent(Time::Milliseconds(1), ExecuteTest, index);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ExecuteTest(any value)
 {
     int index = int(value);
@@ -136,7 +136,7 @@ void ExecuteTest(any value)
     FinishTest(ctx);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void WatchTest(any value)
 {
     int index = int(value);
@@ -151,7 +151,6 @@ void WatchTest(any value)
     FinishTest(ctx);
 }
 
-[[Async]]
 void FinishTest(TestContext ctx)
 {
     if (ctx.Advanced) {
@@ -239,56 +238,40 @@ void Pass(TestContext ctx)
 // Фикстуры: тестовая локация и спавн NPC; всё созданное уничтожается в CleanupTest
 // ---------------------------------------------------------------------------
 
-[[Async]]
 Location? CreateTestLocation(TestContext ctx, hstring locPid)
 {
     Location loc = Location::CreateLocation(locPid, ipos(Settings.GlobalMap.GlobalMapZoneLength * 5, Settings.GlobalMap.GlobalMapZoneLength * 5), null);
-    if (!Sync::Lock(loc)) {
-        return null;
-    }
-
     loc.AutoGarbage = false;
     loc.Hidden = true;
     ctx.TrackedLocations.insertLast(loc.Id);
     return loc;
 }
 
-[[Async]]
 Critter? SpawnTestNpc(TestContext ctx, Map map, hstring protoId, mpos hex)
 {
-    if (!Sync::Lock(map)) {
-        return null;
-    }
-
-    // AddCritter синхронно зовёт обработчики OnMapCritterIn (Main), которые читают локацию карты —
-    // без неё в покрытии цепочка родителей не спасает (лок карты не покрывает её родителя)
+    // AddCritter синхронно зовёт обработчики OnMapCritterIn (Main), которые читают локацию карты
     Location loc = map.GetLocation();
-    if (!Sync::Lock(map, loc)) {
-        return null;
-    }
-
     Critter cr = map.AddCritter(protoId, hex, HDIR_Random);
     ctx.TrackedCritters.insertLast(cr.Id);
     return cr;
 }
 
 // Уничтожает созданные тестом сущности; возвращает описание утечек (пусто = чисто)
-[[Async]]
 string CleanupTest(TestContext ctx)
 {
     string leaks = "";
 
     for (int i = 0; i < ctx.TrackedCritters.length(); i++) {
         Critter? cr = Game.GetCritter(ctx.TrackedCritters[i]);
-        // Уничтожение зовёт OnMapCritterOut (Main), читающий локацию — нужна полная цепочка в покрытии
-        if (cr != null && Sync::LockCritterWithMapAndLocation(cr)) {
+        // Уничтожение зовёт OnMapCritterOut (Main), читающий локацию
+        if (cr != null) {
             Game.DestroyCritter(cr);
         }
     }
 
     for (int i = 0; i < ctx.TrackedLocations.length(); i++) {
         Location? loc = Game.GetLocation(ctx.TrackedLocations[i]);
-        if (loc != null && Sync::Lock(loc)) {
+        if (loc != null) {
             Game.DestroyLocation(loc);
         }
     }

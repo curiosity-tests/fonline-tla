@@ -69,11 +69,11 @@ void BeggarFinish(Critter npc)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void BeggarTimeEvent(any value)
 {
     Critter? npc = Game.GetCritter(value);
-    if (npc == null || !Sync::LockCritterWithMap(npc)) {
+    if (npc == null) {
         return;
     }
 
@@ -115,11 +115,11 @@ void CountMoney(Critter player, Critter? npc)
 }
 
 // нищенка прячет деньги в тайник
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void TimeToHideMoney(any value)
 {
     Critter? npc = Game.GetCritter(value);
-    if (npc == null || !Sync::LockCritterWithMap(npc)) {
+    if (npc == null) {
         return;
     }
 
@@ -466,11 +466,11 @@ void NcrRanchMapInit(Map map, bool firstTime)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void NextIllBrahmin(any value)
 {
     Map? map = Game.GetMap(ident(value));
-    if (map == null || !Sync::Lock(map)) {
+    if (map == null) {
         return;
     }
 
@@ -525,13 +525,8 @@ void OnSmthUseItem(Critter cr, Critter fromCr, Item item, Critter? onCritter, It
     Dialogbox::RunDialogBox(fromCr, DialogBoxType::NcrIllBrahmin, 2, "");
 }
 
-[[Async]]
 void CureBrahmin(Critter player, int answerI)
 {
-    if (!Sync::Lock(player)) {
-        return;
-    }
-
     if (answerI == 1) {
         player.NcrCommonBrahminId = ZERO_IDENT;
         return;
@@ -541,29 +536,6 @@ void CureBrahmin(Critter player, int answerI)
     player.NcrCommonBrahminId = ZERO_IDENT;
 
     if (brahmin == null) {
-        return;
-    }
-
-    if (!Sync::Lock(player, brahmin)) {
-        return;
-    }
-
-    ident playerMapId = player.MapId;
-    ident brahminMapId = brahmin.MapId;
-    Map? playerMap = player.GetMap();
-    Map? brahminMap = brahmin.GetMap();
-    Entity[] cover = {player, brahmin};
-    if (playerMap != null) {
-        cover.insertLast(playerMap);
-    }
-    if (brahminMap != null && (playerMap == null || !(brahminMap is playerMap))) {
-        cover.insertLast(brahminMap);
-    }
-    if (!Sync::Lock(cover)) {
-        return;
-    }
-
-    if (player.MapId != playerMapId || brahmin.MapId != brahminMapId) {
         return;
     }
 

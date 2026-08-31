@@ -321,7 +321,7 @@ void NpcDialog(Critter player, StaticItem trigger, bool entered, mdir dir)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void NpcTimerDialog(any[] values)
 {
     if (values.length() == 5) {
@@ -339,15 +339,6 @@ void NpcTimerDialog(any[] values)
         }
 
         // Событие бежит в воркере: покрываем обоих нпц + их карту до любого обращения к состоянию.
-        Entity[] extra = {};
-        if (npc2 != null) {
-            extra.insertLast(npc2);
-        }
-
-        if (!Sync::LockCritterWithMapAndLocation(npc1, extra)) {
-            return;
-        }
-
         if (npc1.IsAlive() && NpcPlanes::IsNoPlanes(npc1) && !Dialogs::IsTalking(npc1) && npc2 != null && npc2.IsAlive() && NpcPlanes::IsNoPlanes(npc2) &&
             !Dialogs::IsTalking(npc2)) {
             Messaging::SayOnHead(npc1, TextPackKey(TextPackName::Text, "" + firstStr));

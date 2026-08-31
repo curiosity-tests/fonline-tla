@@ -108,11 +108,11 @@ void KillGhost(Critter player, Critter ghost, any val)
 // Обработчики отложенных событий
 
 // Воскрешает призрака.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RessurectGhost(any value)
 {
     Critter? ghost = Game.GetCritter(value);
-    if (ghost == null || !Sync::LockCritterWithMap(ghost)) {
+    if (ghost == null) {
         return;
     }
 
@@ -129,11 +129,11 @@ void RessurectGhost(any value)
 }
 
 // Запускает диалог о проклятом сокровище.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RunTreasureDialog(any value)
 {
     Critter? player = Game.GetCritter(value);
-    if (player == null || !Sync::LockCritterWithMap(player)) {
+    if (player == null) {
         return;
     }
 

@@ -350,96 +350,22 @@ void MoveInvItem(Critter cr, ident itemId, CritterItemSlot slot)
     cr.ChangeItemSlot(item.Id, slot);
 }
 
-// Захватывает полный набор сущностей, который затем читает/меняет OperateContainer. Промежуточный
-// lock cr+target нужен до чтения карт; итоговый Game.Sync одним вызовом удерживает обе карты тоже.
-[[Async]]
-bool LockContainerTransfer(Critter cr, TransferTypes expectedTransferType, ident expectedContainerId, uint expectedTransferSession)
+// Проверяет, что заявленный перенос всё ещё актуален: тип, контейнер и сессия должны совпадать
+// с текущим состоянием криттера, а сам контейнер — существовать.
+bool IsContainerTransferValid(Critter cr, TransferTypes expectedTransferType, ident expectedContainerId, uint expectedTransferSession)
 {
-    while (true) {
-        if (!Sync::Lock(cr)) {
-            return false;
-        }
-
-        if (cr.TransferType != expectedTransferType || cr.TransferContainerId != expectedContainerId || cr.TransferSession != expectedTransferSession ||
-            expectedContainerId == ZERO_IDENT || expectedContainerId == cr.Id) {
-            return false;
-        }
-
-        if (expectedTransferType == TransferTypes::HexContUp || expectedTransferType == TransferTypes::HexContDown ||
-            expectedTransferType == TransferTypes::SelfCont || expectedTransferType == TransferTypes::FarCont) {
-            Item? itemCont = Game.GetItem(expectedContainerId);
-            if (itemCont == null || !Sync::Lock(cr, itemCont)) {
-                return false;
-            }
-
-            if (cr.TransferType != expectedTransferType || cr.TransferContainerId != expectedContainerId || cr.TransferSession != expectedTransferSession) {
-                return false;
-            }
-
-            Map? crMap = cr.GetMap();
-            Map? itemMap = itemCont.GetMap();
-            ident crMapId = cr.MapId;
-            ident itemMapId = itemCont.MapId;
-            Entity[] syncCover = {cr, itemCont};
-            if (crMap != null) {
-                syncCover.insertLast(crMap);
-            }
-            if (itemMap != null && (crMap == null || itemMap.Id != crMap.Id)) {
-                syncCover.insertLast(itemMap);
-            }
-
-            if (!Sync::Lock(syncCover)) {
-                return false;
-            }
-
-            if (cr.TransferType != expectedTransferType || cr.TransferContainerId != expectedContainerId || cr.TransferSession != expectedTransferSession) {
-                return false;
-            }
-            if (cr.MapId != crMapId || itemCont.MapId != itemMapId) {
-                continue;
-            }
-
-            return true;
-        }
-
-        if (expectedTransferType == TransferTypes::CritLoot || expectedTransferType == TransferTypes::CritSteal ||
-            expectedTransferType == TransferTypes::FarCrit) {
-            Critter? crCont = Game.GetCritter(expectedContainerId);
-            if (crCont == null || !Sync::Lock(cr, crCont)) {
-                return false;
-            }
-
-            if (cr.TransferType != expectedTransferType || cr.TransferContainerId != expectedContainerId || cr.TransferSession != expectedTransferSession) {
-                return false;
-            }
-
-            Map? crMap = cr.GetMap();
-            Map? contMap = crCont.GetMap();
-            ident crMapId = cr.MapId;
-            ident contMapId = crCont.MapId;
-            Entity[] syncCover = {cr, crCont};
-            if (crMap != null) {
-                syncCover.insertLast(crMap);
-            }
-            if (contMap != null && (crMap == null || contMap.Id != crMap.Id)) {
-                syncCover.insertLast(contMap);
-            }
-
-            if (!Sync::Lock(syncCover)) {
-                return false;
-            }
-
-            if (cr.TransferType != expectedTransferType || cr.TransferContainerId != expectedContainerId || cr.TransferSession != expectedTransferSession) {
-                return false;
-            }
-            if (cr.MapId != crMapId || crCont.MapId != contMapId) {
-                continue;
-            }
-
-            return true;
-        }
-
+    if (!IsActiveContainerTransfer(cr, expectedTransferType, expectedContainerId, expectedTransferSession) || expectedContainerId == ZERO_IDENT ||
+        expectedContainerId == cr.Id) {
         return false;
+    }
+
+    if (expectedTransferType == TransferTypes::HexContUp || expectedTransferType == TransferTypes::HexContDown ||
+        expectedTransferType == TransferTypes::SelfCont || expectedTransferType == TransferTypes::FarCont) {
+        return Game.GetItem(expectedContainerId) != null;
+    }
+
+    if (expectedTransferType == TransferTypes::CritLoot || expectedTransferType == TransferTypes::CritSteal || expectedTransferType == TransferTypes::FarCrit) {
+        return Game.GetCritter(expectedContainerId) != null;
     }
 
     return false;

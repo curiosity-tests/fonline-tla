@@ -159,7 +159,7 @@ void RunDialog(Critter cr, hstring dialogId, Critter? talker, bool ignoreDistanc
 
 // Игрок выбрал ответ: валидируем индекс, перепроверяем демоды ответа (анти-чит),
 // применяем результаты и переходим к следующей реплике либо закрываем/бартер/атака.
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void SpeechAnswer(Player player, int answerIndex)
 {
     Critter? cr = player.GetControlledCritter();
@@ -168,24 +168,7 @@ void SpeechAnswer(Player player, int answerIndex)
         throw("SpeechAnswer - Critter is not talking", player);
     }
 
-    // Берём покрытие безусловно и включаем карту: демоды/результаты ответа могут читать карту/локацию
-    // (DR_PROP_MAP/DR_PROP_LOCATION, MapGeckCity::OpenDoor), а прежняя проверка при talker == null
-    // не брала лок вовсе и падала «Entity access without sync»
     Critter? talker = Game.GetCritter(cr.DialogContext.TalkerId);
-    Map? crMap = cr.GetMap();
-    Entity[] cover = {cr};
-    if (crMap != null) {
-        cover.insertLast(crMap);
-    }
-
-    if (talker != null) {
-        cover.insertLast(talker);
-    }
-
-    if (!Sync::Lock(cover)) {
-        return;
-    }
-
     // Специальные индексы ответа
     switch (answerIndex) {
     case -1:
@@ -348,13 +331,9 @@ bool IsTalking(Critter cr)
 
 // Периодический таймер диалога: закрывает разговор, когда тот больше не валиден
 // (таймаут, уход с дистанции, движение, потеря собеседника).
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ProcessDialog(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (IsDialogMustBeClosed(cr)) {
         CloseDialog(cr);
     }
@@ -363,7 +342,6 @@ void ProcessDialog(Critter cr)
 // Условия, при которых диалог обязан закрыться: нет контекста/не разговаривает,
 // криттер двинулся, истёк таймаут, либо (если дистанция учитывается) собеседник
 // недоступен или ушёл за пределы дистанции разговора.
-[[Async]]
 bool IsDialogMustBeClosed(Critter cr)
 {
     if (!cr.HasDialogContext || !cr.DialogContext.Talking) {
@@ -383,16 +361,6 @@ bool IsDialogMustBeClosed(Critter cr)
     if (!cr.DialogContext.IgnoreDistance) {
         if (cr.DialogContext.TalkerId != ZERO_IDENT) {
             Critter? talker = Game.GetCritter(cr.DialogContext.TalkerId);
-
-            // talker — вторая сущность вне cr+map-набора вызывающего; расширяем sync-набор на неё перед
-            // чтением её свойств в IsCrittersCanTalk (Game.Sync ЗАМЕНЯЕТ набор, поэтому включаем и cr, и карту).
-            if (talker != null) {
-                Map? crMap = cr.GetMap();
-                bool locked = crMap != null ? Sync::Lock(cr, crMap, talker) : Sync::Lock(cr, talker);
-                if (!locked) {
-                    return true;
-                }
-            }
 
             if (talker == null || !IsCrittersCanTalk(cr, talker)) {
                 return true;

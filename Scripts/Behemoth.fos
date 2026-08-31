@@ -403,53 +403,16 @@ EventResult BehemothOnGlobal(Critter cr, int type, Item car, float x, float y, f
 }
 
 // Периодическая проверка простоя: при активном приказе "маршрут" дотягивает бегемота до целевой локации или отменяет приказ.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void BehemothIdle(Critter cr)
 {
-    Map? map;
-    Location? loc = null;
-    Location? locTo;
-
-    while (true) {
-        if (!Sync::LockCritterWithMapAndLocation(cr)) {
-            return;
-        }
-
-        if (cr.BehemothOrderType != TYPE_ORDER_ROUTE) {
-            return;
-        }
-
-        map = cr.GetMap();
-        if (map != null) {
-            loc = map.GetLocation();
-        }
-        else {
-            loc = null;
-        }
-
-        locTo = GetLocationTo(cr);
-        if (locTo == null) {
-            break;
-        }
-
-        Entity[] fixedEntities = {locTo};
-        if (!Sync::LockCritterWithMapAndLocation(cr, fixedEntities)) {
-            return;
-        }
-
-        if (cr.BehemothOrderType != TYPE_ORDER_ROUTE) {
-            return;
-        }
-
-        Location? currentLocTo = GetLocationTo(cr);
-        if (currentLocTo == null || currentLocTo !is locTo) {
-            continue;
-        }
-
-        map = cr.GetMap();
-        loc = map != null ? map.GetLocation() : null;
-        break;
+    if (cr.BehemothOrderType != TYPE_ORDER_ROUTE) {
+        return;
     }
+
+    Map? map = cr.GetMap();
+    Location? loc = map != null ? map.GetLocation() : null;
+    Location? locTo = GetLocationTo(cr);
 
     if (locTo != null && loc != null && locTo.Id != loc.Id) {
         Radio::SendChannelRadioMessage(cr.BehemothRadio, TextPackKey(TextPackName::Text, "" + (STR_CONTINUING_ROUTE)));
@@ -597,25 +560,21 @@ void RunOrderCamera(Critter cr)
 }
 
 // Отложенный показ обзора карты владельцу: values = {ownerId, mapId, hexX, hexY, dir}.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ShowCamera(any[] values)
 {
     Critter? player = Game.GetCritter(values[0]);
-    if (player == null || !Sync::Lock(player) || !player.ControlledByPlayer) {
+    if (player == null || !player.ControlledByPlayer) {
         return;
     }
 
     ident mapId = values[1];
     Map? map = Game.GetMap(mapId);
-    if (map == null || !Sync::Lock(player, map)) {
+    if (map == null) {
         return;
     }
 
     Location loc = map.GetLocation();
-    if (!Sync::Lock(player, map, loc)) {
-        return;
-    }
-
     if (!player.ControlledByPlayer || map.Id != mapId || map.GetLocation().Id != loc.Id) {
         return;
     }

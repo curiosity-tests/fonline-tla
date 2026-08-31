@@ -193,7 +193,7 @@ void Arest(Critter cr, StaticItem trigger, bool entered, mdir dir)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void PrisonerTalk(any[] values)
 {
     if (values.length() < 1) {
@@ -201,7 +201,7 @@ void PrisonerTalk(any[] values)
     }
 
     Critter? cr = Game.GetCritter(values[0]);
-    if (cr == null || !Sync::LockCritterWithMap(cr)) {
+    if (cr == null) {
         return;
     }
 
@@ -313,7 +313,7 @@ void AddUniqueAnswerCritter(Critter[] & critters, Critter? candidate)
     critters.insertLast(candidate);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Answer(any[] values)
 {
     if (values.length() > 2) {
@@ -329,10 +329,6 @@ void Answer(any[] values)
                 guards.insertLast(guard);
                 AddUniqueAnswerCritter(participants, guard);
             }
-        }
-
-        if (!Sync::LockCrittersWithMaps(participants)) {
-            return;
         }
 
         for (int i = 0; i < guards.length(); i++) {
@@ -382,13 +378,9 @@ void AddGuards(Critter cr, Critter npc)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeleteGuard(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Game.DestroyCritter(cr);
     return;
 }

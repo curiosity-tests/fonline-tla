@@ -390,10 +390,10 @@ EventResult GuardAttacked(Critter cr, Critter attacker)
     return EventResult::StopChain;
 }
 
-[[Async]] [[ItemTrigger]]
+[[ItemTrigger]]
 void Alarm(Critter player, StaticItem trigger, bool entered, mdir dir)
 {
-    if (!entered || !Sync::LockCritterWithMapAndLocation(player)) {
+    if (!entered) {
         return;
     }
 
@@ -409,14 +409,6 @@ void Alarm(Critter player, StaticItem trigger, bool entered, mdir dir)
     }
 
     Critter? npc = map.GetCritter(CritterProperty::NpcRole, NPC_ROLE_MARODEUR, CritterFindType::NonDeadNpc);
-    Entity[] cover = {player, map, loc, guard};
-    if (npc != null && !(npc is guard)) {
-        cover.insertLast(npc);
-    }
-    if (!Sync::Lock(cover)) {
-        return;
-    }
-
     if (player.MapId != map.Id || map.GetLocation().Id != loc.Id || guard.MapId != map.Id || guard.IsDead() || !player.ControlledByPlayer || IsHostile(map) ||
         player.NRWriKidnap == 2 || player.NRWriKidnap == 4) {
         return;
@@ -431,10 +423,10 @@ void Alarm(Critter player, StaticItem trigger, bool entered, mdir dir)
 }
 
 // Триггер, наступая на который игрок должен быть в снике и подходить ровно со спины
-[[Async]] [[ItemTrigger]]
+[[ItemTrigger]]
 void CheckSneak(Critter player, StaticItem trigger, bool entered, mdir dir)
 {
-    if (!entered || !Sync::LockCritterWithMapAndLocation(player)) {
+    if (!entered) {
         return;
     }
 
@@ -450,14 +442,6 @@ void CheckSneak(Critter player, StaticItem trigger, bool entered, mdir dir)
     }
 
     Critter? npc = map.GetCritter(CritterProperty::NpcRole, NPC_ROLE_MARODEUR, CritterFindType::NonDeadNpc);
-    Entity[] cover = {player, map, loc, guard};
-    if (npc != null && !(npc is guard)) {
-        cover.insertLast(npc);
-    }
-    if (!Sync::Lock(cover)) {
-        return;
-    }
-
     if (player.MapId != map.Id || map.GetLocation().Id != loc.Id || guard.MapId != map.Id || guard.IsDead() || !player.ControlledByPlayer || IsHostile(map)) {
         return;
     }
@@ -635,24 +619,20 @@ void UpdateQuestStatus(Map? map, Critter? cr)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeleteQuestLocation(any value)
 {
     Map? map = Game.GetMap(ident(value));
-    if (map == null || !Sync::LockMapWithLocation(map)) {
+    if (map == null) {
         return;
     }
 
     map.GetLocation().AutoGarbage = true;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void WrightAttack(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Map? map = cr.GetMap();
     if (map == null) {
         return;

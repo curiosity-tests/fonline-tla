@@ -174,11 +174,11 @@ void MineWalk(Item mine, Critter cr, bool entered, mdir dir)
 }
 
 // Отложенный взрыв по таймеру: подрывает заряд на карте либо на глобалке (в инвентаре криттера).
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeferredExplode(any value)
 {
     Item? item = Game.GetItem(value);
-    if (item == null || !Sync::LockItemWithParent(item)) {
+    if (item == null) {
         return;
     }
 
@@ -326,7 +326,7 @@ void TimerMineWalk(Item mine, Critter cr, bool entered, mdir dir)
 }
 
 // Возрождение маппер-мины в исходных координатах с восстановлением её параметров из сохранённого массива.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RespawnTimerMine(any[] values)
 {
     if (values.length() < 9) {
@@ -334,7 +334,7 @@ void RespawnTimerMine(any[] values)
     }
 
     Map? map = Game.GetMap(ident(values[0]));
-    if (map == null || !Sync::Lock(map)) {
+    if (map == null) {
         return;
     }
 

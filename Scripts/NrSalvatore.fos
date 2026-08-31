@@ -26,14 +26,10 @@ void MoveMasonText(Critter cr, Critter? npc, string& text)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void MoveMasonTimeEvent(Critter cr)
 {
     // Асинхронный обработчик обязан взять блокировку криттера с картой перед движением
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     MoveRandom::CritterMoveRandom(cr);
     return;
 }

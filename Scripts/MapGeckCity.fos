@@ -621,14 +621,10 @@ void MapInit(Map map, bool firstTime)
 }
 
 // Периодический тик: пока барьер включён, тратим один заряд; когда зарядов нет — отключаем барьер.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void GeckMapLoop(Map map)
 {
     Location loc = map.GetLocation();
-    if (!Sync::Lock(map, loc)) {
-        return;
-    }
-
     if (EnergyBarier::GetNetState(loc.Id, GATES_NET_NUM) == BM_ON) {
         int charges = map.GeckCityCharges;
         if (charges > 0) {

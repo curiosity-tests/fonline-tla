@@ -87,13 +87,9 @@ void OnCritterInit(Critter cr, bool firstTime)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void OnCritterIdle(Critter npc)
 {
-    if (!Sync::LockCritterWithMap(npc)) {
-        return;
-    }
-
     if (npc.ControlledByPlayer || CritterState::IsBusy(npc)) {
         return;
     }

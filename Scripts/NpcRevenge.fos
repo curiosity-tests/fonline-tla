@@ -312,13 +312,9 @@ void MapInCritter(Map map, Critter cr)
 }
 
 // Если нпц загородили друг другу проход
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void MapLoopCheckGag(Map map)
 {
-    if (!Sync::Lock(map)) {
-        return;
-    }
-
     DebugLog("Checking gag");
 
     RevengeMapInfo? rm = RevengeFromMap(map);
@@ -348,13 +344,9 @@ void MapLoopCheckGag(Map map)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void CheckGag(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     DebugLog("Checking gag");
     Map? map = cr.GetMap();
     if (map != null && CritterGagHome(cr, map)) {
@@ -381,13 +373,9 @@ bool CritterGagHome(Critter cr, Map map)
     return false;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void MapLoopMeeting(Map map)
 {
-    if (!Sync::Lock(map)) {
-        return;
-    }
-
     RevengeMapInfo? rm = RevengeFromMap(map);
     if (rm == null) {
         return;
@@ -415,7 +403,7 @@ void MapLoopMeeting(Map map)
     rm.SetMode(MODE_HOSTILE);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void MeetingAnswer(any[] values)
 {
     if (values.length() < 3) {
@@ -426,7 +414,7 @@ void MeetingAnswer(any[] values)
     int hx = values[1];
     int hy = values[2];
     Map? map = Game.GetMap(mapId);
-    if (map == null || !Sync::Lock(map)) {
+    if (map == null) {
         return;
     }
 
@@ -443,13 +431,9 @@ void MeetingAnswer(any[] values)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void MapLoopLeaderCalls(Map map)
 {
-    if (!Sync::Lock(map)) {
-        return;
-    }
-
     RevengeMapInfo? rm = RevengeFromMap(map);
     if (rm == null) {
         return;

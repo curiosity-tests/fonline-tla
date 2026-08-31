@@ -45,20 +45,16 @@ void Move(Critter npc, int p0, int p1, int p2)
 
 // Триггер входа траппера на первую карту Кламата: перебрасывает Майка/Брайана,
 // проставляет их пост-квестовые дом, диалог и инвентарь, а заодно переводит Эмму в пост-квестовое состояние.
-[[Async]] [[ItemTrigger]]
+[[ItemTrigger]]
 void Transit(Critter cr, StaticItem entry, bool entered, mdir dir)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Map? sourceMap = cr.GetMap();
     if (sourceMap == null || (cr.NpcRole != MIKE_ROLE_ID && cr.NpcRole != BRIAN_ROLE_ID)) {
         return;
     }
 
     Location? klamath = Game.GetLocation(Content::Location::klamath);
-    if (klamath == null || !Sync::Lock(array<Entity> = {cr, sourceMap, klamath})) {
+    if (klamath == null) {
         return;
     }
 
@@ -67,14 +63,6 @@ void Transit(Critter cr, StaticItem entry, bool entered, mdir dir)
     }
 
     Map map = klamath.GetMapByIndex(0);
-    Entity[] mapCover = {cr, sourceMap, klamath};
-    if (!(map is sourceMap)) {
-        mapCover.insertLast(map);
-    }
-    if (!Sync::Lock(mapCover)) {
-        return;
-    }
-
     if (cr.MapId != sourceMap.Id || klamath.GetMapByIndex(0).Id != map.Id) {
         return;
     }
@@ -82,16 +70,6 @@ void Transit(Critter cr, StaticItem entry, bool entered, mdir dir)
     mpos emmaHex;
     Entrance::GetEntryFreeHex(map, EMMA_ENTRY_START_HOME, emmaHex);
     Critter[] critters = map.GetCrittersInRadius(emmaHex, 100, CritterFindType::Any);
-    Entity[] cover = mapCover;
-    for (int i = 0; i < critters.length(); i++) {
-        if (!(critters[i] is cr)) {
-            cover.insertLast(critters[i]);
-        }
-    }
-    if (!Sync::Lock(cover)) {
-        return;
-    }
-
     if (cr.MapId != sourceMap.Id || klamath.GetMapByIndex(0).Id != map.Id) {
         return;
     }
@@ -119,20 +97,16 @@ void Transit(Critter cr, StaticItem entry, bool entered, mdir dir)
 }
 
 // Триггер входа на вторую карту Кламата: только Майк, закрепляет его финальную домашнюю точку.
-[[Async]] [[ItemTrigger]]
+[[ItemTrigger]]
 void TransitMike(Critter cr, StaticItem entry, bool entered, mdir dir)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Map? sourceMap = cr.GetMap();
     if (sourceMap == null || cr.NpcRole != MIKE_ROLE_ID) {
         return;
     }
 
     Location? klamath = Game.GetLocation(Content::Location::klamath);
-    if (klamath == null || !Sync::Lock(array<Entity> = {cr, sourceMap, klamath})) {
+    if (klamath == null) {
         return;
     }
 
@@ -141,14 +115,6 @@ void TransitMike(Critter cr, StaticItem entry, bool entered, mdir dir)
     }
 
     Map map = klamath.GetMapByIndex(1);
-    Entity[] cover = {cr, sourceMap, klamath};
-    if (!(map is sourceMap)) {
-        cover.insertLast(map);
-    }
-    if (!Sync::Lock(cover)) {
-        return;
-    }
-
     if (cr.MapId != sourceMap.Id || klamath.GetMapByIndex(1).Id != map.Id) {
         return;
     }

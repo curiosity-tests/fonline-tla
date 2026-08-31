@@ -899,7 +899,7 @@ void CritterReloadWeapon(Critter cr, Item weapon, Item? ammo)
 
 // Вызывается при регистрации/входе игрока или создании/загрузке NPC.
 // Стартовая позиция игроков по умолчанию — центр глобальной карты.
-[[Event]] [[Async]]
+[[Event]]
 void CritterInit(Critter cr, bool firstTime)
 {
     if (firstTime) {
@@ -1066,7 +1066,6 @@ void CritterFinish(Critter cr)
 
 // Перенос меняет топологию сущностей и потому выполняется вызывающим скриптом только после
 // возврата Game.CreateCritter/Game.LoadCritter, а не из вложенного OnCritterInit-контекста.
-[[Async]]
 bool PlacePlayerAfterInitialization(Critter cr)
 {
     verify(cr.ControlledByPlayer, "Only a player critter can use the login placement flow", cr);
@@ -1083,13 +1082,9 @@ bool PlacePlayerAfterInitialization(Critter cr)
 }
 
 // Вызывается каждый тик Settings.Critter.CritterIdleTick.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void CritterIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     // Репликация
     if (cr.IsDead() && cr.ReplicationTime >= 0 && !Time::IsTimeoutActive(cr.TimeoutReplication)) {
         Replication::ReplicateCritter(cr);
@@ -1330,24 +1325,13 @@ void CritterRespawn(Critter cr)
 }
 
 // Вызывается при входе криттера на карту.
-[[Event]] [[Async]]
+[[Event]]
 void MapCritterIn(Map map, Critter cr)
 {
-    Entity[] previousSyncCover = Sync::Snapshot();
     Location loc = map.GetLocation();
-    Entity[] eventSyncCover = previousSyncCover.clone();
-    eventSyncCover.insertLast(cr);
-    eventSyncCover.insertLast(map);
-    eventSyncCover.insertLast(loc);
-
-    if (!Sync::Lock(eventSyncCover)) {
-        Sync::Restore(previousSyncCover);
-        return;
-    }
 
     map.OnCritterIn.Fire(cr);
-    if (!Sync::Lock(eventSyncCover) || cr.MapId != map.Id) {
-        Sync::Restore(previousSyncCover);
+    if (cr.MapId != map.Id) {
         return;
     }
 
@@ -1367,28 +1351,16 @@ void MapCritterIn(Map map, Critter cr)
     }
 
     cr.WorldPos = loc.WorldPos;
-    Sync::Restore(previousSyncCover);
 }
 
 // Вызывается при выходе криттера с карты.
-[[Event]] [[Async]]
+[[Event]]
 void MapCritterOut(Map map, Critter cr)
 {
-    Entity[] previousSyncCover = Sync::Snapshot();
     Location loc = map.GetLocation();
-    Entity[] eventSyncCover = previousSyncCover.clone();
-    eventSyncCover.insertLast(cr);
-    eventSyncCover.insertLast(map);
-    eventSyncCover.insertLast(loc);
-
-    if (!Sync::Lock(eventSyncCover)) {
-        Sync::Restore(previousSyncCover);
-        return;
-    }
 
     map.OnCritterOut.Fire(cr);
-    if (!Sync::Lock(eventSyncCover) || cr.MapId != map.Id) {
-        Sync::Restore(previousSyncCover);
+    if (cr.MapId != map.Id) {
         return;
     }
 
@@ -1404,7 +1376,6 @@ void MapCritterOut(Map map, Critter cr)
     }
 
     cr.WorldPos = loc.WorldPos;
-    Sync::Restore(previousSyncCover);
 }
 
 // Вызывается, когда игрок голосует за другого.
@@ -1475,18 +1446,9 @@ bool PlayerRegistration(Player player, string name)
 
 // Вызывается при попытке входа игрока
 // Вернуть true — разрешить, false — запретить
-[[Event]] [[Async]]
+[[Event]]
 EventResult PlayerLogin(Player player, Player? unloginedPlayer)
 {
-    Entity[] loginSyncCover = {player};
-    if (unloginedPlayer != null) {
-        loginSyncCover.insertLast(unloginedPlayer);
-    }
-
-    if (!Sync::Lock(loginSyncCover)) {
-        return EventResult::StopChain;
-    }
-
     if (Settings.Combat.PermanentDeath > 0 && Replication::IsPermanentDeath(player.Id)) {
         Messaging::Info(player, TextPackKey(TextPackName::Game, "" + (MsgStr::StrNetPermanentDeath)));
         return EventResult::StopChain;
@@ -1495,7 +1457,7 @@ EventResult PlayerLogin(Player player, Player? unloginedPlayer)
     player.DisplayName = unloginedPlayer != null ? unloginedPlayer.Name : player.Name;
 
     if (player.MainCritterId != ZERO_IDENT) {
-        if (!OnPlayerEnter(player, loginSyncCover)) {
+        if (!OnPlayerEnter(player)) {
             return EventResult::StopChain;
         }
     }
@@ -1503,13 +1465,8 @@ EventResult PlayerLogin(Player player, Player? unloginedPlayer)
     return EventResult::ContinueChain;
 }
 
-[[Async]]
-bool OnPlayerEnter(Player player, Entity[] loginSyncCover)
+bool OnPlayerEnter(Player player)
 {
-    if (!Sync::Lock(loginSyncCover)) {
-        return false;
-    }
-
     Critter? cr = player.GetControlledCritter();
     bool switchCritter = cr == null;
 
@@ -1525,19 +1482,7 @@ bool OnPlayerEnter(Player player, Entity[] loginSyncCover)
     verify(cr != null, "Player controlled critter must be available", player);
     Critter mainCritter = cr;
 
-    // SwitchCritter требует единое покрытие player + critter + map + location. Раздельные Sync-вызовы
-    // здесь недостаточны: каждый новый Game.Sync полностью заменяет предыдущий набор.
-    if (!Sync::LockCritterWithMapAndLocation(mainCritter, loginSyncCover)) {
-        return false;
-    }
-
-    Entity[] initialInfoCover = Sync::Snapshot();
-    if (!GlobalMapLocations::LockKnownLocations(mainCritter, initialInfoCover)) {
-        return false;
-    }
-
-    initialInfoCover = Sync::Snapshot();
-    if (!GlobalmapGroup::LockInitialInfoGroup(mainCritter, initialInfoCover)) {
+    if (!GlobalmapGroup::SnapshotInitialInfoGroup(mainCritter)) {
         return false;
     }
 
@@ -1548,17 +1493,7 @@ bool OnPlayerEnter(Player player, Entity[] loginSyncCover)
 
             // SwitchCritter вызывает ре-энтрантные события отправки начального состояния; после них
             // повторно захватываем и проверяем весь набор перед дальнейшим доступом к свойствам.
-            if (!Sync::LockCritterWithMapAndLocation(mainCritter, loginSyncCover)) {
-                return false;
-            }
-
-            initialInfoCover = Sync::Snapshot();
-            if (!GlobalMapLocations::LockKnownLocations(mainCritter, initialInfoCover)) {
-                return false;
-            }
-
-            initialInfoCover = Sync::Snapshot();
-            if (!GlobalmapGroup::LockInitialInfoGroup(mainCritter, initialInfoCover)) {
+            if (!GlobalmapGroup::SnapshotInitialInfoGroup(mainCritter)) {
                 return false;
             }
         }

@@ -36,7 +36,6 @@ bool FindMovableHex(Map map, mpos& hex)
     return false;
 }
 
-[[Async]]
 void DropThenAdd(Testing::TestContext ctx)
 {
     Location? loc = Testing::CreateTestLocation(ctx, Content::Location::desert_12);
@@ -84,7 +83,6 @@ void DropThenAdd(Testing::TestContext ctx)
 // У большинства нпц нет покриттерного обработчика OnNpcPlaneBegin. Движок на событии без
 // подписчиков возвращает ContinueChain, поэтому при трактовке ContinueChain как вето AddPlane
 // стирал только что добавленный план и такие нпц не получали планов вообще.
-[[Async]]
 void AddPlaneWithoutSubscriber(Testing::TestContext ctx)
 {
     Location? loc = Testing::CreateTestLocation(ctx, Content::Location::desert_12);
@@ -120,7 +118,6 @@ void AddPlaneWithoutSubscriber(Testing::TestContext ctx)
 
 // Часть вызывающего кода (GuardLib и др.) использует только счётчик планов и передаёт null
 // вместо массива-приёмника. Проверяем, что перегрузка GetPlanes с out-параметром это переносит.
-[[Async]]
 void GetPlanesNullOut(Testing::TestContext ctx)
 {
     Location? loc = Testing::CreateTestLocation(ctx, Content::Location::desert_12);

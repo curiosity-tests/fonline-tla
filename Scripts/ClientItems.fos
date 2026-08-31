@@ -1,7 +1,7 @@
 // ClientItems — клиентские коллекции предметов для интерфейса.
 // Ключевое: получение коллекций (инвентарь/лут/бартер), исключение отданных/убранных предметов,
-// перенос между коллекциями, отправка бартер-оффера на сервер; SERVER-часть принимает оффер под локами.
-// Сторона: MIXED (CLIENT основной + SERVER RemoteCall). Связи: Gui, Barter, Sync, ClientDefines, Content.
+// перенос между коллекциями, отправка бартер-оффера на сервер; SERVER-часть принимает оффер.
+// Сторона: MIXED (CLIENT основной + SERVER RemoteCall). Связи: Gui, Barter, ClientDefines, Content.
 namespace ClientItems
 {
 
@@ -565,11 +565,11 @@ bool BarterTransfer(ident item_id, int collectionTypeFrom, int item_count)
 
 // Закрывает transfer-контекст только если клиент закрывает именно то окно, которое ещё активно
 // на сервере. Проверка типа и контейнера не даёт запоздалому OnHide закрыть уже новое окно.
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void CloseTransfer(Player player, int expectedTransferType, ident expectedContainerId, uint expectedTransferSession)
 {
     Critter? cr = player.GetControlledCritter();
-    if (cr == null || !Sync::Lock(cr)) {
+    if (cr == null) {
         return;
     }
 
@@ -586,11 +586,11 @@ void CloseTransfer(Player player, int expectedTransferType, ident expectedContai
 // Кнопка «Диалог» атомарно завершает текущий бартер с ожидаемым НПЦ и снова начинает
 // разговор. Отдельный CloseTransfer здесь не нужен: иначе два async-RPC могли бы обогнать
 // друг друга и закрыть уже восстановленный диалог/следующее окно.
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void ResumeDialogFromBarter(Player player, ident traderId, uint expectedTransferSession)
 {
     Critter? cr = player.GetControlledCritter();
-    if (cr == null || !Sync::Lock(cr)) {
+    if (cr == null) {
         return;
     }
 
@@ -599,9 +599,8 @@ void ResumeDialogFromBarter(Player player, ident traderId, uint expectedTransfer
     }
 
     Critter? trader = Game.GetCritter(traderId);
-    if (trader == null || !Sync::Lock(cr, trader)) {
-        if (Sync::Lock(cr) && cr.TransferType == TransferTypes::CritBarter && cr.TransferContainerId == traderId &&
-            cr.TransferSession == expectedTransferSession) {
+    if (trader == null) {
+        if (cr.TransferType == TransferTypes::CritBarter && cr.TransferContainerId == traderId && cr.TransferSession == expectedTransferSession) {
             Barter::SendBarterClose(cr);
         }
         return;
@@ -617,18 +616,12 @@ void ResumeDialogFromBarter(Player player, ident traderId, uint expectedTransfer
     }
 }
 
-// Серверный приём бартер-оффера: берёт локи на криттера, торговца и их карты, затем передаёт
-// обработку в Barter. Без полного набора локов выходит, не трогая состояние.
-[[ServerRemoteCall]] [[Async]]
+// Серверный приём бартер-оффера: проверяет предусловия и передаёт обработку в Barter.
+[[ServerRemoteCall]]
 void ProcessBarterNpcOffer(Player player, ident[] saleItemsIds, int[] saleItemsCount, ident[] buyItemsIds, int[] buyItemsCount, uint expectedTransferSession)
 {
     Critter? cr = player.GetControlledCritter();
     if (cr == null) {
-        player.ClientCall.BarterOfferProcessed(expectedTransferSession);
-        return;
-    }
-
-    if (!Sync::Lock(cr)) {
         player.ClientCall.BarterOfferProcessed(expectedTransferSession);
         return;
     }
@@ -646,57 +639,8 @@ void ProcessBarterNpcOffer(Player player, ident[] saleItemsIds, int[] saleItemsC
         return;
     }
 
-    while (true) {
-        if (!Sync::Lock(cr, trader)) {
-            if (Sync::Lock(cr) && cr.TransferType == TransferTypes::CritBarter && cr.TransferContainerId == traderId &&
-                cr.TransferSession == expectedTransferSession) {
-                Barter::SendBarterClose(cr);
-            }
-            player.ClientCall.BarterOfferProcessed(expectedTransferSession);
-            return;
-        }
-
-        if (cr.TransferType != TransferTypes::CritBarter || cr.TransferContainerId != traderId || cr.TransferSession != expectedTransferSession) {
-            player.ClientCall.BarterOfferProcessed(expectedTransferSession);
-            return;
-        }
-
-        Map? crMap = cr.GetMap();
-        Map? traderMap = trader.GetMap();
-        ident crMapId = cr.MapId;
-        ident traderMapId = trader.MapId;
-        Entity[] entities = {cr, trader};
-
-        if (crMap != null) {
-            entities.insertLast(crMap);
-        }
-
-        if (traderMap != null && (crMap == null || traderMap.Id != crMap.Id)) {
-            entities.insertLast(traderMap);
-        }
-
-        if (!Sync::Lock(entities)) {
-            if (Sync::Lock(cr) && cr.TransferType == TransferTypes::CritBarter && cr.TransferContainerId == traderId &&
-                cr.TransferSession == expectedTransferSession) {
-                Barter::SendBarterClose(cr);
-            }
-            player.ClientCall.BarterOfferProcessed(expectedTransferSession);
-            return;
-        }
-
-        if (cr.TransferType != TransferTypes::CritBarter || cr.TransferContainerId != traderId || cr.TransferSession != expectedTransferSession) {
-            player.ClientCall.BarterOfferProcessed(expectedTransferSession);
-            return;
-        }
-
-        if (cr.MapId != crMapId || trader.MapId != traderMapId) {
-            continue;
-        }
-
-        Barter::ProcessBarterNpcOffer(cr, trader, saleItemsIds, saleItemsCount, buyItemsIds, buyItemsCount, expectedTransferSession);
-        player.ClientCall.BarterOfferProcessed(expectedTransferSession);
-        return;
-    }
+    Barter::ProcessBarterNpcOffer(cr, trader, saleItemsIds, saleItemsCount, buyItemsIds, buyItemsCount, expectedTransferSession);
+    player.ClientCall.BarterOfferProcessed(expectedTransferSession);
 }
 
 #endif

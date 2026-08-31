@@ -560,7 +560,7 @@ CTool? GetTool(hstring sourcePid)
     return null;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void AddResourcesCount(any[] values)
 {
     if (values.length() < 4) {
@@ -568,7 +568,7 @@ void AddResourcesCount(any[] values)
     }
 
     Map? map = Game.GetMap(ident(values[0]));
-    if (map == null || !Sync::Lock(map)) {
+    if (map == null) {
         return;
     }
 

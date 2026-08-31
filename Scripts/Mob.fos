@@ -2,7 +2,7 @@
 // SERVER: реакция мобов на игроков и сородичей — агрессия, страх, ярость, групповая помощь,
 // возврат в зону обитания и бегство при панике.
 // Связи: NpcPlanes (планы ИИ), EnemyStack (список врагов моба), SendMessage (оповещение группы),
-// MoveRandom (случайное блуждание), Maps (тип локации), Sync (локи для async-обработчика Idle).
+// MoveRandom (случайное блуждание), Maps (тип локации).
 
 namespace Mob
 {
@@ -332,13 +332,9 @@ void IdleImpl(Critter npc)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Idle(Critter npc)
 {
-    if (!Sync::LockCritterWithMap(npc)) {
-        return;
-    }
-
     IdleImpl(npc);
 }
 

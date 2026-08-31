@@ -36,11 +36,11 @@ void ScanerInit(Item item, bool firstTime)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeleteScaner(any value)
 {
     Item? item = Game.GetItem(value);
-    if (item == null || !Sync::LockItemWithParent(item)) {
+    if (item == null) {
         return;
     }
 

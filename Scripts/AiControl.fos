@@ -330,7 +330,7 @@ void ClearDialogState()
 
 // Ответ сервера на qa_get_prop: публикуем значение свойства как событие qa_prop_value (имя свойства +
 // числовое значение). Так раннер может верифицировать Server-scope квестовые флаги, невидимые в наблюдении.
-[[ClientRemoteCall]] [[Async]]
+[[ClientRemoteCall]]
 void AiControlReceiveQaProp(CritterProperty prop, int value, int requestId)
 {
     PushEvent(Object({StringMember("type", "qa_prop_value"),
@@ -341,7 +341,7 @@ void AiControlReceiveQaProp(CritterProperty prop, int value, int requestId)
 
 // Подтверждение qa_set_prop приходит только после явного скриптового critter-cover и успешной записи.
 // Корреляция отделяет поздний ответ предыдущей попытки от текущей настройки предусловия.
-[[ClientRemoteCall]] [[Async]]
+[[ClientRemoteCall]]
 void AiControlReceiveQaPropSet(CritterProperty prop, int value, int requestId)
 {
     PushEvent(Object({StringMember("type", "qa_prop_set"),
@@ -352,7 +352,7 @@ void AiControlReceiveQaPropSet(CritterProperty prop, int value, int requestId)
 
 // Диагностика приходит из обычного StartDialog и только наблюдает его серверные проверки. Она не
 // открывает диалог в обход механик и не меняет состояние игрового мира.
-[[ClientRemoteCall]] [[Async]]
+[[ClientRemoteCall]]
 void AiControlReceiveTalkDiagnostic(ident npcId, int status, bool playerAlive, bool npcAlive, bool npcControlled, bool npcNoTalk, bool sameMap, int distance,
                                     int talkDistance, bool playerSeesNpc, bool npcSeesPlayer)
 {
@@ -2127,14 +2127,14 @@ string EscapeJson(string value)
 // QA-команды. Все гейтированы AiControl.AllowQaCommands (Common, default False) — на боевом
 // сервере это no-op. Используются только тест-харнессом для детерминированных fixtures.
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void AiControlQaShowDialogBox(Player player)
 {
     if (!Settings.AiControl.AllowQaCommands) {
         return;
     }
     Critter? cr = player.GetControlledCritter();
-    if (cr == null || !Sync::Lock(cr)) {
+    if (cr == null) {
         return;
     }
     if (!cr.ControlledByPlayer || cr.IsDead()) {
@@ -2158,7 +2158,7 @@ void AiControlQaShowDialogBox(Player player)
     Dialogbox::RunDialogBox(cr, DialogBoxType::AskFollowGlobalGroupRuler, 2, "|who:QA");
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void AiControlQaTeleportGlobal(Player player)
 {
     if (!Settings.AiControl.AllowQaCommands) {
@@ -2168,13 +2168,10 @@ void AiControlQaTeleportGlobal(Player player)
     if (cr == null) {
         return;
     }
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
     cr.TransferToGlobal();
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void AiControlQaTeleportHex(Player player, mpos hex)
 {
     if (!Settings.AiControl.AllowQaCommands) {
@@ -2185,13 +2182,10 @@ void AiControlQaTeleportHex(Player player, mpos hex)
     if (cr == null) {
         return;
     }
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
     cr.TransferToHex(hex);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void AiControlQaTeleportMap(Player player, hstring locPid, hstring mapPid, mpos hex)
 {
     if (!Settings.AiControl.AllowQaCommands) {
@@ -2208,11 +2202,6 @@ void AiControlQaTeleportMap(Player player, hstring locPid, hstring mapPid, mpos 
     // локации, и в таком случае нельзя вызывать CreateLocation с ним.
     Map? directMap = locPid == mapPid ? Game.GetMap(mapPid) : null;
     Location? loc = Game.GetLocation(locPid);
-    // Локация — серверная сущность; перед чтением её свойств (IsDestroyed/GetMapCount/GetMapByIndex)
-    // её нужно залочить (Sync::Lock покрывает локацию и её карты).
-    if (loc != null && !Sync::Lock(loc)) {
-        loc = null;
-    }
     if (loc != null && (loc.IsDestroyed || loc.GetMapCount() == 0)) {
         loc = null;
     }
@@ -2223,9 +2212,6 @@ void AiControlQaTeleportMap(Player player, hstring locPid, hstring mapPid, mpos 
     if (loc == null && directMap == null) {
         int zl = Settings.GlobalMap.GlobalMapZoneLength;
         loc = Location::CreateLocation(locPid, ipos(zl * 10, zl * 10));
-        if (loc != null && !Sync::Lock(loc)) {
-            loc = null;
-        }
         if (loc != null) {
             loc.AutoGarbage = false;
         }
@@ -2253,29 +2239,6 @@ void AiControlQaTeleportMap(Player player, hstring locPid, hstring mapPid, mpos 
         Game.Log("AiControl QA teleport: map/location not found " + locPid + "/" + mapPid);
         return;
     }
-    if (!Sync::Lock(cr, targetMap)) {
-        Game.Log("AiControl QA teleport: lock failed for " + locPid + "/" + mapPid);
-        return;
-    }
-    // Перенос читает/меняет И карту-источник (текущую карту криттера, напр. repl1 сразу после
-    // регистрации), И целевую карту с их локациями. Sync::Lock заменяет весь набор блокировок: сначала
-    // лочим обе карты (cr уже залочен — можно взять его карту), чтобы прочитать их локации, затем полное
-    // покрытие cr+карты+локации — иначе EntitySyncException «Entity access without sync» внутри TransferToMap.
-    Map? srcMap = cr.GetMap();
-    if (srcMap != null && srcMap.Id != targetMap.Id) {
-        if (!Sync::Lock(array<Entity> = {cr, targetMap, srcMap})) {
-            Game.Log("AiControl QA teleport: lock failed for " + locPid + "/" + mapPid);
-            return;
-        }
-        if (!Sync::Lock(array<Entity> = {cr, targetMap, targetMap.GetLocation(), srcMap, srcMap.GetLocation()})) {
-            Game.Log("AiControl QA teleport: lock failed for " + locPid + "/" + mapPid);
-            return;
-        }
-    }
-    else if (!Sync::Lock(cr, targetMap, targetMap.GetLocation())) {
-        Game.Log("AiControl QA teleport: lock failed for " + locPid + "/" + mapPid);
-        return;
-    }
     // hex (0,0) => используем стандартный вход карты "0" (валидный гекс входа).
     if (hex.x == 0 && hex.y == 0) {
         Entrance::CritterTransferToMapEntry(cr, targetMap.Id, "0".hstr());
@@ -2285,7 +2248,7 @@ void AiControlQaTeleportMap(Player player, hstring locPid, hstring mapPid, mpos 
     }
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void AiControlQaSetProp(Player player, CritterProperty prop, int value, int requestId)
 {
     if (!Settings.AiControl.AllowQaCommands) {
@@ -2295,14 +2258,11 @@ void AiControlQaSetProp(Player player, CritterProperty prop, int value, int requ
     if (cr == null) {
         return;
     }
-    if (!Sync::Lock(cr)) {
-        return;
-    }
     cr.SetAsInt(prop, value);
     cr.PlayerClientCall.AiControlReceiveQaPropSet(prop, cr.GetAsInt(prop), requestId);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void AiControlQaGetProp(Player player, CritterProperty prop, int requestId)
 {
     if (!Settings.AiControl.AllowQaCommands) {
@@ -2312,13 +2272,10 @@ void AiControlQaGetProp(Player player, CritterProperty prop, int requestId)
     if (cr == null) {
         return;
     }
-    if (!Sync::Lock(cr)) {
-        return;
-    }
     cr.PlayerClientCall.AiControlReceiveQaProp(prop, cr.GetAsInt(prop), requestId);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void AiControlQaGiveItem(Player player, hstring pid, int count)
 {
     if (!Settings.AiControl.AllowQaCommands) {
@@ -2328,13 +2285,10 @@ void AiControlQaGiveItem(Player player, hstring pid, int count)
     if (cr == null) {
         return;
     }
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
     cr.AddItem(pid, count);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void AiControlQaSetGameProp(Player player, GameProperty prop, int value)
 {
     if (!Settings.AiControl.AllowQaCommands) {
@@ -2342,9 +2296,6 @@ void AiControlQaSetGameProp(Player player, GameProperty prop, int value)
     }
     Critter? cr = player.GetControlledCritter();
     if (cr == null) {
-        return;
-    }
-    if (!Sync::Lock(cr)) {
         return;
     }
     Game.SetAsInt(prop, value);

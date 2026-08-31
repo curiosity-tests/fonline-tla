@@ -238,7 +238,7 @@ class ComputerRiddleInfo
 };
 
 // Сброс загадки по таймеру: пока карта жива - генерируем новый код и перезапускаем таймер, иначе удаляем запись.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ResetRiddle(any[] values)
 {
     if (values.length() < 3) {
@@ -247,7 +247,7 @@ void ResetRiddle(any[] values)
 
     ident mapId = values[0];
     Map? map = Game.GetMap(mapId);
-    if (map == null || !Sync::Lock(map) || map.Id != mapId) {
+    if (map == null || map.Id != mapId) {
         return;
     }
 
@@ -322,11 +322,11 @@ void AnswerTrySolveRiddle(Critter player, hstring sceneryPid, mpos hex, string t
 }
 
 // Наградный показ карты "со спутника": выбирает случайную локацию неподалёку и переключает обзор игрока на её вход.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ShowCamera(any value)
 {
     Critter? cr = Game.GetCritter(value);
-    if (cr == null || !Sync::Lock(cr) || !cr.ControlledByPlayer) {
+    if (cr == null || !cr.ControlledByPlayer) {
         return;
     }
 
@@ -335,10 +335,6 @@ void ShowCamera(any value)
     Location[] locations = {};
     for (int i = 0; i < allLocations.length(); i++) {
         Location loc = allLocations[i];
-        if (!Sync::Lock(cr, loc)) {
-            continue;
-        }
-
         if (!cr.ControlledByPlayer) {
             return;
         }
@@ -352,12 +348,12 @@ void ShowCamera(any value)
     }
 
     Location loc = locations[Game.Random(0, locations.length() - 1)];
-    if (!Sync::Lock(cr, loc) || !cr.ControlledByPlayer || Math::Distance(playerWorldPos, loc.WorldPos) > loc.Radius + 300 || loc.GetMapCount() == 0) {
+    if (!cr.ControlledByPlayer || Math::Distance(playerWorldPos, loc.WorldPos) > loc.Radius + 300 || loc.GetMapCount() == 0) {
         return;
     }
 
     Map map = loc.GetMapByIndex(0);
-    if (!Sync::Lock(cr, loc, map) || !cr.ControlledByPlayer || loc.GetMapByIndex(0).Id != map.Id || map.GetLocation().Id != loc.Id) {
+    if (!cr.ControlledByPlayer || loc.GetMapByIndex(0).Id != map.Id || map.GetLocation().Id != loc.Id) {
         return;
     }
 

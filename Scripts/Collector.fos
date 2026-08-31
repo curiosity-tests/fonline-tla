@@ -1,7 +1,7 @@
 // Collector — НПЦ-уборщик карты. Ключевые обязанности: периодический поиск предметов
 // в радиусе 5*Perception, добавление планов подбора, складывание собранного в контейнер
 // на ENTRY_CONTAINER или в ближайший контейнер. Сторона: SERVER.
-// Связи: NpcPlanes, Entrance, ItemMovement, Sync, Tla.
+// Связи: NpcPlanes, Entrance, ItemMovement, Tla.
 namespace Collector
 {
 
@@ -24,13 +24,9 @@ void CollectorInit(Critter cr, bool firstTime)
 
 // Основной тик уборщика: по таймеру либо ищет новые предметы, либо относит собранное
 // в контейнер.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void CollectorIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (Game.SynchronizedTime >= cr.CollectorTimeNextSearch) {
         SearchForItems(cr);
         cr.CollectorTimeNextSearch = Game.SynchronizedTime + NEXT_SEARCH_TIME; // Планируем следующий поиск
@@ -111,7 +107,7 @@ void SearchForItems(Critter cr)
 
 // По завершении плана подбора в контейнер (если успех) перекладывает весь инвентарь
 // уборщика внутрь контейнера.
-[[Event]] [[Async]]
+[[Event]]
 EventResult CollectorPlaneEnd(Critter cr, int planeId, int reason, Critter someCr, Item someItem)
 {
     NpcPlanes::NpcPlane? plane = NpcPlanes::GetCritterPlane(cr, planeId);
@@ -120,10 +116,6 @@ EventResult CollectorPlaneEnd(Critter cr, int planeId, int reason, Critter someC
     }
 
     if (plane.Type == NpcPlanes::AI_PLANE_PICK && plane.Priority == PUT_ITEMS_PRIORITY) {
-        if (!Sync::LockCritterWithMap(cr)) {
-            return EventResult::StopChain;
-        }
-
         Map? map = cr.GetMap();
         if (map == null) {
             return EventResult::StopChain;

@@ -656,7 +656,7 @@ bool BarierOpen(Critter master)
 }
 
 // Отложенная инициализация барьера (когда на момент создания итем ещё не был привязан к карте).
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void InitBarier(any value)
 {
     Item? barier = Game.GetItem(value);
@@ -665,34 +665,13 @@ void InitBarier(any value)
         return;
     }
 
-    while (true) {
-        if (!Sync::Lock(barier)) {
-            return;
-        }
-
-        ident mapId = barier.MapId;
-        if (mapId == ZERO_IDENT) {
-            InitBariers(barier);
-            return;
-        }
-
-        Map? map = Game.GetMap(mapId);
-        if (map == null) {
-            Game.Log("Barier map not valid");
-            return;
-        }
-
-        if (!Sync::Lock(barier, map)) {
-            continue;
-        }
-
-        if (barier.MapId != mapId) {
-            continue;
-        }
-
-        InitBariers(barier);
+    ident mapId = barier.MapId;
+    if (mapId != ZERO_IDENT && Game.GetMap(mapId) == null) {
+        Game.Log("Barier map not valid");
         return;
     }
+
+    InitBariers(barier);
 }
 
 // Подписывает триггеры прохода на вход криттера и прописывает им номер охраны, id и номер барьера.
@@ -1352,21 +1331,21 @@ int CheckAccessCard(Critter master, Critter slave)
 }
 
 // Отложенное автовключение всей сети (values: locId, netNum, режим). Парный к ChangeNetMode.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void TurnOnBariers(any[] values)
 {
     CBariersNet? net = GetBariersNet(values[1], values[0]);
-    if (net != null && EnergyBarierSync::LockBariersNet(net)) {
+    if (net != null) {
         net.ChangeNetMode(values[2], AE_DEFAULT);
     }
 }
 
 // Отложенное автовключение одиночного барьера по id его основного итема (values[0]).
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void TurnOnBarier(any[] values)
 {
     CBarier? barier = GetBarier(values[0]);
-    if (barier == null || !EnergyBarierSync::LockBarierModes({barier})) {
+    if (barier == null) {
         return;
     }
 
@@ -1401,11 +1380,11 @@ void HalfOn(Critter master, Critter npc)
 }
 
 // Отключает силовое поле без охраны (values: netNum, locId); автовозврат запрещён (AE_OFF).
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DisableForceField(any[] values)
 {
     CBariersNet? net = GetBariersNet(values[0], values[1]);
-    if (net != null && EnergyBarierSync::LockBariersNet(net)) {
+    if (net != null) {
         net.ChangeNetMode(BM_OFF_NO_GUARD, AE_OFF);
     }
 }
@@ -1420,11 +1399,11 @@ void DisableForceFieldWithGuards(any[] values)
 }
 
 // Включает силовое поле; автовозврат запрещён (AE_OFF).
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void EnableForceField(any[] values)
 {
     CBariersNet? net = GetBariersNet(values[0], values[1]);
-    if (net != null && EnergyBarierSync::LockBariersNet(net)) {
+    if (net != null) {
         net.ChangeNetMode(BM_ON, AE_OFF);
     }
 }

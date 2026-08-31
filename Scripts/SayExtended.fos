@@ -79,7 +79,7 @@ void Rpc_ProcessSay(Player player, string text, bool fromDialog, ident talkerId,
     Game.OnPlayerSaidText.Fire(cr, text, fromDialog, talkerId, isNpc);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void ProcessSayExtendedFromScenery(Player player, string text, hstring sceneryPid, mpos hex)
 {
     Critter? cr = player.GetControlledCritter();
@@ -102,10 +102,6 @@ void ProcessSayExtendedFromScenery(Player player, string text, hstring sceneryPi
     }
 
     Map? map = cr.GetMap();
-    if (map != null && !Sync::Lock(cr, map)) {
-        return;
-    }
-
     if (map != null) {
         StaticItem? scenery = map.GetStaticItemOnHex(hex, sceneryPid);
 

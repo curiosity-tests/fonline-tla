@@ -369,13 +369,9 @@ EventResult SpectatorTalk(Critter cr, Critter player, bool attach, int talkCount
 
 // Возвращает зрителя домой: восстанавливает прежний дом/направление/роль из GERacing*-полей
 // и отписывает от OnTalk. Пока фаза активна — повторяется, чтобы дождаться конца события
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Npc2HomePos(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (GameEvent::CheckEventStatus(EVENT_RACING_BEGIN, STATUS_RUNNING) || GameEvent::CheckEventStatus(EVENT_RACING_STOP, STATUS_RUNNING)) {
         timespan delayTicks = Time::Minutes(5);
         if (delayTicks != ZERO_TIMESPAN) {
@@ -423,13 +419,9 @@ void GuardSmthSkill(Critter cr, Critter fromCr, CritterProperty skill, Critter o
 }
 
 // Ждёт, пока Билл дойдёт до стартового гекса; по прибытии запускает фазу run и комментарии зрителей
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RunStartEvent(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (cr.Hex.x == cr.GERacingCritterHx && cr.Hex.y == cr.GERacingCritterHy && cr.IsAlive()) {
         GameEvent::RunGameEvent(EVENT_RACING_RUN);
         cr.StartTimeEvent(Time::Seconds(30), Comment);
@@ -444,13 +436,9 @@ void RunStartEvent(Critter cr, TimeEventContext event)
 
 // Периодически выбирает двух разных зрителей (не браминов) и заставляет их обменяться репликами,
 // пока идёт фаза run
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Comment(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (!GameEvent::CheckEventStatus(EVENT_RACING_RUN, STATUS_RUNNING)) {
         return;
     }
@@ -499,13 +487,9 @@ void Comment(Critter cr, TimeEventContext event)
 }
 
 // Произносит реплику (обычная речь) с ключом текст-пака из rate
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Talk(Critter cr, any rate)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Messaging::Say(cr, TextPackKey(TextPackName::Text, "" + (rate)));
     return;
 }
@@ -536,13 +520,9 @@ void RunRacing()
 
 // Пошаговая приветственная речь Билла по строкам OpeningPhrases (rate — индекс шага в массиве):
 // реплика Билла, затем выкрики зрителей/женщин/телохранителей; на шаге 12 открывает чекпоинты (Start)
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Opening(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     any data = event.GetData();
     int rate = data;
     Map? map = cr.GetMap();
@@ -619,13 +599,9 @@ void Opening(Critter cr, TimeEventContext event)
 }
 
 // Выкрик над головой криттера с ключом текст-пака из rate
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Shout(Critter cr, any rate)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Messaging::SayOnHead(cr, TextPackKey(TextPackName::Text, "" + (rate)));
     return;
 }
@@ -775,13 +751,9 @@ void Win(Critter player, StaticItem trigger, bool entered, mdir dir)
 
 // Пошаговая поздравительная речь Билла победителю по строкам FirstWinnerPhrases (аналогично Opening):
 // реплики Билла и выкрики зрителей; по завершении/без победителя — финальный радио-анонс
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void WinnerTimeEvent(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     any data = event.GetData();
     int rate = data;
     Map? map = cr.GetMap();
@@ -1050,13 +1022,9 @@ void StopEvent(Critter cr, Critter npc)
 }
 
 // Удаляет НПЦ события (кроме управляемых игроком) по таймеру разбора обстановки
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DelNpc(Critter cr, any rate)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (!cr.ControlledByPlayer) {
         Game.DestroyCritter(cr);
     }

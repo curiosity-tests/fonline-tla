@@ -455,13 +455,8 @@ class BattleInfo
 
 // Оповещения
 // Приглашение на участие
-[[Async]]
 void BattleInvite(Critter player, int answerI)
 {
-    if (!PurgatoryInviteSync::LockBattleInviteCover(player)) {
-        return;
-    }
-
     DebugLog("Answer called. Answ " + answerI);
     BattleTeam? bt = bInfo.GetCritterTeam(player.Id);
     if (bt != null && bt.LastPeekedRequestId == player.Id) {
@@ -477,15 +472,11 @@ void BattleInvite(Critter player, int answerI)
 }
 
 // Если по каким то причинам последняя заявка не получила ответа, или игрок слишком долго думает
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void CheckInvite(any[] values)
 {
     ident crId = values[1];
     Critter? cr = Game.GetCritter(crId);
-    if (!PurgatoryInviteSync::LockBattleInviteCover(cr)) {
-        return;
-    }
-
     BattleTeam bt = bInfo.Teams[values[0]];
     // Сторожевой таймер не должен срабатывать, если приглашение уже принято: иначе SendTeamInvite
     // перезапишет LastPeekedRequestId и согласившийся игрок выпадет и из Requests, и из Players
@@ -569,20 +560,12 @@ void TeamCount(Critter player, Critter npc, string& textArgs)
     textArgs = textArgs + "|total:" + total;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RemoveNpc(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (!cr.ControlledByPlayer) {
         Map? map = Game.GetMap(cr.HomeMapId);
         if (cr.HomeMapId != ZERO_IDENT && map != null) {
-            if (!Sync::Lock(cr, map)) {
-                return;
-            }
-
             cr.TransferToMap(map, cr.HomeHex, hdir(cr.HomeDir));
             return;
         }
@@ -594,13 +577,9 @@ void RemoveNpc(Critter cr)
     return;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void BattleNpcSearchForTarget(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (cr.IsAlive() && NpcPlanes::IsNoPlanes(cr)) {
         BattleTeam? team = bInfo.GetCritterTeam(cr.Id);
         if (team != null) {
@@ -1221,13 +1200,9 @@ void RiperInit(Critter cr, bool firstTime)
     cr.StartTimeEvent(Time::Asap(), Time::Seconds(1), RiperIdle);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RipperShout(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (bInfo.Stage == STAGE_PREPARE) {
         Messaging::SayShout(cr, MsgStr::DialogTextKey(cr.DialogId, 1));
         timespan delayTicks = Time::Minutes(9);
@@ -1239,13 +1214,9 @@ void RipperShout(Critter cr, TimeEventContext event)
     return;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RiperIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     cr.CurrentHp = cr.MaxLife;
 }
 
@@ -1341,13 +1312,9 @@ void PurgatoryMapOut(Map map, Critter cr)
     BattleMapCritterInImpl(map, cr);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void NoPvpOff(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (!cr.IsNoPvp) {
         return;
     }
@@ -1437,22 +1404,14 @@ void Team4(Critter player, Critter npc, string& textArgs)
 // Генерация итемов в ящиках
 // На третьей карте Чистилища стоят ящики с лутом
 // периодически совершается попытка переместить из одного из ящиков содержимое на территорию бг
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void PurgatoryLoop(Map map)
 {
     if (bInfo.Stage == STAGE_FIGHT) {
         Location loc = map.GetLocation();
-        if (!Sync::Lock(map, loc)) {
-            return;
-        }
-
         if (Game.SynchronizedTime >= loc.LastLootTransfer + Time::Minutes(1)) {
             loc.LastLootTransfer = Game.SynchronizedTime;
             Map mapFrom = loc.GetMapByIndex(2);
-            if (!Sync::Lock(map, loc, mapFrom)) {
-                return;
-            }
-
             Item[] containersTo = map.GetItems(ItemProperty::Type, ItemType::Container);
             Item[] containersFrom = mapFrom.GetItems(ItemProperty::Type, ItemType::Container);
             if (containersFrom.length() > 0 && containersTo.length() > 0) {
@@ -1467,16 +1426,14 @@ void PurgatoryLoop(Map map)
 }
 
 // Удаление локации после того, как время истекло
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeletePurgatory(any value)
 {
     Location? loc = Game.GetLocation(ident(value));
-    if (loc == null || !Sync::Lock(loc)) {
+    if (loc == null) {
         return;
     }
 
-    // Покрытие локации включает её карты и текущих дочерних криттеров, поэтому оно остаётся
-    // полным и для уведомлений игроков, и для последующего каскадного DestroyLocation.
     Critter[] critters = {};
     for (int i = 0; i < 3; i++) {
         Map map = loc.GetMapByIndex(i);

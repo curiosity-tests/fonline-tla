@@ -11,11 +11,11 @@ namespace KlamJura
 const int ROLE_Jura = 229;
 
 // Отложенный сброс квестового флага: по срабатыванию таймера обнуляем KlamKuklachev у криттера.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ResetVar(any value)
 {
     Critter? cr = Game.GetCritter(value);
-    if (cr == null || !Sync::LockCritterWithMap(cr)) {
+    if (cr == null) {
         return;
     }
 

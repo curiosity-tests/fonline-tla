@@ -35,11 +35,11 @@ void RetryAutoCloseDoor(any value, timespan delay)
     Game.StartTimeEvent(delay, AutoCloseDoor, value); //SavedDeferredCall
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void AutoCloseDoor(any value)
 {
     Item? door = Game.GetItem(value);
-    if (door == null || !Sync::Lock(door)) {
+    if (door == null) {
         return;
     }
 
@@ -53,10 +53,6 @@ void AutoCloseDoor(any value)
         return;
     }
 
-    if (!Sync::Lock(door, map)) {
-        return;
-    }
-
     // Пока воркер ожидал карту, дверь могла сменить владельца или позицию.
     mpos lockedHex;
     Map? lockedMap = door.GetMapPosition(lockedHex);
@@ -67,12 +63,6 @@ void AutoCloseDoor(any value)
 
     Critter? cr = map.GetCritterOnHex(hex);
     if (cr != null) {
-        // Game.Sync заменяет весь набор: дверь и карта должны остаться в покрытии вместе с криттером.
-        if (!Sync::Lock(door, map, cr)) {
-            RetryAutoCloseDoor(value, Time::Seconds(1));
-            return;
-        }
-
         lockedMap = door.GetMapPosition(lockedHex);
         if (lockedMap !is map || lockedHex != hex || map.GetCritterOnHex(hex) !is cr) {
             RetryAutoCloseDoor(value, Time::Seconds(1));
@@ -87,12 +77,7 @@ void AutoCloseDoor(any value)
             // Попытка сдвинуть труп. Если не получится, дверь поверх трупа закроется
             cr.TransferToMap(map, mpos(hex.x - 1, hex.y), cr.Dir);
 
-            // TransferToMap запускает вложенные события: перед дальнейшей работой восстанавливаем
-            // скриптовое покрытие двери и карты и повторно проверяем их связь.
-            if (!Sync::Lock(door, map)) {
-                return;
-            }
-
+            // TransferToMap запускает вложенные события, поэтому связь двери с картой перепроверяется.
             lockedMap = door.GetMapPosition(lockedHex);
             if (lockedMap !is map || lockedHex != hex) {
                 RetryAutoCloseDoor(value, Time::Seconds(1));
@@ -156,11 +141,11 @@ void SetDestroyItem(Item item, int delHours)
     Game.StartTimeEvent(Time::GameHours(delHours), DeferredDestroyItem, item.Id); //SavedDeferredCall
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeferredDestroyItem(any value)
 {
     Item? item = Game.GetItem(value);
-    if (item == null || !Sync::LockItemWithParent(item)) {
+    if (item == null) {
         return;
     }
 

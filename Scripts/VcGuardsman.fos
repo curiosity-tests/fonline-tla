@@ -418,7 +418,7 @@ class MarchQueue
 // Проверяется, что план выполнен, у НПЦ нет других планов, если это верно, отдается следующий приказ
 // иначе делается MAX_EXECUTE_TRIES попыток выполнить приказ
 // если приказ не выполним, очередь приказов отменяется
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DoNextOrder(any[] values)
 {
     if (values.length() < 2) {
@@ -427,7 +427,7 @@ void DoNextOrder(any[] values)
 
     DebugLog("next order");
     Critter? cr = Game.GetCritter(values[0]);
-    if (cr == null || !Sync::LockCritterWithMap(cr)) {
+    if (cr == null) {
         return;
     }
 
@@ -606,16 +606,10 @@ void AddUniqueMarchCritter(Critter[] & critters, Critter? candidate)
     critters.insertLast(candidate);
 }
 
-// Очереди хранят только id участников. Перед вызовом методов MarchQueue/SquadCommander
-// превращаем снимок состава в единый cover криттеров и их текущих карт. Командир входит
-// в оба последовательных набора, поэтому его SquadMarchSquads не может измениться между ними.
-[[Async]]
-bool LockCommanderSquad(Critter commander, Critter? extra, Critter[] & participants)
+// Очереди хранят только id участников, поэтому перед вызовом методов MarchQueue/SquadCommander
+// состав разворачивается в список криттеров.
+void CollectCommanderSquad(Critter commander, Critter? extra, Critter[] & participants)
 {
-    if (!Sync::LockCritterWithMap(commander)) {
-        return false;
-    }
-
     ident[] squadIds = commander.SquadMarchSquads.clone();
     participants.clear();
     AddUniqueMarchCritter(participants, commander);
@@ -623,8 +617,6 @@ bool LockCommanderSquad(Critter commander, Critter? extra, Critter[] & participa
     for (int i = 0; i < squadIds.length(); i++) {
         AddUniqueMarchCritter(participants, Game.GetCritter(squadIds[i]));
     }
-
-    return Sync::LockCrittersWithMaps(participants);
 }
 
 // Обработка наступания игроком на триггер перед началом тренировки
@@ -660,7 +652,7 @@ void Enter(Critter player, StaticItem trigger, bool entered, mdir dir)
 }
 
 // Контрольная очистка переменных через 15 реальных минут, если что-то пошло не так, и все данные не удалились
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ResetCommander(any[] values)
 {
     if (values.length() < 2) {
@@ -673,7 +665,8 @@ void ResetCommander(any[] values)
     }
 
     Critter[] participants = {};
-    if (!LockCommanderSquad(cr, null, participants) || cr.VCGuardsmanTriggerPlayerId != ident(values[1])) {
+    CollectCommanderSquad(cr, null, participants);
+    if (cr.VCGuardsmanTriggerPlayerId != ident(values[1])) {
         return; // Если уже другой персонаж занимается строевой подготовкой, для него будет персональный эвент
     }
 
@@ -690,18 +683,14 @@ void ResetCommanderImpl(Critter cr)
 }
 
 // Сброс глобальной переменной и переменных командира
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ResetCommander(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     ResetCommanderImpl(cr);
 }
 
 // Проверка, что игрок в нужной позиции и запуск очереди приказов
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void TimeToStart(any[] values)
 {
     if (values.length() < 3) {
@@ -715,10 +704,6 @@ void TimeToStart(any[] values)
     }
 
     Critter[] participants = {npc, player};
-    if (!Sync::LockCrittersWithMaps(participants)) {
-        return;
-    }
-
     if (npc.MapId == ZERO_IDENT || player.MapId != npc.MapId || player.Hex.x != POS_X || player.Hex.y != POS_Y) // Игрок не находится в нужной позиции
     {
         if (values[2] > 5) // Максимум 5 проверок, потом заново
@@ -781,7 +766,7 @@ void TimeToStart(any[] values)
 }
 
 // Время отдавать новый приказ
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void NextGuardOrder(any[] values)
 {
     if (values.length() < 3) {
@@ -795,10 +780,7 @@ void NextGuardOrder(any[] values)
 
     Critter? player = Game.GetCritter(values[2]);
     Critter[] participants = {};
-    if (!LockCommanderSquad(cr, player, participants)) {
-        return;
-    }
-
+    CollectCommanderSquad(cr, player, participants);
     SquadCommander cmdr = SquadCommander(cr);
     cmdr.Load();
     if (cmdr.CheckCommandExecuted()) {
@@ -851,13 +833,9 @@ int GetRank(Critter cr)
     return cr.VCGuardRank;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void GuardsmanSalary(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     int rank = GetRank(cr);
     int money = 0;
     switch (rank) {
@@ -944,11 +922,11 @@ void MutantsOutGroundInit(Map map, bool firstTime)
     Game.StartTimeEvent(Time::GameDays(3), DeleteQuestLocation, loc.Id); //SavedDeferredCall
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeleteQuestLocation(any value)
 {
     Location? loc = Game.GetLocation(ident(value));
-    if (loc == null || !Sync::Lock(loc)) {
+    if (loc == null) {
         return;
     }
 

@@ -83,19 +83,15 @@ void BrahminInit(Critter cr, bool firstTime)
 }
 
 // Триггер, переключающий статус квеста. Должны быть расположены на карте в линию
-[[Async]] [[ItemTrigger]]
+[[ItemTrigger]]
 void ChangeStatus(Critter player, StaticItem trigger, bool entered, mdir dir)
 {
     if (GameTime::GetHour() < 23 && GameTime::GetHour() > 4) // В дневное время ничего не происходит
     {
-        if (entered && Sync::Lock(player)) {
+        if (entered) {
             Messaging::Info(player, TextPackKey(TextPackName::Text, "" + (STR_NOT_NIGHT)));
         }
 
-        return;
-    }
-
-    if (!Sync::LockCritterWithMapAndLocation(player)) {
         return;
     }
 
@@ -154,13 +150,9 @@ void BatInit(Critter cr, bool firstTime)
     cr.StartTimeEvent(Time::Asap(), Time::Seconds(1), BatIdle); // Удаление вампира сразу, как дойдет до нужной точки
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void BatIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     // Удаляем только после того, как летучая мышь-проводник дошла до точки (иначе walk-план не отыгрывается)
     if (cr.IsMoving() || !NpcPlanes::IsNoPlanes(cr)) {
         return;

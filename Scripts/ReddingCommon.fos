@@ -227,13 +227,9 @@ void GuardInit(Critter npc, bool firstTime)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Observing(Critter npc, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(npc)) {
-        return;
-    }
-
     timespan delayTicks = Grd.EventObserving(npc);
     if (delayTicks != ZERO_TIMESPAN) {
         event.Repeat(delayTicks);

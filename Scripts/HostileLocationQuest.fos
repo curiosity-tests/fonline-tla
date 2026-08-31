@@ -8,7 +8,7 @@
 //   - хранит описание квеста в Property-декларациях криттера/карты (сериализуемое состояние).
 // Сторона исполнения: SERVER.
 // Связи: NpcPlanes (планы NPC), SendMessage (рассылка сигналов между NPC), Location/Entrance,
-//   Sync (блокировки для async-колбэков), Serializer (упаковка состояния квеста).
+//   Serializer (упаковка состояния квеста).
 //
 // Особенности логики:
 //   - локация видна одному игроку
@@ -428,14 +428,10 @@ void AllyInit(Critter cr, bool firstTime)
 }
 
 // Периодическое поведение союзника: догоняет игрока, если отстал, или переходит за ним на
-// другую карту локации. Async-колбэк — доступ к криттеру/карте/игроку прикрыт Sync-локами.
-[[TimeEvent]] [[Async]]
+// другую карту локации.
+[[TimeEvent]]
 void AllyIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Map? crMap = cr.GetMap();
     if (cr.HostileLQIsStoped || crMap == null) {
         return;
@@ -446,15 +442,9 @@ void AllyIdle(Critter cr)
         return;
     }
 
-    // Игрока берём в покрытие ДО чтения его HostileLQData: Serialized()/Load() читают свойства игрока,
-    // поэтому лочим cr + карту + игрока перед ними
     Critter? player = Game.GetCritter(info.PlayerId);
     if (player == null) {
         SendAllyHome(cr);
-        return;
-    }
-
-    if (!Sync::Lock(cr, crMap, player)) {
         return;
     }
 
@@ -470,15 +460,7 @@ void AllyIdle(Critter cr)
         return;
     }
 
-    if (!Sync::Lock(array<Entity> = {cr, crMap, player, map})) {
-        return;
-    }
-
     Location loc = map.GetLocation();
-    if (!Sync::Lock(array<Entity> = {cr, crMap, player, map, loc})) {
-        return;
-    }
-
     if (loc.Id != info.LocId) {
         SendAllyHome(cr);
         return;

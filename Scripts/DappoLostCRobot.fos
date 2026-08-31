@@ -111,13 +111,9 @@ void RoboSmthDead(Critter robo, Critter fromCrit, Critter killer)
 }
 
 // Робот достиг контрольной точки — пауза на 3 игровых минуты перед движением к следующей.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RoboCritterIdle(Critter robo)
 {
-    if (!Sync::LockCritterWithMap(robo)) {
-        return;
-    }
-
     // Объявляем прибытие и планируем паузу только когда робот реально дошёл (нет активных планов), а не на каждом тике
     if (!NpcPlanes::IsNoPlanes(robo)) {
         return;

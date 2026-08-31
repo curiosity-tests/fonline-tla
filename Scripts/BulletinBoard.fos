@@ -662,13 +662,9 @@ void AldoFinished(Critter cr)
 }
 
 // Таймивент после первой строки: предлагает диктовать дальше и должен переключить текст-листенеры на «Далее/Хватит».
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void SayMsgFirstSaved(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Messaging::Say(cr, MsgStr::DialogTextKey(cr.DialogId, STR_NEXT));
     Map? map = cr.GetMap();
     if (map == null) {
@@ -684,13 +680,9 @@ void SayMsgFirstSaved(Critter cr)
 }
 
 // Таймивент завершения записи: сообщает, что всё готово, и отправляет Альдо домой; должен снять текст-листенеры.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void SayMsgSaved(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Map? map = cr.GetMap();
     if (map == null) {
         return;
@@ -706,13 +698,9 @@ void SayMsgSaved(Critter cr)
 }
 
 // Таймивент-сторож: по истечении времени сбрасывает режим записи у Альдо.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ClearVars(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     ClearTempVariables(cr);
     return;
 }

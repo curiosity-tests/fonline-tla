@@ -152,7 +152,7 @@ void MercInit(Critter merc, bool firstTime)
 
 // * ****************************** Обработка событий мерка ***************************** *//
 
-[[Event]] [[Async]]
+[[Event]]
 EventResult MercGlobalProcess(Critter cr, int type, Item, float, float, float, float, float, int, bool)
 {
     if (type == Tla::GlobalProcessNpcIdle) {
@@ -228,13 +228,8 @@ void MercSmthDead(Critter merc, Critter fromCr, Critter killer)
     MercSmthDeadImpl(merc, fromCr, killer);
 }
 
-[[Async]]
 void MercIdleImpl(Critter merc)
 {
-    if (!Sync::LockCritterWithMap(merc)) {
-        return;
-    }
-
     ident masterId = merc.MercMasterId;
     if (masterId == ZERO_IDENT) {
         return;
@@ -247,11 +242,6 @@ void MercIdleImpl(Critter merc)
 
     Critter? master = Game.GetCritter(masterId);
     if (master == null) {
-        return;
-    }
-
-    Critter[] pair = {merc, master};
-    if (!Sync::LockCrittersWithMaps(pair)) {
         return;
     }
 
@@ -289,9 +279,7 @@ void MercIdleImpl(Critter merc)
             }
             else {
                 if (!merc.MercWaitForMaster) {
-                    Entity[] pairCover = Sync::Snapshot();
-                    if (!Sync::LockForTransferToMap(merc, masterMap, pairCover) || merc.MercMasterId != master.Id || master.IsDead() ||
-                        master.MapId != masterMapId) {
+                    if (merc.MercMasterId != master.Id || master.IsDead() || master.MapId != masterMapId) {
                         return;
                     }
 
@@ -300,8 +288,7 @@ void MercIdleImpl(Critter merc)
             }
         }
         else {
-            Entity[] pairCover = Sync::Snapshot();
-            if (!Sync::LockForTransferToMap(merc, masterMap, pairCover) || merc.MercMasterId != master.Id || master.IsDead() || master.MapId != masterMapId) {
+            if (merc.MercMasterId != master.Id || master.IsDead() || master.MapId != masterMapId) {
                 return;
             }
 
@@ -329,8 +316,7 @@ void MercIdleImpl(Critter merc)
             }
 
             Critter[] globalGroup = {};
-            Entity[] pairCover = Sync::Snapshot();
-            if (!GlobalmapGroup::LockGroupForMutation(master, masterTripId, pairCover, globalGroup) || merc.MercMasterId != master.Id || master.IsDead() ||
+            if (!GlobalmapGroup::SnapshotGroupForMutation(master, masterTripId, globalGroup) || merc.MercMasterId != master.Id || master.IsDead() ||
                 master.MapId != ZERO_IDENT || merc.GetMap() == null) {
                 return;
             }
@@ -352,7 +338,7 @@ void MercIdleImpl(Critter merc)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void MercIdle(Critter merc)
 {
     MercIdleImpl(merc);
@@ -459,11 +445,11 @@ void CancelMerc(Critter merc)
     Game.StartTimeEvent(ReleaseTime(), ReleaseMerc, merc.Id); //SavedDeferredCall
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ReleaseMerc(any value)
 {
     Critter? merc = Game.GetCritter(value);
-    if (merc == null || !Sync::LockCritterWithMap(merc) || !CanReleaseMerc(merc.MercMasterId != ZERO_IDENT)) {
+    if (merc == null || !CanReleaseMerc(merc.MercMasterId != ZERO_IDENT)) {
         return;
     }
 
@@ -488,9 +474,7 @@ void ReleaseMerc(any value)
         }
     }
 
-    Entity[] releaseCover = Sync::Snapshot();
-    if (!Sync::LockForTransferToMap(merc, homeMap, releaseCover) || !CanReleaseMerc(merc.MercMasterId != ZERO_IDENT) || merc.HomeMapId != homeMapId ||
-        merc.HomeHex != homeHex || merc.HomeDir != homeDir) {
+    if (!CanReleaseMerc(merc.MercMasterId != ZERO_IDENT) || merc.HomeMapId != homeMapId || merc.HomeHex != homeHex || merc.HomeDir != homeDir) {
         return;
     }
 

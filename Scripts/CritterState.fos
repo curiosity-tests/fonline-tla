@@ -32,13 +32,9 @@ void OnCritterInit(Critter cr, bool firstTime)
 }
 
 // Периодический тик (раз в секунду): пробуем поднять криттера из нокаута по мере восстановления AP.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void OnCritterIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (cr.IsKnockout()) {
         TryUpOnKnockout(cr);
     }

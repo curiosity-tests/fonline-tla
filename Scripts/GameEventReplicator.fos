@@ -9,7 +9,7 @@
 // Сторона исполнения: SERVER (весь модуль под директивой SERVER).
 // Связи: GameEvent (статусы фаз эвента), Entrance (точки входа/свободные гексы), NpcPlanes (боевые планы
 //  и проверки занятости НПЦ), Messaging/SendMessage/MapText (реплики и тревога), Explode/SmokeGrenade
-//  (взрыв и газ), Sync (локи для async-колбэков), Tla/Content (прото-id, словари свойств, хеши точек).
+//  (взрыв и газ), Tla/Content (прото-id, словари свойств, хеши точек).
 namespace GameEventReplicator
 {
 
@@ -264,16 +264,15 @@ void StopReplicationEvent()
 
 // Отложенная зачистка наземной карты после остановки эвента:
 // эвакуирует игроков на глобал, сносит мешки и удаляет временных нпц (зомби и хабологов)
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeleteSandbags(any value)
 {
     Map? map = Game.GetMap(ident(value));
-    if (map == null || !Sync::Lock(map)) {
+    if (map == null) {
         return;
     }
 
-    // Перенос игроков на глобал. Покрытие карты автоматически включает её текущих детей,
-    // поэтому оно одновременно покрывает криттера и его исходную карту для TransferToGlobal.
+    // Перенос игроков на глобал.
     Critter[] critters = map.GetCritters(CritterFindType::NonDeadPlayers);
     for (int i = 0; i < critters.length(); i++) {
         Critter cr = critters[i];
@@ -302,10 +301,10 @@ void DeleteSandbags(any value)
 }
 
 // Триггер люка: спускает игрока на подземную карту (индекс 2), пока эвент активен
-[[Async]] [[ItemTrigger]]
+[[ItemTrigger]]
 void ReplDoorTrigger(Critter player, StaticItem trigger, bool entered, mdir dir)
 {
-    if (!Game.GEReplStationStatus || !Sync::LockCritterWithMapAndLocation(player)) {
+    if (!Game.GEReplStationStatus) {
         return;
     }
 
@@ -320,11 +319,6 @@ void ReplDoorTrigger(Critter player, StaticItem trigger, bool entered, mdir dir)
     }
 
     Map targetMap = loc.GetMapByIndex(2);
-    Entity[] cover = {player, playerMap, loc, targetMap};
-    if (!Sync::Lock(cover)) {
-        return;
-    }
-
     if (player.MapId != playerMap.Id || playerMap.GetLocation().Id != loc.Id || loc.GetMapByIndex(2).Id != targetMap.Id) {
         return;
     }
@@ -443,20 +437,12 @@ void MapLoop2(Map map)
 }
 
 // Перемещение мобов на следующий пункт сбора
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void MapLoopEx1(Map map)
 {
     mpos hex;
     Location loc = map.GetLocation();
-    if (!Sync::Lock(map, loc)) {
-        return;
-    }
-
     Map mapGround = loc.GetMapByIndex(0);
-    if (!Sync::Lock(map, loc, mapGround)) {
-        return;
-    }
-
     Critter[] zombies = map.GetCritters(Content::Critter::Zombie, CritterFindType::NonDeadNpc);
     for (int i = 0; i < zombies.length(); i++) {
         Critter cr = zombies[i];
@@ -534,7 +520,7 @@ EventResult ReplTankUseOnMe(Item item, Critter cr, Item usedItem, int param)
 }
 
 // Отложенный подрыв чана: засчитывает квест, взрывает чан, оставляет «сломанный» чан и пускает газ
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void ExplodeReplTank(any[] values)
 {
     if (values.length() < 3) {
@@ -548,7 +534,7 @@ void ExplodeReplTank(any[] values)
     Critter? cr = Game.GetCritter(crId);
     Item? item = Game.GetItem(itemId);
     Map? map = mapId != ZERO_IDENT ? Game.GetMap(mapId) : null;
-    if (cr == null || item == null || map == null || !Sync::LockItemWithParent(item)) {
+    if (cr == null || item == null || map == null) {
         return;
     }
 
@@ -556,10 +542,7 @@ void ExplodeReplTank(any[] values)
         return;
     }
 
-    Entity[] cover = Sync::Snapshot();
-    Sync::AddUniqueEntity(cover, cr);
-    Sync::AddUniqueEntity(cover, map);
-    if (!Sync::Lock(cover) || item.Ownership != ItemOwnership::MapHex || item.MapId != map.Id) {
+    if (item.Ownership != ItemOwnership::MapHex || item.MapId != map.Id) {
         return;
     }
 
@@ -621,13 +604,9 @@ EventResult OnZombieAttackedGround(Critter cr, Critter attacker)
 }
 
 // Idle-цикл наземного зомби: ведёт его к точке выхода и снимает с карты у самого выхода
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void OnZombieIdleGround(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (!cr.IsAlive()) {
         return;
     }
@@ -704,13 +683,9 @@ const int STR_IDLE = 4002;
 const int RADIUS_ATTACK = 10;
 
 // Idle-цикл подземного зомби: случайно агрит на близких игроков, иначе бродит вокруг точки
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void OnZombieIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (cr.IsDead()) {
         return;
     }
@@ -782,13 +757,9 @@ void OnZombieDead(Critter cr, Critter? killer)
 const int STR_RESPAWN = 4000;
 
 // Отложенный респаун зомби: «свежий» труп оживает на половине HP; иначе — засчитывается убийце по квесту
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RespawnZombie(Critter cr, any identifier)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     DebugLog("respawn/ Anim:" + cr.DeadActionAnim);
     int qStatus = 0;
     Critter? killer;
@@ -796,15 +767,6 @@ void RespawnZombie(Critter cr, any identifier)
     if (identifier != ZERO_IDENT) {
         killer = Game.GetCritter(identifier);
         if (killer != null) {
-            if (map != null) {
-                if (!Sync::Lock(array<Entity> = {cr, map, killer})) {
-                    return;
-                }
-            }
-            else if (!Sync::Lock(cr, killer)) {
-                return;
-            }
-
             qStatus = killer.GEReplNopasaran;
         }
     }

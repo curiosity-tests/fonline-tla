@@ -237,11 +237,11 @@ void FillBag(Item bag, hstring[] pids, int min, int max, int chance)
 }
 
 // Тайм-ивент удаления невостребованной машины снабжения
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeleteCar(any value)
 {
     Item? car = Game.GetItem(value);
-    if (car == null || !Sync::LockItemWithParent(car)) {
+    if (car == null) {
         return;
     }
 

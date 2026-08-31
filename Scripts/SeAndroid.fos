@@ -88,7 +88,7 @@ EventResult RadioSkill(Item item, Critter cr, CritterProperty skill)
     return EventResult::StopChain;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void AndroidRadio(any[] values)
 {
     if (values.length() < 4) {
@@ -97,7 +97,7 @@ void AndroidRadio(any[] values)
 
     DebugLog("AndroidRadio. ItemId:" + values[0] + "; MsgCount:" + values[1] + "; " + "radioChannel: " + values[2]);
     Item? item = Game.GetItem(values[0]);
-    if (item == null || !Sync::LockItemWithParent(item) || !item.SeAndroidRadioListened || !item.HasRadio) {
+    if (item == null || !item.SeAndroidRadioListened || !item.HasRadio) {
         return;
     }
 
@@ -151,13 +151,9 @@ EventResult UseGroundDoor(Item door, Critter cr, CritterProperty skill)
     return (loc.SeAndroidPlayerIn) ? EventResult::StopChain : EventResult::ContinueChain;
 }
 
-[[Async]] [[ItemTrigger]]
+[[ItemTrigger]]
 void TransitPlayer(Critter player, StaticItem trigger, bool entered, mdir dir)
 {
-    if (!Sync::LockCritterWithMapAndLocation(player)) {
-        return;
-    }
-
     Map? map = player.GetMap();
     if (map == null) {
         return;
@@ -167,11 +163,6 @@ void TransitPlayer(Critter player, StaticItem trigger, bool entered, mdir dir)
     if (not loc.SeAndroidPlayerIn) {
         // Переносим игрока в подвал, кладем в нокаут
         Map basement = loc.GetMapByIndex(1);
-
-        Entity[] mapCover = {player, map, loc, basement};
-        if (!Sync::Lock(mapCover)) {
-            return;
-        }
 
         if (player.MapId != map.Id || map.GetLocation().Id != loc.Id || loc.GetMapByIndex(1).Id != basement.Id) {
             return;
@@ -185,33 +176,9 @@ void TransitPlayer(Critter player, StaticItem trigger, bool entered, mdir dir)
         Item? door = hasDoorEntry ? map.GetItemOnHex(hex, Content::Item::door_2421) : null;
         Item[] items = player.GetItems();
 
-        Entity[] cover = {player, map, loc, basement};
-        for (int i = 0; i < items.length(); i++) {
-            cover.insertLast(items[i]);
-        }
-        if (cont != null) {
-            cover.insertLast(cont);
-        }
-        if (doctor != null) {
-            cover.insertLast(doctor);
-        }
-        if (door != null) {
-            cover.insertLast(door);
-        }
-
-        if (!Sync::Lock(cover)) {
-            return;
-        }
-
         Item[] containerItems = {};
         if (!items.isEmpty() && cont != null) {
             containerItems = cont.GetItems(Tla::RootContainerStack());
-            for (int i = 0; i < containerItems.length(); i++) {
-                cover.insertLast(containerItems[i]);
-            }
-            if (!Sync::Lock(cover)) {
-                return;
-            }
         }
 
         if (player.MapId != map.Id || map.GetLocation().Id != loc.Id || loc.GetMapByIndex(1).Id != basement.Id) {
@@ -278,23 +245,15 @@ void TransitPlayer(Critter player, StaticItem trigger, bool entered, mdir dir)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void CheckPlayerKnockOut(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     DebugLog("CheckKnockout");
 
     if (cr.IsKnockout()) {
         Map? map = cr.GetMap();
         if (map != null) {
             Location loc = map.GetLocation();
-            if (!Sync::Lock(cr, map, loc)) {
-                return;
-            }
-
             if (loc.ProtoId == Content::Location::android) {
                 Game.Log("Warning: player character can't stand up knockout.");
                 CritterState::ToAlive(cr);
@@ -334,13 +293,9 @@ void DoctorInit(Critter cr, bool firstTime)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DoctorIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (not cr.SEAndroidMonologEnd) {
         if (!Monologue::MonologueRunning(cr)) {
             DebugLog("Second stage begin");
@@ -351,13 +306,9 @@ void DoctorIdle(Critter cr)
             }
 
             Location loc = map.GetLocation();
-            if (!Sync::Lock(cr, map, loc)) {
-                return;
-            }
-
             if (loc.SeAndroidPlayerId != ZERO_IDENT) {
                 Critter? player = Game.GetCritter(loc.SeAndroidPlayerId);
-                if (player != null && Sync::Lock(array<Entity> = {cr, map, loc, player})) {
+                if (player != null) {
                     TransformPlayer(map, player, cr);
                 }
             }
@@ -410,7 +361,7 @@ void TransformPlayer(Map map, Critter player, Critter doctor)
     Game.StartTimeEvent(GameTime::GameSeconds(60), AwakePlayer, values); //SavedDeferredCall
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void AwakePlayer(any[] values)
 {
     if (values.length() < 3) {
@@ -424,14 +375,7 @@ void AwakePlayer(any[] values)
         return;
     }
 
-    Critter[] critters = {player, doctor};
-    if (!Sync::LockCrittersWithMaps(critters)) {
-        return;
-    }
-
-    Entity[] cover = Sync::Snapshot();
-    Sync::AddUniqueEntity(cover, map);
-    if (!Sync::Lock(cover) || player.MapId != map.Id || doctor.MapId != map.Id) {
+    if (player.MapId != map.Id || doctor.MapId != map.Id) {
         return;
     }
 
@@ -464,13 +408,9 @@ void SendDoctorHome(Critter player, Critter? npc)
 const int ENTRY_EXPLODE = 30; // Номера гексов, на которых будут взрывы
 const int STR_OUT = 70095;    // Вам чудом удалось пройти мимо ловушек безумца. Но сейчас нужно делать ноги.
 
-[[Async]] [[ItemTrigger]]
+[[ItemTrigger]]
 void Warn(Critter player, StaticItem trigger, bool entered, mdir dir)
 {
-    if (!Sync::LockCritterWithMapAndLocation(player)) {
-        return;
-    }
-
     Map? map = player.GetMap();
     if (map == null) {
         return;
@@ -486,11 +426,11 @@ void Warn(Critter player, StaticItem trigger, bool entered, mdir dir)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeferredExplode(any value)
 {
     Map? map = Game.GetMap(ident(value));
-    if (map == null || !Sync::Lock(map)) {
+    if (map == null) {
         return;
     }
 
@@ -506,11 +446,11 @@ void DeferredExplode(any value)
     Game.StartTimeEvent(GameTime::GameSeconds(1), DeferredExplode, value); //SavedDeferredCall
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DeferredDestroyMap(any value)
 {
     Map? map = Game.GetMap(ident(value));
-    if (map == null || !Sync::LockMapWithLocation(map)) {
+    if (map == null) {
         return;
     }
 
@@ -556,11 +496,11 @@ void PotInit(Item item, bool firstTime)
     item.OnCritterUse.Subscribe(PotUse);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void DefferedDestroyItem(any value)
 {
     Item? item = Game.GetItem(value);
-    if (item == null || !Sync::LockItemWithParent(item)) {
+    if (item == null) {
         return;
     }
 

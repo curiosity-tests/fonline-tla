@@ -798,7 +798,7 @@ void ChosenProcess()
         }
 
         // Контейнерный UI обновляется только authoritative-снимком сервера. Оптимистичное скрытие
-        // здесь оставляло предмет навсегда скрытым при stale count, исчезнувшей цели или отказе лока.
+        // здесь оставляло предмет навсегда скрытым при stale count или исчезнувшей цели.
         if (!ClientItems::TryBeginContainerOperation(int(transferType), transferContainerId, transferSession)) {
             break;
         }
@@ -1220,94 +1220,7 @@ bool IsFree(Critter cr)
 
 #if SERVER
 
-[[Async]]
-bool LockPickCritterAction(Critter cr, Critter target)
-{
-    return Sync::Lock(cr, target);
-}
-
-[[Async]]
-bool LockUseSkillAction(Critter cr, ident targetCrId, ident targetItemId, hstring sceneryPid)
-{
-    if (targetCrId != ZERO_IDENT && targetCrId != cr.Id) {
-        Critter? target = Game.GetCritter(targetCrId);
-        if (target != null) {
-            return Sync::Lock(cr, target);
-        }
-
-        return Sync::Lock(cr);
-    }
-
-    if (targetItemId != ZERO_IDENT || sceneryPid != EMPTY_HSTRING) {
-        return Sync::LockCritterWithMap(cr);
-    }
-
-    return Sync::Lock(cr);
-}
-
-[[Async]]
-bool LockAttackAction(Critter cr, ident targetId)
-{
-    Map? map = cr.GetMap();
-    Critter? target = Game.GetCritter(targetId);
-
-    if (map != null && target != null) {
-        return Sync::Lock(array<Entity> = {cr, map, target});
-    }
-
-    if (map != null) {
-        return Sync::Lock(cr, map);
-    }
-
-    if (target != null) {
-        return Sync::Lock(cr, target);
-    }
-
-    return Sync::Lock(cr);
-}
-
-[[Async]]
-bool LockUseItemOnAction(Critter cr, ident usedItemId, ident targetCrId, ident targetItemId)
-{
-    while (true) {
-        if (!Sync::Lock(cr)) {
-            return false;
-        }
-
-        Map? map = cr.GetMap();
-        ident mapId = cr.MapId;
-        Item? usedItem = cr.GetItem(usedItemId);
-        Critter? targetCr = map != null && targetCrId != ZERO_IDENT && targetCrId != cr.Id ? map.GetCritter(targetCrId) : null;
-        Item? targetItem = map != null && targetItemId != ZERO_IDENT ? map.GetItem(targetItemId) : null;
-
-        Entity[] entities = {cr};
-        if (map != null) {
-            entities.insertLast(map);
-        }
-        if (usedItem != null) {
-            entities.insertLast(usedItem);
-        }
-        if (targetCr != null) {
-            entities.insertLast(targetCr);
-        }
-        if (targetItem != null) {
-            entities.insertLast(targetItem);
-        }
-
-        if (!Sync::Lock(entities)) {
-            return false;
-        }
-        if (cr.MapId != mapId) {
-            continue;
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void PickCritter(Player player, ident crId)
 {
     Critter? cr = player.GetControlledCritter();
@@ -1316,14 +1229,14 @@ void PickCritter(Player player, ident crId)
     }
 
     Critter? target = Game.GetCritter(crId);
-    if (target == null || !LockPickCritterAction(cr, target)) {
+    if (target == null) {
         return;
     }
 
     CritterActions::PickCritter(cr, target);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void PickItem(Player player, mpos hex, hstring pid)
 {
     Critter? cr = player.GetControlledCritter();
@@ -1331,14 +1244,10 @@ void PickItem(Player player, mpos hex, hstring pid)
         return;
     }
 
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     CritterActions::PickItem(cr, hex, pid);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void DropInvItem(Player player, ident itemId, int count)
 {
     Critter? cr = player.GetControlledCritter();
@@ -1346,22 +1255,14 @@ void DropInvItem(Player player, ident itemId, int count)
         return;
     }
 
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     CritterActions::DropInvItem(cr, itemId, count);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void UseSkill(Player player, CritterProperty skill, ident targetCrId, ident targetItemId, hstring sceneryPid, mpos hex)
 {
     Critter? cr = player.GetControlledCritter();
     if (cr == null) {
-        return;
-    }
-
-    if (!LockUseSkillAction(cr, targetCrId, targetItemId, sceneryPid)) {
         return;
     }
 
@@ -1379,7 +1280,7 @@ void MoveInvItem(Player player, ident itemId, CritterItemSlot slot)
     CritterActions::MoveInvItem(cr, itemId, slot);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void OperateContainer(Player player, bool take, bool all, ident itemId, int itemCount, int expectedTransferType, ident expectedContainerId,
                       uint expectedTransferSession)
 {
@@ -1393,9 +1294,8 @@ void OperateContainer(Player player, bool take, bool all, ident itemId, int item
         return;
     }
 
-    if (!CritterActions::LockContainerTransfer(cr, transferType, expectedContainerId, expectedTransferSession)) {
-        if (Sync::Lock(cr) && cr.TransferType == transferType && cr.TransferContainerId == expectedContainerId &&
-            cr.TransferSession == expectedTransferSession) {
+    if (!CritterActions::IsContainerTransferValid(cr, transferType, expectedContainerId, expectedTransferSession)) {
+        if (cr.TransferType == transferType && cr.TransferContainerId == expectedContainerId && cr.TransferSession == expectedTransferSession) {
             CritterActions::CloseContainerTransfer(cr);
         }
         return;
@@ -1415,7 +1315,7 @@ void ReloadWeapon(Player player, ident weaponId, ident ammoId)
     CritterActions::ReloadWeapon(cr, weaponId, ammoId);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void Attack(Player player, ident targetId, int mode)
 {
     Critter? cr = player.GetControlledCritter();
@@ -1423,22 +1323,14 @@ void Attack(Player player, ident targetId, int mode)
         return;
     }
 
-    if (!LockAttackAction(cr, targetId)) {
-        return;
-    }
-
     CritterActions::Attack(cr, targetId, mode);
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void UseItemOn(Player player, ident usedItemId, ident targetCrId, ident targetItemId, hstring sceneryPid, mpos hex, int timer)
 {
     Critter? cr = player.GetControlledCritter();
     if (cr == null) {
-        return;
-    }
-
-    if (!LockUseItemOnAction(cr, usedItemId, targetCrId, targetItemId)) {
         return;
     }
 

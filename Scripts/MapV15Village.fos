@@ -3,8 +3,8 @@
 // заводит отложенное событие, после которого ближайший гуманоид озвучивает
 // презрительную реплику.
 // Сторона исполнения: SERVER.
-// Связи: Messaging (озвучивание реплик), Sync (блокировки async-колбэка),
-// Content::Map (идентификатор карты), KarmaPerkPedobear (свойство кармы криттера).
+// Связи: Messaging (озвучивание реплик), Content::Map (идентификатор карты),
+// KarmaPerkPedobear (свойство кармы криттера).
 namespace MapV15Village
 {
 
@@ -44,14 +44,10 @@ void MapInCritter(Map map, Critter cr)
 
 // Периодический колбэк: находит ближайшего NPC-гуманоида и заставляет его
 // озвучить реплику, после чего повторяет реакцию каждые 20 секунд.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void NpcReact(Critter cr, TimeEventContext event)
 {
     // Async-доступ к криттеру и его карте требует блокировки.
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     // Реагируем только пока игрок остаётся на наземной карте Убежища 15.
     Map? map = cr.GetMap();
     if (map == null || map.ProtoId != Content::Map::v15_village) {
@@ -79,13 +75,9 @@ void DelayKarma(Critter player, Critter npc)
     player.StartTimeEvent(Time::Hours(8), IncKarma);
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void IncKarma(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     cr.KarmaPerkPedobear = 2;
     return;
 }

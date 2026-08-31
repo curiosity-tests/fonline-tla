@@ -90,11 +90,11 @@ void ClearPendingDialogBox(Critter cr)
 // Принимает ответ игрока на модалку и маршрутизирует его по типу диалога.
 // Окно валидно ограниченное время; session/type/count связывают ответ именно с показанным
 // окном, а погашение pending до маршрутизации не допускает повторное выполнение результата.
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void AnswerDialogBox(Player player, uint dialogBoxSession, int dialogBoxType, int answer)
 {
     Critter? cr = player.GetControlledCritter();
-    if (cr == null || !Sync::Lock(cr)) {
+    if (cr == null) {
         return;
     }
 

@@ -284,13 +284,9 @@ EventResult SlayerAttacked(Critter sniper, Critter attacker)
     return (pattern.Attacked(sniper, attacker)) ? EventResult::ContinueChain : EventResult::StopChain;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void SlayerIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     pattern.Idle(cr);
 }
 

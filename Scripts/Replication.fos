@@ -41,25 +41,14 @@ Map? GetStartReplicatorMap()
 
 // Registry lookup не покрывает карты репликаторов и их локации. Для сравнения WorldPos
 // собираем все доступные пары map/location вместе с криттером и его исходной картой.
-[[Async]]
 Map? GetNearReplicatorMap(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return null;
-    }
-
     Map[] maps = {};
-    Entity[] cover = Sync::Snapshot();
     for (int i = 0; i < ReplicatorsMapPids.length(); i++) {
         Map? candidate = Game.GetMap(ReplicatorsMapPids[i]);
         if (candidate != null) {
             maps.insertLast(candidate);
-            Sync::AddUniqueEntity(cover, candidate);
         }
-    }
-
-    if (!Sync::Lock(cover)) {
-        return null;
     }
 
     Location[] locations = {};
@@ -68,11 +57,6 @@ Map? GetNearReplicatorMap(Critter cr)
         Location loc = maps[i].GetLocation();
         locations.insertLast(loc);
         locationIds.insertLast(loc.Id);
-        Sync::AddUniqueEntity(cover, loc);
-    }
-
-    if (!Sync::Lock(cover)) {
-        return null;
     }
 
     Map? nearMap = null;
@@ -101,18 +85,7 @@ Map? GetNearReplicatorMap(Critter cr)
     return nearMap;
 }
 
-void AddStartLocationSyncEntity(Entity[] & entities, Entity entity)
-{
-    for (int i = 0; i < entities.length(); i++) {
-        if (entities[i] is entity) {
-            return;
-        }
-    }
-
-    entities.insertLast(entity);
-}
-
-void AddStartKnownLocation(Location[] & locations, Entity[] & syncCover, Location? loc)
+void AddStartKnownLocation(Location[] & locations, Location? loc)
 {
     if (loc == null) {
         return;
@@ -125,12 +98,9 @@ void AddStartKnownLocation(Location[] & locations, Entity[] & syncCover, Locatio
     }
 
     locations.insertLast(loc);
-    AddStartLocationSyncEntity(syncCover, loc);
 }
 
-// Перенос вызывается после возврата CreateCritter/LoadCritter. Сохраняем покрытие вызывающего
-// и одним набором блокируем криттера, карту репликатора и все изменяемые известные локации.
-[[Async]]
+// Перенос вызывается после возврата CreateCritter/LoadCritter.
 bool SetStartLocation(Critter cr)
 {
     Map? replicator = GetStartReplicatorMap();
@@ -138,40 +108,33 @@ bool SetStartLocation(Critter cr)
         return false;
     }
 
-    Entity[] syncCover = Sync::SurvivingSnapshot();
-    AddStartLocationSyncEntity(syncCover, replicator);
-    if (!Sync::LockCritterWithMapAndLocation(cr, syncCover)) {
-        return false;
-    }
-    syncCover = Sync::Snapshot();
-
     Location replicatorLocation = replicator.GetLocation();
     Location[] knownLocations = {};
-    AddStartKnownLocation(knownLocations, syncCover, replicatorLocation);
-    if (!Sync::Lock(syncCover) || replicator.GetLocation() !is replicatorLocation) {
+    AddStartKnownLocation(knownLocations, replicatorLocation);
+    if (replicator.GetLocation() !is replicatorLocation) {
         return false;
     }
 
-    AddStartKnownLocation(knownLocations, syncCover, Game.GetLocation(Content::Location::replication_hell));
+    AddStartKnownLocation(knownLocations, Game.GetLocation(Content::Location::replication_hell));
 
     hstring replicatorPid = replicatorLocation.ProtoId;
     if (replicatorPid == Content::Location::replication_1) {
-        AddStartKnownLocation(knownLocations, syncCover, Game.GetLocation(Content::Location::den));
-        AddStartKnownLocation(knownLocations, syncCover, Game.GetLocation(Content::Location::klamath));
-        AddStartKnownLocation(knownLocations, syncCover, Game.GetLocation(Content::Location::arroyo));
+        AddStartKnownLocation(knownLocations, Game.GetLocation(Content::Location::den));
+        AddStartKnownLocation(knownLocations, Game.GetLocation(Content::Location::klamath));
+        AddStartKnownLocation(knownLocations, Game.GetLocation(Content::Location::arroyo));
     }
     else if (replicatorPid == Content::Location::replication_2) {
-        AddStartKnownLocation(knownLocations, syncCover, Game.GetLocation(Content::Location::modoc));
+        AddStartKnownLocation(knownLocations, Game.GetLocation(Content::Location::modoc));
     }
     else if (replicatorPid == Content::Location::replication_3) {
-        AddStartKnownLocation(knownLocations, syncCover, Game.GetLocation(Content::Location::redding));
+        AddStartKnownLocation(knownLocations, Game.GetLocation(Content::Location::redding));
     }
     else if (replicatorPid == Content::Location::replication_4) {
-        AddStartKnownLocation(knownLocations, syncCover, Game.GetLocation(Content::Location::broken_hills));
-        AddStartKnownLocation(knownLocations, syncCover, Game.GetLocation(Content::Location::new_reno));
+        AddStartKnownLocation(knownLocations, Game.GetLocation(Content::Location::broken_hills));
+        AddStartKnownLocation(knownLocations, Game.GetLocation(Content::Location::new_reno));
     }
 
-    if (!Sync::Lock(syncCover) || replicator.GetLocation() !is replicatorLocation) {
+    if (replicator.GetLocation() !is replicatorLocation) {
         return false;
     }
 
@@ -190,8 +153,8 @@ bool SetStartLocation(Critter cr)
 
     bool transferred = Entrance::CritterTransferToMapEntry(cr, replicator.Id, Tla::ENTRY_REPLICATION);
 
-    // TransferToMap запускает вложенные события, которые могут заменить набор Game.Sync.
-    if (!transferred || !Sync::Lock(syncCover) || cr.MapId != replicator.Id || cr.GetMap() !is replicator || replicator.GetLocation() !is replicatorLocation) {
+    // TransferToMap запускает вложенные события.
+    if (!transferred || cr.MapId != replicator.Id || cr.GetMap() !is replicator || replicator.GetLocation() !is replicatorLocation) {
         return false;
     }
 
@@ -241,7 +204,6 @@ bool IsHellMap(hstring mapPid)
 // Существующая встреча хранит только id локации. Перед InviteToEncounter явно добавляем
 // эту локацию (а значит, и её дочернюю карту) к уже удерживаемому cover глобальной группы.
 // Новая встреча создаёт локацию в текущем контексте и получает registration self-cover.
-[[Async]]
 bool LockEncounterForInvite(int encounterDescriptor)
 {
     Worldmap::CFoundedEncounter? encounter = Worldmap::GetFoundedEncounter(encounterDescriptor);
@@ -259,23 +221,12 @@ bool LockEncounterForInvite(int encounterDescriptor)
         return false;
     }
 
-    Entity[] cover = Sync::SurvivingSnapshot();
-    Sync::AddUniqueEntity(cover, loc);
-    if (!Sync::Lock(cover)) {
-        return false;
-    }
-
     encounter = Worldmap::GetFoundedEncounter(encounterDescriptor);
     return encounter != null && encounter.IsGenerated && encounter.LocationId == locationId;
 }
 
-[[Async]]
 void ReplicateCritter(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     Map? dieMap = cr.GetMap();
     Map? map = null;
     mpos hex;
@@ -288,8 +239,7 @@ void ReplicateCritter(Critter cr)
         int tripId = int(cr.GlobalMapTripId);
         if (tripId != 0) {
             Critter[] group = {};
-            Entity[] baseCover = Sync::Snapshot();
-            if (!GlobalmapGroup::LockGroupForMutation(cr, tripId, baseCover, group)) {
+            if (!GlobalmapGroup::SnapshotGroupForMutation(cr, tripId, group)) {
                 return;
             }
 
@@ -310,12 +260,8 @@ void ReplicateCritter(Critter cr)
                 Worldmap::InviteToEncounter(group, cars[0], encounterDescriptor, 0, mapId, hex, dir);
                 if (mapId != ZERO_IDENT) {
                     Map? mapTo = Game.GetMap(mapId);
-                    if (mapTo != null && Sync::LockForTransferToMap(cr, mapTo)) {
+                    if (mapTo != null) {
                         cr.TransferToMap(mapTo, hex, dir);
-                        if (!Sync::LockCritterWithMap(cr)) {
-                            return;
-                        }
-
                         transferred = cr.GetMap() != null;
                     }
                 }
@@ -324,10 +270,6 @@ void ReplicateCritter(Critter cr)
 
         // Встреча не найдена или перенос не удался — уничтожаем машины
         if (!transferred) {
-            if (!Sync::LockCritterWithMap(cr)) {
-                return;
-            }
-
             cars = cr.GetItems(ItemProperty::Type, ItemType::Car);
             Game.DestroyItems(cars);
         }
@@ -380,10 +322,6 @@ void ReplicateCritter(Critter cr)
             return;
         }
 
-        if (!Sync::LockForTransferToMap(cr, map)) {
-            return;
-        }
-
         hstring replicationEntry = customReplMap ? cr.NextReplicationEntry : Tla::ENTRY_REPLICATION;
         if (not Entrance::GetEntryFreeHex(map, replicationEntry, hex)) {
             cr.TimeoutReplication = Game.SynchronizedTime + Time::Minutes(1);
@@ -419,9 +357,6 @@ void ReplicateCritter(Critter cr)
         // Перемещение/уничтожение предметов может вызвать вложенные события. Перед дальнейшими
         // изменениями криттера и самим TransferToMap восстанавливаем полный transfer-cover и
         // заново выбираем свободный entry-гекс под удерживаемой целевой картой.
-        if (!Sync::LockForTransferToMap(cr, map)) {
-            return;
-        }
         if (not Entrance::GetEntryFreeHex(map, replicationEntry, hex)) {
             cr.TimeoutReplication = Game.SynchronizedTime + Time::Minutes(1);
             return;
@@ -446,10 +381,7 @@ void ReplicateCritter(Critter cr)
     }
     else {
         NpcPlanes::DropPlanes(cr);
-        if (!EnemyStack::ClearEnemyStackNpc(cr) || !Sync::LockCritterWithMap(cr)) {
-            return;
-        }
-
+        EnemyStack::ClearEnemyStackNpc(cr);
         cr.LastWeaponId = ZERO_IDENT;
         cr.LastWeaponNotFound = false;
         map = cr.GetMap();
@@ -464,15 +396,7 @@ void ReplicateCritter(Critter cr)
         if (cr.DeadBlockerId != ZERO_IDENT) {
             Item? block = Game.GetItem(cr.DeadBlockerId);
             if (block != null) {
-                if (!Sync::LockItemWithParent(block)) {
-                    return;
-                }
-
                 Game.DestroyItem(block);
-                if (!Sync::LockCritterWithMap(cr)) {
-                    return;
-                }
-
                 map = cr.GetMap();
                 if (map == null) {
                     Game.DestroyCritter(cr);
@@ -534,15 +458,7 @@ void ReplicateCritter(Critter cr)
         return;
     }
 
-    if (!Sync::LockForTransferToMap(cr, map)) {
-        return;
-    }
-
     cr.TransferToMap(map, hex, HDIR_Random);
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     map = cr.GetMap();
     if (map == null) {
         cr.TimeoutReplication = Game.SynchronizedTime + Time::Minutes(1);

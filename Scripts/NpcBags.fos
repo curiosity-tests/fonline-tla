@@ -54,13 +54,9 @@ void CritterInit(Critter cr, bool firstTime)
 
 ///@ Property Critter Common synctime LastBagRefreshedTime Mutable OwnerSync Persistent
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void OnCritterIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     // Таймер тикает раз в секунду, но реально перезаполняем сумку не чаще BagRefreshTime — иначе пропускаем.
     if (cr.ControlledByPlayer || cr.LastBagRefreshedTime > Game.SynchronizedTime || !cr.IsAlive()) { // TODO: переделать,
         return;

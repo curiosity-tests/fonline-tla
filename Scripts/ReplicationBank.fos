@@ -140,13 +140,9 @@ void BankerFinish(Critter banker)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void BankerIdle(Critter banker)
 {
-    if (!Sync::LockCritterWithMap(banker)) {
-        return;
-    }
-
     CBank? bank = GetBank(banker);
     if (bank == null) {
         return;
@@ -393,13 +389,9 @@ void GuardInit(Critter guard, bool firstTime)
     guard.BonusLook = 300; // Чтобы реагировали на атаки других игроков сникерами.
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void GuardIdle(Critter guard)
 {
-    if (!Sync::LockCritterWithMap(guard)) {
-        return;
-    }
-
     CBank? bank = GetBank(guard);
     if (bank == null) {
         return;
@@ -592,13 +584,9 @@ void KeeperInit(Critter keeper, bool firstTime)
     keeper.IsNoEnemyStack = true;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void KeeperIdle(Critter keeper)
 {
-    if (!Sync::LockCritterWithMap(keeper)) {
-        return;
-    }
-
     CBank? bank = GetBank(keeper);
     if (bank == null) {
         return;
@@ -715,7 +703,7 @@ bool AddCheckPlayerPosition(Critter guard, Critter player)
     return true;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void WarnGagPlayer(any[] values)
 {
     if (values.length() < 4) {
@@ -729,14 +717,10 @@ void WarnGagPlayer(any[] values)
     }
 
     Critter[] critters = {guard, player};
-    if (!Sync::LockCrittersWithMaps(critters) || guard.MapId == ZERO_IDENT || guard.MapId != player.MapId || !guard.IsSee(player)) {
-        return;
-    }
-
     Messaging::SayShout(guard, MsgStr::DialogTextKey(guard.DialogId, STR_WARN_PLAYER), "|pname: " + PlayerRegistration::GetPlayerName(player.Id));
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void AttackGagPlayer(any[] values)
 {
     if (values.length() < 4) {
@@ -745,7 +729,7 @@ void AttackGagPlayer(any[] values)
 
     Critter? guard = Game.GetCritter(values[0]);
     Critter? player = Game.GetCritter(values[1]);
-    if (guard == null || !Sync::LockCritterWithMap(guard)) {
+    if (guard == null) {
         return;
     }
 
@@ -756,10 +740,6 @@ void AttackGagPlayer(any[] values)
     }
 
     Critter[] critters = {guard, player};
-    if (!Sync::LockCrittersWithMaps(critters)) {
-        return;
-    }
-
     guard.ReplBankeIsAttackGagPlayer = false;
     if (!player.ControlledByPlayer || guard.MapId == ZERO_IDENT || guard.MapId != player.MapId) {
         return;

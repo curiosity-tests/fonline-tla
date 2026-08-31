@@ -58,13 +58,9 @@ void PetInit(Critter cr, bool firstTime)
     cr.ShowCritterDist1 = OwnerLostDist;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void PetIdle(Critter cr)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     if (cr.IsAlive() && FollowMaster(cr, cr.PetOwnerId)) {
         if (Game.Random(1, 5) > 4 && NpcPlanes::IsNoPlanes(cr)) {
             MoveRandom::CritterMoveRandom(cr);

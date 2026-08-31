@@ -29,7 +29,7 @@ void CallTownSupply(Critter victim, Critter hostile)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void CallTownSupplyNext(any[] values)
 {
     if (values.length() < 3) {
@@ -42,7 +42,7 @@ void CallTownSupplyNext(any[] values)
     values[2] = int(values[2]) + 1;
     int rate = values[2];
 
-    if (hostile != null && Sync::LockCritterWithMap(hostile) && hostile.MapId != ZERO_IDENT && not hostile.IsDead()) {
+    if (hostile != null && hostile.MapId != ZERO_IDENT && not hostile.IsDead()) {
         int count = hostile.Level / 10 + 1;
         if (count > 10) {
             count = 10;
@@ -139,13 +139,9 @@ void GuardInit(Critter bountyHunter, bool firstTime)
     bountyHunter.PerkBetterCriticals = 1;
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void GuardIdle(Critter bountyHunter)
 {
-    if (!Sync::LockCritterWithMap(bountyHunter)) {
-        return;
-    }
-
     mpos hex = bountyHunter.Hex;
     if (not Entrance::GetNearEntry(bountyHunter.GetMap(), EXIT_ENTRY, hex)) {
         Game.DestroyCritter(bountyHunter);

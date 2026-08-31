@@ -64,11 +64,11 @@ EventResult UseOnJukeBox(Item item, Critter cr, Item? usedItem, int param)
 }
 
 // Отложенно гасим анимацию автомата по окончании проигрывания трека.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void OffJukeBox(any value)
 {
     Item? item = Game.GetItem(value);
-    if (item == null || !Sync::LockItemWithParent(item)) {
+    if (item == null) {
         return;
     }
 

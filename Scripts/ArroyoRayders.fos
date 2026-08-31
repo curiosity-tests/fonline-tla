@@ -1,6 +1,6 @@
 // ArroyoRayders — ИИ рейдеров Арройо.
 // Обязанности: захват цели-игрока, реплики при виде/исчезновении, тревога по сообщению, поиск игроков по таймеру, учёт счётчика рейдеров.
-// Сторона: SERVER. Зависит от NpcPlanes, SendMessage, EnemyStack, Sync.
+// Сторона: SERVER. Зависит от NpcPlanes, SendMessage, EnemyStack.
 namespace ArroyoRayders
 {
 
@@ -75,13 +75,9 @@ void RaiderHide(Critter raider, Critter player)
 }
 
 // Периодический поиск целей: если в поле зрения есть живой игрок — заводим план атаки на него.
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void RaiderIdle(Critter raider)
 {
-    if (!Sync::LockCritterWithMap(raider)) {
-        return;
-    }
-
     // Берём первого видимого живого игрока как цель атаки.
     Critter[] playerCritters = raider.GetCritters(CritterSeeType::WhoISee, CritterFindType::NonDeadPlayers);
     if (!playerCritters.isEmpty()) {

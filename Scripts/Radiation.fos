@@ -134,13 +134,9 @@ void DropRadiation(Critter cr)
     }
 }
 
-[[TimeEvent]] [[Async]]
+[[TimeEvent]]
 void Radiation(Critter cr, TimeEventContext event)
 {
-    if (!Sync::LockCritterWithMap(cr)) {
-        return;
-    }
-
     any rate = event.GetData();
     if (cr.IsDead()) {
         timespan delayTicks = Time::Minutes(5);

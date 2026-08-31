@@ -14,19 +14,6 @@ namespace PlayerRegistration
 #if SERVER
 
 const hstring PlayerNamesCollectionName = "PlayerNames".hstr();
-const int LoginSyncMaxAttempts = 16;
-
-void AddLoginSyncEntity(Entity[] & entities, Entity entity)
-{
-    for (int i = 0; i < entities.length(); i++) {
-        if (entities[i] is entity) {
-            return;
-        }
-    }
-
-    entities.insertLast(entity);
-}
-
 ident ResolveStoredMainCritterId(ident playerId)
 {
     dict<string, string> playerData = Game.DbGetPlayerData(playerId);
@@ -44,42 +31,24 @@ bool SameLivePlayer(Player? expected, Player? actual)
     return (expected == null && actual == null) || (expected != null && actual is expected);
 }
 
-[[Async]]
-void DisconnectIfAliveSynced(Player player)
+void DisconnectIfAlive(Player player)
 {
-    if (player.IsDestroyed || !Sync::Lock(player)) {
+    if (player.IsDestroyed) {
         return;
     }
 
     player.Disconnect();
 }
 
-// Оставляет во внешнем remote-call контексте полный граф, который LoginPlayerToExistentRecord
-// использует после вложенного OnPlayerLogin: оба Player, криттер, его карта и локация.
-[[Async]]
-bool LockExistingLoginGraph(Player requestPlayer, Player? livePlayer, Critter cr)
+// LoginPlayerToExistentRecord работает с криттером после вложенного OnPlayerLogin, поэтому состав
+// его глобальной группы снимается до продолжения.
+bool PrepareExistingLoginGroup(Critter cr)
 {
-    Entity[] fixedCover = {requestPlayer};
-    if (livePlayer != null) {
-        AddLoginSyncEntity(fixedCover, livePlayer);
-    }
-
-    if (!Sync::LockCritterWithMapAndLocation(cr, fixedCover)) {
-        return false;
-    }
-
-    Entity[] initialInfoCover = Sync::Snapshot();
-    if (!GlobalMapLocations::LockKnownLocations(cr, initialInfoCover)) {
-        return false;
-    }
-
-    initialInfoCover = Sync::Snapshot();
-    return GlobalmapGroup::LockInitialInfoGroup(cr, initialInfoCover);
+    return GlobalmapGroup::SnapshotInitialInfoGroup(cr);
 }
 
 // При неудаче подготовки возвращаем загруженный этим запросом экземпляр в состояние unloaded.
 // Документ существующего персонажа сохраняется; следующий login загрузит его заново.
-[[Async]]
 void CleanupLoadedLoginCritter(Critter? loadedCritter)
 {
     if (loadedCritter == null || loadedCritter.IsDestroyed) {
@@ -87,11 +56,6 @@ void CleanupLoadedLoginCritter(Critter? loadedCritter)
     }
 
     Critter cr = loadedCritter;
-    Entity[] cover = Sync::SurvivingSnapshot();
-    if (!Sync::LockCritterWithMapAndLocation(cr, cover)) {
-        return;
-    }
-
     Critter? registeredCritter = Game.GetCritter(cr.Id);
     if (registeredCritter !is cr || cr.GetPlayer() != null) {
         return;
@@ -100,7 +64,6 @@ void CleanupLoadedLoginCritter(Critter? loadedCritter)
     Game.UnloadCritter(cr);
 }
 
-[[Async]]
 bool FailPreparedExistingLogin(Critter? loadedCritter)
 {
     CleanupLoadedLoginCritter(loadedCritter);
@@ -109,15 +72,9 @@ bool FailPreparedExistingLogin(Critter? loadedCritter)
 
 // Новый криттер ещё не связан с Player record. Любой отказ до LoginPlayerToNewRecord должен
 // удалить и live-сущность, и созданный persistent-документ, иначе в базе останется orphan.
-[[Async]]
 bool RollbackUnregisteredCritter(Critter cr, ident crId)
 {
     if (!cr.IsDestroyed) {
-        if (!Sync::LockCritterWithMapAndLocation(cr)) {
-            Game.Log("Unable to lock an unregistered critter for rollback " + crId);
-            return false;
-        }
-
         if (cr.GetPlayer() != null) {
             return false;
         }
@@ -133,97 +90,74 @@ bool RollbackUnregisteredCritter(Critter cr, ident crId)
     return true;
 }
 
-// Подготавливает граф до входа в движковую функцию. Загруженный криттер размещается уже после
-// возврата LoadCritter, поэтому OnCritterInit больше не меняет топологию в отдельном SyncContext.
-[[Async]]
+// Подготавливает игрока и его криттера до входа в движковую функцию: резолвит или загружает
+// главного криттера и размещает его, если он был загружен этим запросом.
 bool PrepareExistingLogin(Player requestPlayer, ident playerId, Critter? & loadedByRequest)
 {
     loadedByRequest = null;
 
-    for (int attempt = 0; attempt < LoginSyncMaxAttempts; attempt++) {
-        Player? livePlayer = Game.GetPlayer(playerId);
-        Entity[] baseCover = {requestPlayer};
-        if (livePlayer != null) {
-            AddLoginSyncEntity(baseCover, livePlayer);
-        }
-
-        if (!Sync::Lock(baseCover)) {
-            return FailPreparedExistingLogin(loadedByRequest);
-        }
-
-        Player? currentLivePlayer = Game.GetPlayer(playerId);
-        if (!SameLivePlayer(livePlayer, currentLivePlayer)) {
-            continue;
-        }
-
-        ident mainCritterId = livePlayer != null ? livePlayer.MainCritterId : ResolveStoredMainCritterId(playerId);
-        if (mainCritterId == ZERO_IDENT) {
-            return FailPreparedExistingLogin(loadedByRequest);
-        }
-
-        Critter? cr = livePlayer != null ? livePlayer.GetControlledCritter() : null;
-        if (cr != null && cr.Id != mainCritterId) {
-            return FailPreparedExistingLogin(loadedByRequest);
-        }
-
-        if (cr == null) {
-            cr = Game.GetCritter(mainCritterId);
-        }
-
-        bool loadedCritter = false;
-        if (cr == null) {
-            try {
-                cr = Game.LoadCritter(mainCritterId, true);
-                loadedCritter = true;
-                loadedByRequest = cr;
-            }
-            catch {
-                // Допустим только race с другим запросом, уже зарегистрировавшим тот же id.
-                cr = Game.GetCritter(mainCritterId);
-                if (cr == null) {
-                    throw("LoadCritter failed without a concurrently registered critter", mainCritterId);
-                }
-            }
-        }
-
-        if (cr == null) {
-            return FailPreparedExistingLogin(loadedByRequest);
-        }
-
-        Critter mainCritter = cr;
-        Entity[] loadedCover = baseCover.clone();
-        AddLoginSyncEntity(loadedCover, mainCritter);
-        if (!Sync::Lock(loadedCover)) {
-            return FailPreparedExistingLogin(loadedByRequest);
-        }
-
-        if (loadedCritter && !Main::PlacePlayerAfterInitialization(mainCritter)) {
-            return FailPreparedExistingLogin(loadedByRequest);
-        }
-
-        if (!LockExistingLoginGraph(requestPlayer, livePlayer, mainCritter)) {
-            continue;
-        }
-
-        currentLivePlayer = Game.GetPlayer(playerId);
-        if (!SameLivePlayer(livePlayer, currentLivePlayer)) {
-            continue;
-        }
-        if (livePlayer != null) {
-            if (livePlayer.MainCritterId != mainCritterId) {
-                continue;
-            }
-
-            Critter? controlledCritter = livePlayer.GetControlledCritter();
-            if (controlledCritter != null && controlledCritter !is mainCritter) {
-                continue;
-            }
-        }
-
-        return true;
+    Player? livePlayer = Game.GetPlayer(playerId);
+    ident mainCritterId = livePlayer != null ? livePlayer.MainCritterId : ResolveStoredMainCritterId(playerId);
+    if (mainCritterId == ZERO_IDENT) {
+        return FailPreparedExistingLogin(loadedByRequest);
     }
 
-    return FailPreparedExistingLogin(loadedByRequest);
+    Critter? cr = livePlayer != null ? livePlayer.GetControlledCritter() : null;
+    if (cr != null && cr.Id != mainCritterId) {
+        return FailPreparedExistingLogin(loadedByRequest);
+    }
+
+    if (cr == null) {
+        cr = Game.GetCritter(mainCritterId);
+    }
+
+    bool loadedCritter = false;
+    if (cr == null) {
+        try {
+            cr = Game.LoadCritter(mainCritterId, true);
+            loadedCritter = true;
+            loadedByRequest = cr;
+        }
+        catch {
+            // Допустим только race с другим запросом, уже зарегистрировавшим тот же id.
+            cr = Game.GetCritter(mainCritterId);
+            if (cr == null) {
+                throw("LoadCritter failed without a concurrently registered critter", mainCritterId);
+            }
+        }
+    }
+
+    if (cr == null) {
+        return FailPreparedExistingLogin(loadedByRequest);
+    }
+
+    Critter mainCritter = cr;
+    if (loadedCritter && !Main::PlacePlayerAfterInitialization(mainCritter)) {
+        return FailPreparedExistingLogin(loadedByRequest);
+    }
+
+    if (!PrepareExistingLoginGroup(mainCritter)) {
+        return FailPreparedExistingLogin(loadedByRequest);
+    }
+
+    // LoadCritter и размещение реэнтрантны через события, поэтому связь игрока с криттером
+    // перепроверяется после них
+    if (!SameLivePlayer(livePlayer, Game.GetPlayer(playerId))) {
+        return FailPreparedExistingLogin(loadedByRequest);
+    }
+
+    if (livePlayer != null) {
+        if (livePlayer.MainCritterId != mainCritterId) {
+            return FailPreparedExistingLogin(loadedByRequest);
+        }
+
+        Critter? controlledCritter = livePlayer.GetControlledCritter();
+        if (controlledCritter != null && controlledCritter !is mainCritter) {
+            return FailPreparedExistingLogin(loadedByRequest);
+        }
+    }
+
+    return true;
 }
 
 Player? GetPlayerByName(string playerName)
@@ -302,7 +236,6 @@ void RemovePlayerNameReservation(string playerName, ident crId)
     }
 }
 
-[[Async]]
 void RollbackNewPlayerRegistration(string playerName, Critter cr, ident crId)
 {
     if (!RollbackUnregisteredCritter(cr, crId)) {
@@ -315,13 +248,9 @@ void RollbackNewPlayerRegistration(string playerName, Critter cr, ident crId)
 
 // Публикует PlayerId внутри OnPlayerLogin. Если этот обработчик или следующий подписчик
 // откажет во входе, движок ещё откатит Player record, а внешний registration-вызов удалит резерв.
-[[Event]] [[Async]]
+[[Event]]
 EventResult CommitReservedPlayerNameOnLogin(Player player, Player? unloginedPlayer)
 {
-    if (!Sync::Lock(player)) {
-        return EventResult::StopChain;
-    }
-
     string playerName = player.Name;
     if (!Game.DbHasRecord(PlayerNamesCollectionName, playerName)) {
         return EventResult::ContinueChain;
@@ -374,7 +303,7 @@ void AddRegistrationProperty(CritterProperty prop)
     Game.RegProperties = properies;
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void LoginExistingPlayer(Player player, string name)
 {
     ident playerId = ResolvePlayerIdByName(name);
@@ -387,7 +316,7 @@ void LoginExistingPlayer(Player player, string name)
     Critter? loadedByRequest = null;
     if (!PrepareExistingLogin(player, playerId, loadedByRequest)) {
         Game.Log("Player login rejected because the entity sync graph could not be stabilized");
-        DisconnectIfAliveSynced(player);
+        DisconnectIfAlive(player);
         return;
     }
 
@@ -460,7 +389,7 @@ bool ValidateRegistrationProps(Player player, string name, dict<CritterProperty,
     return true;
 }
 
-[[ServerRemoteCall]] [[Async]]
+[[ServerRemoteCall]]
 void RegisterNewPlayer(Player player, string name, dict<CritterProperty, int> props)
 {
     if (!ValidateRegistrationProps(player, name, props)) {
@@ -486,20 +415,8 @@ void RegisterNewPlayer(Player player, string name, dict<CritterProperty, int> pr
         return;
     }
 
-    if (!Sync::Lock(player, startMap)) {
-        DisconnectIfAliveSynced(player);
-        return;
-    }
-
-    Location startLocation = startMap.GetLocation();
-    if (!Sync::Lock(player, startMap, startLocation)) {
-        DisconnectIfAliveSynced(player);
-        return;
-    }
-
-    // Все регистрации проходят через одну стартовую карту. Резерв имени ниже создаётся под этим
-    // Game.Sync до следующей замены покрытия: второй запрос увидит запись после разблокировки карты,
-    // даже если оба запроса прошли раннюю проверку.
+    // Все регистрации проходят через одну стартовую карту, поэтому резерв имени ниже виден
+    // следующему запросу, даже если оба прошли раннюю проверку.
     if (IsPlayerNameClaimed(name)) {
         Messaging::Info(player, TextPackKey(TextPackName::Game, "" + (MsgStr::STR_NET_ACCOUNT_ALREADY)));
         player.Disconnect();
@@ -524,40 +441,19 @@ void RegisterNewPlayer(Player player, string name, dict<CritterProperty, int> pr
         throw("Unable to reserve a new player name", crId);
     }
 
-    if (!Sync::Lock(array<Entity> = {player, cr, startMap, startLocation})) {
-        DisconnectIfAliveSynced(player);
-        RollbackNewPlayerRegistration(name, cr, crId);
-        return;
-    }
-
     // Криттер игрока должен быть явно Persistent: при офлайн-выгрузке снятие с карты
     // отменяет только неявный флаг Persistent и иначе удаляет его документ из базы.
     cr.MakePersistent(true);
 
     if (!Main::PlacePlayerAfterInitialization(cr)) {
         Game.Log("Player registration placement failed");
-        DisconnectIfAliveSynced(player);
+        DisconnectIfAlive(player);
         RollbackNewPlayerRegistration(name, cr, crId);
         return;
     }
 
-    Entity[] newLoginCover = {player};
-    if (!Sync::LockCritterWithMapAndLocation(cr, newLoginCover)) {
-        DisconnectIfAliveSynced(player);
-        RollbackNewPlayerRegistration(name, cr, crId);
-        return;
-    }
-
-    Entity[] initialInfoCover = Sync::Snapshot();
-    if (!GlobalMapLocations::LockKnownLocations(cr, initialInfoCover)) {
-        DisconnectIfAliveSynced(player);
-        RollbackNewPlayerRegistration(name, cr, crId);
-        return;
-    }
-
-    initialInfoCover = Sync::Snapshot();
-    if (!GlobalmapGroup::LockInitialInfoGroup(cr, initialInfoCover)) {
-        DisconnectIfAliveSynced(player);
+    if (!GlobalmapGroup::SnapshotInitialInfoGroup(cr)) {
+        DisconnectIfAlive(player);
         RollbackNewPlayerRegistration(name, cr, crId);
         return;
     }
