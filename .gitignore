@@ -25,3 +25,4 @@
 .DS_Store
 __pycache__
 /AS_DEBUG
+/TexDump_**
