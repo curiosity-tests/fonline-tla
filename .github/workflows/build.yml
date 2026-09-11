@@ -1,4 +1,5 @@
 name: build
+run-name: "build ${{ inputs.leg || github.event_name }} ${{ inputs.racecar_run }}"
 
 on:
   push:
@@ -8,6 +9,24 @@ on:
     branches:
     - master
 
+  workflow_dispatch:
+    inputs:
+      leg:
+        description: "baseline (uninstrumented) or instrumented (under chalk/curiosity)"
+        type: choice
+        options: [instrumented, baseline]
+        default: baseline
+      profile:
+        description: "CrashOverride chalk profile"
+        type: string
+        default: curiosity-tests-racecar
+      racecar_run:
+        description: "racecar correlation token, echoed into the run name"
+        type: string
+        default: ""
+
+env:
+  CHALK_ON: ${{ inputs.leg == 'instrumented' }}
 permissions:
   contents: read
 
@@ -66,6 +85,7 @@ jobs:
         if-no-files-found: error
         retention-days: 1
   windows-build:
+    if: false   # racecar: non-Linux runner, not measured here
     runs-on: windows-2025-vs2026
     strategy:
       fail-fast: false
@@ -127,6 +147,7 @@ jobs:
         if-no-files-found: error
         retention-days: 1
   macos-build:
+    if: false   # racecar: non-Linux runner, not measured here
     runs-on: macos-26-intel
     strategy:
       fail-fast: false
@@ -148,7 +169,7 @@ jobs:
         retention-days: 1
   package:
     runs-on: ubuntu-24.04
-    needs: [validate, unit-tests, compile-scripts, bake-resources, windows-build, linux-build, macos-build]
+    needs: [validate, unit-tests, compile-scripts, bake-resources, linux-build]
     steps:
     - uses: actions/checkout@v6
       with:
@@ -210,6 +231,7 @@ jobs:
         if-no-files-found: error
         retention-days: 7
   release:
+    if: false   # racecar: scan/report job, not a build
     runs-on: ubuntu-24.04
     needs: package
     permissions:
